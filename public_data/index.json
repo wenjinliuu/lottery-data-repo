@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_public_data_index",
   "version": 1,
-  "updated_at": "2026-04-29T16:24:29+08:00",
+  "updated_at": "",
   "timezone": "Asia/Shanghai",
   "files": {
     "latest": "latest.json",
@@ -10,14 +10,5 @@
     "draws": "draws/{lottery_type}.json",
     "by_year": "by-year/{lottery_type}/{year}.json"
   },
-  "lotteries": [
-    "ssq",
-    "fc3d",
-    "qlc",
-    "dlt",
-    "qxc",
-    "pl3",
-    "pl5",
-    "kl8"
-  ]
+  "lotteries": ["ssq", "fc3d", "qlc", "dlt", "qxc", "pl3", "pl5", "kl8"]
 }

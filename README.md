@@ -45,6 +45,25 @@ JISU_APPKEY
 
 The workflow `.github/workflows/update-lottery-data.yml` runs at several times after normal draw windows and can also be started manually.
 
+## Server and Lobster Backup
+
+Tencent Cloud can run the same updater as a backup:
+
+```bash
+JISU_APPKEY="your_appkey" bash scripts/server_update_and_push.sh /root/lottery-data-repo
+```
+
+Lobster/OpenClaw can manually trigger the same command or query status with:
+
+```bash
+python scripts/lottery_data_control.py status
+```
+
+See:
+
+- `docs/SERVER_CRON.md`
+- `docs/LOBSTER_CONTROL.md`
+
 ## Public Base URL
 
 After pushing to GitHub, RandomDrawAgent clients can read:

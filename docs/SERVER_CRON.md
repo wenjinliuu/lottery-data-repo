@@ -33,8 +33,32 @@ git push
 Beijing time examples:
 
 ```cron
-36 22 * * * JISU_APPKEY=your_appkey bash /root/lottery-data/scripts/server_update_and_push.sh /root/lottery-data
-36 2 * * * JISU_APPKEY=your_appkey bash /root/lottery-data/scripts/server_update_and_push.sh /root/lottery-data
+36 22 * * * JISU_APPKEY=your_appkey LOTTERY_NOTIFY_WEBHOOK_URL=https://your-webhook bash /root/lottery-data-repo/scripts/server_update_and_push.sh /root/lottery-data-repo
+36 2 * * * JISU_APPKEY=your_appkey LOTTERY_NOTIFY_WEBHOOK_URL=https://your-webhook bash /root/lottery-data-repo/scripts/server_update_and_push.sh /root/lottery-data-repo
 ```
 
 The helper script updates JSON, validates schema, commits only when files changed, and pushes to GitHub.
+
+## Logs
+
+The updater writes logs to:
+
+```text
+/root/lottery-data-repo/update.log
+```
+
+Override it with:
+
+```bash
+export LOTTERY_UPDATE_LOG="/var/log/lottery-data-update.log"
+```
+
+## Failure Notification
+
+If `LOTTERY_NOTIFY_WEBHOOK_URL` is set, failures are sent to that webhook. Success stays silent unless:
+
+```bash
+export LOTTERY_NOTIFY_ON_SUCCESS=1
+```
+
+See `docs/LOBSTER_CONTROL.md` for Lobster/OpenClaw command mapping.
