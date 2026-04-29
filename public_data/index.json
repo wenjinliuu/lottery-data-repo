@@ -1,0 +1,14 @@
+{
+  "schema": "random_draw_agent_public_data_index",
+  "version": 1,
+  "updated_at": "",
+  "timezone": "Asia/Shanghai",
+  "files": {
+    "latest": "latest.json",
+    "calendar": "calendar.json",
+    "health": "health.json",
+    "draws": "draws/{lottery_type}.json",
+    "by_year": "by-year/{lottery_type}/{year}.json"
+  },
+  "lotteries": ["ssq", "fc3d", "qlc", "dlt", "qxc", "pl3", "pl5", "kl8"]
+}
