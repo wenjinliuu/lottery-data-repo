@@ -1,8 +1,49 @@
 {
   "schema": "random_draw_agent_public_data_health",
   "version": 1,
-  "ok": false,
-  "updated_at": "",
-  "message": "not initialized",
-  "results": []
+  "ok": true,
+  "updated_at": "2026-04-29T16:24:29+08:00",
+  "message": "updated",
+  "results": [
+    {
+      "lottery_type": "ssq",
+      "issue": "2026047",
+      "draw_date": "2026-04-28"
+    },
+    {
+      "lottery_type": "fc3d",
+      "issue": "2026108",
+      "draw_date": "2026-04-28"
+    },
+    {
+      "lottery_type": "qlc",
+      "issue": "2026046",
+      "draw_date": "2026-04-27"
+    },
+    {
+      "lottery_type": "dlt",
+      "issue": "26045",
+      "draw_date": "2026-04-27"
+    },
+    {
+      "lottery_type": "qxc",
+      "issue": "26047",
+      "draw_date": "2026-04-28"
+    },
+    {
+      "lottery_type": "pl3",
+      "issue": "26108",
+      "draw_date": "2026-04-28"
+    },
+    {
+      "lottery_type": "pl5",
+      "issue": "26108",
+      "draw_date": "2026-04-28"
+    },
+    {
+      "lottery_type": "kl8",
+      "issue": "2026108",
+      "draw_date": "2026-04-28"
+    }
+  ]
 }
