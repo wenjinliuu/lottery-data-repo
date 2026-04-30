@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_calendar",
   "version": 1,
-  "updated_at": "2026-04-30T22:36:37+08:00",
+  "updated_at": "2026-04-30T23:54:24+08:00",
   "timezone": "Asia/Shanghai",
   "lotteries": {
     "ssq": {
@@ -15,8 +15,8 @@
       "draw_time": "21:15",
       "expected_publish_time": "21:45",
       "sale_close_time": "20:00",
-      "last_issue": "2026047",
-      "next_issue": "2026048",
+      "last_issue": "2026048",
+      "next_issue": "2026049",
       "next_open_time": "2026-04-30 21:15:00",
       "next_buy_end_time": "2026-04-30 20:00:00",
       "raw_class_info": {
@@ -25,8 +25,8 @@
         "parentid": 1,
         "nextopentime": "2026-04-30 21:15:00",
         "nextbuyendtime": "2026-04-30 20:00:00",
-        "lastissueno": "2026047",
-        "nextissueno": "2026048"
+        "lastissueno": "2026048",
+        "nextissueno": "2026049"
       }
     },
     "fc3d": {
@@ -44,18 +44,18 @@
       "draw_time": "21:15",
       "expected_publish_time": "21:45",
       "sale_close_time": "20:00",
-      "last_issue": "2026109",
-      "next_issue": "2026110",
-      "next_open_time": "2026-04-30 21:15:00",
-      "next_buy_end_time": "2026-04-30 20:00:00",
+      "last_issue": "2026110",
+      "next_issue": "2026111",
+      "next_open_time": "2026-05-01 21:15:00",
+      "next_buy_end_time": "2026-05-01 20:00:00",
       "raw_class_info": {
         "caipiaoid": 12,
         "name": "福彩3D",
         "parentid": 1,
-        "nextopentime": "2026-04-30 21:15:00",
-        "nextbuyendtime": "2026-04-30 20:00:00",
-        "lastissueno": "2026109",
-        "nextissueno": "2026110"
+        "nextopentime": "2026-05-01 21:15:00",
+        "nextbuyendtime": "2026-05-01 20:00:00",
+        "lastissueno": "2026110",
+        "nextissueno": "2026111"
       }
     },
     "qlc": {
@@ -148,18 +148,18 @@
       "draw_time": "20:30",
       "expected_publish_time": "21:30",
       "sale_close_time": "20:00",
-      "last_issue": "26109",
-      "next_issue": "26110",
-      "next_open_time": "2026-04-30 21:25:00",
-      "next_buy_end_time": "2026-04-30 21:00:00",
+      "last_issue": "26110",
+      "next_issue": "26111",
+      "next_open_time": "2026-05-01 21:25:00",
+      "next_buy_end_time": "2026-05-01 21:00:00",
       "raw_class_info": {
         "caipiaoid": 16,
         "name": "排列三",
         "parentid": 2,
-        "nextopentime": "2026-04-30 21:25:00",
-        "nextbuyendtime": "2026-04-30 21:00:00",
-        "lastissueno": "26109",
-        "nextissueno": "26110"
+        "nextopentime": "2026-05-01 21:25:00",
+        "nextbuyendtime": "2026-05-01 21:00:00",
+        "lastissueno": "26110",
+        "nextissueno": "26111"
       }
     },
     "pl5": {
@@ -177,18 +177,18 @@
       "draw_time": "20:30",
       "expected_publish_time": "21:30",
       "sale_close_time": "20:00",
-      "last_issue": "26109",
-      "next_issue": "26110",
-      "next_open_time": "2026-04-30 21:25:00",
-      "next_buy_end_time": "2026-04-30 21:00:00",
+      "last_issue": "26110",
+      "next_issue": "26111",
+      "next_open_time": "2026-05-01 21:25:00",
+      "next_buy_end_time": "2026-05-01 21:00:00",
       "raw_class_info": {
         "caipiaoid": 17,
         "name": "排列五",
         "parentid": 2,
-        "nextopentime": "2026-04-30 21:25:00",
-        "nextbuyendtime": "2026-04-30 21:00:00",
-        "lastissueno": "26109",
-        "nextissueno": "26110"
+        "nextopentime": "2026-05-01 21:25:00",
+        "nextbuyendtime": "2026-05-01 21:00:00",
+        "lastissueno": "26110",
+        "nextissueno": "26111"
       }
     },
     "kl8": {
@@ -206,18 +206,18 @@
       "draw_time": "21:30",
       "expected_publish_time": "22:00",
       "sale_close_time": "20:00",
-      "last_issue": "2026109",
-      "next_issue": "2026110",
-      "next_open_time": "2026-04-30 21:30:00",
-      "next_buy_end_time": "2026-04-30 20:30:00",
+      "last_issue": "2026110",
+      "next_issue": "2026111",
+      "next_open_time": "2026-05-01 21:30:00",
+      "next_buy_end_time": "2026-05-01 20:30:00",
       "raw_class_info": {
         "caipiaoid": 89,
         "name": "快乐8",
         "parentid": 1,
-        "nextopentime": "2026-04-30 21:30:00",
-        "nextbuyendtime": "2026-04-30 20:30:00",
-        "lastissueno": "2026109",
-        "nextissueno": "2026110"
+        "nextopentime": "2026-05-01 21:30:00",
+        "nextbuyendtime": "2026-05-01 20:30:00",
+        "lastissueno": "2026110",
+        "nextissueno": "2026111"
       }
     }
   }

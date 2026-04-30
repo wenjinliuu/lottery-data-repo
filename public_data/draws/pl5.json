@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "pl5",
-  "updated_at": "2026-04-30T22:36:33+08:00",
+  "updated_at": "2026-04-30T23:54:22+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -44,16 +44,16 @@
           }
         }
       ],
-      "next_issue": "26110",
-      "next_draw_date": "2026-04-30",
-      "next_open_time": "2026-04-30 21:25:00",
-      "next_buy_end_time": "2026-04-30 21:00:00",
-      "class_last_issue": "26109",
+      "next_issue": "26111",
+      "next_draw_date": "2026-05-01",
+      "next_open_time": "2026-05-01 21:25:00",
+      "next_buy_end_time": "2026-05-01 21:00:00",
+      "class_last_issue": "26110",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=17",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-04-30T22:36:11+08:00"
+        "fetched_at": "2026-04-30T23:54:10+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -102,13 +102,13 @@
           "caipiaoid": 17,
           "name": "排列五",
           "parentid": 2,
-          "nextopentime": "2026-04-30 21:25:00",
-          "nextbuyendtime": "2026-04-30 21:00:00",
-          "lastissueno": "26109",
-          "nextissueno": "26110"
+          "nextopentime": "2026-05-01 21:25:00",
+          "nextbuyendtime": "2026-05-01 21:00:00",
+          "lastissueno": "26110",
+          "nextissueno": "26111"
         }
       },
-      "fetched_at": "2026-04-30T22:36:11+08:00"
+      "fetched_at": "2026-04-30T23:54:10+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
