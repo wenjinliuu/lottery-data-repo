@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     # UTC time. Beijing time = UTC + 8.
-    # Beijing time 20:06, 20:36, 22:06, and next-day 02:36.
+    # Beijing time 19:46, 20:06, 21:26, and next-day 02:36.
+    - cron: "46 11 * * *"
     - cron: "6 12 * * *"
-    - cron: "36 12 * * *"
-    - cron: "6 14 * * *"
+    - cron: "26 13 * * *"
     - cron: "36 18 * * *"
 
 permissions:
