@@ -1,6 +1,7 @@
+[README.md](https://github.com/user-attachments/files/27269242/README.md)
 # lottery-data-repo
 
-公共彩票开奖数据仓库。这个仓库只保存公开开奖数据，供 RandomDrawAgent 或其他客户端读取。
+公共彩票开奖数据仓库。这个仓库只保存公开开奖数据，供 lotto-Agent 或其他客户端读取。
 
 本仓库不保存任何用户私有数据，包括：
 
@@ -54,18 +55,18 @@ public_data/
 定时任务为北京时间：
 
 ```text
+19:46
 20:06
-20:36
-22:06
+21:26
 02:36
 ```
 
 GitHub cron 使用 UTC，因此 workflow 中对应为：
 
 ```text
+11:46 UTC
 12:06 UTC
-12:36 UTC
-14:06 UTC
+13:26 UTC
 18:36 UTC
 ```
 
@@ -131,7 +132,7 @@ https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/
 https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/draws/dlt.json
 ```
 
-RandomDrawAgent 可配置：
+lotto-Agent 可配置：
 
 ```bash
 export LOTTERY_PUBLIC_DATA_BASE_URL="https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data"
