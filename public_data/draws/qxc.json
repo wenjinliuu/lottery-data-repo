@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qxc",
-  "updated_at": "2026-05-01T22:36:04+08:00",
+  "updated_at": "2026-05-02T03:49:01+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -121,16 +121,16 @@
           }
         }
       ],
-      "next_issue": "26048",
-      "next_draw_date": "2026-05-01",
-      "next_open_time": "2026-05-01 21:25:00",
-      "next_buy_end_time": "2026-05-01 21:00:00",
-      "class_last_issue": "26047",
+      "next_issue": "26049",
+      "next_draw_date": "2026-05-03",
+      "next_open_time": "2026-05-03 21:25:00",
+      "next_buy_end_time": "2026-05-03 21:00:00",
+      "class_last_issue": "26048",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-01T22:35:55+08:00"
+        "fetched_at": "2026-05-02T03:48:54+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -239,13 +239,13 @@
           "caipiaoid": 15,
           "name": "七星彩",
           "parentid": 2,
-          "nextopentime": "2026-05-01 21:25:00",
-          "nextbuyendtime": "2026-05-01 21:00:00",
-          "lastissueno": "26047",
-          "nextissueno": "26048"
+          "nextopentime": "2026-05-03 21:25:00",
+          "nextbuyendtime": "2026-05-03 21:00:00",
+          "lastissueno": "26048",
+          "nextissueno": "26049"
         }
       },
-      "fetched_at": "2026-05-01T22:35:55+08:00"
+      "fetched_at": "2026-05-02T03:48:54+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
