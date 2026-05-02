@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "dlt",
-  "updated_at": "2026-05-02T21:41:37+08:00",
+  "updated_at": "2026-05-02T22:29:12+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -29,142 +29,142 @@
       },
       "number_raw": "09 20 21 23 28",
       "refernumber_raw": "06 11",
-      "prize_pool": "0.00",
-      "sales_amount": "",
+      "prize_pool": "776088008.71",
+      "sales_amount": "301530437",
       "prize_details": [
         {
           "prize_level": "一等奖",
           "prize_name": "一等奖",
           "require": "中5+2",
-          "winning_count": null,
-          "prize_amount": "",
+          "winning_count": 5,
+          "prize_amount": "7415209",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "一等奖",
             "require": "中5+2",
-            "num": 0,
-            "singlebonus": 0
+            "num": 5,
+            "singlebonus": 7415209
           }
         },
         {
           "prize_level": "追加一等奖",
           "prize_name": "追加一等奖",
           "require": "中5+2",
-          "winning_count": null,
-          "prize_amount": "",
+          "winning_count": 2,
+          "prize_amount": "5932167",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "追加一等奖",
             "require": "中5+2",
-            "num": 0,
-            "singlebonus": 0
+            "num": 2,
+            "singlebonus": 5932167
           }
         },
         {
           "prize_level": "二等奖",
           "prize_name": "二等奖",
           "require": "中5+1",
-          "winning_count": null,
-          "prize_amount": "",
+          "winning_count": 97,
+          "prize_amount": "139095",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "二等奖",
             "require": "中5+1",
-            "num": 0,
-            "singlebonus": 0
+            "num": 97,
+            "singlebonus": 139095
           }
         },
         {
           "prize_level": "追加二等奖",
           "prize_name": "追加二等奖",
           "require": "中5+1",
-          "winning_count": null,
-          "prize_amount": "",
+          "winning_count": 22,
+          "prize_amount": "111276",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "追加二等奖",
             "require": "中5+1",
-            "num": 0,
-            "singlebonus": 0
+            "num": 22,
+            "singlebonus": 111276
           }
         },
         {
           "prize_level": "三等奖",
           "prize_name": "三等奖",
           "require": "中5+0",
-          "winning_count": null,
-          "prize_amount": "5000",
+          "winning_count": 1320,
+          "prize_amount": "6666",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "三等奖",
             "require": "中5+0",
-            "num": 0,
-            "singlebonus": 5000
+            "num": 1320,
+            "singlebonus": 6666
           }
         },
         {
           "prize_level": "四等奖",
           "prize_name": "四等奖",
           "require": "中4+2",
-          "winning_count": null,
-          "prize_amount": "300",
+          "winning_count": 20216,
+          "prize_amount": "380",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "四等奖",
             "require": "中4+2",
-            "num": 0,
-            "singlebonus": 300
+            "num": 20216,
+            "singlebonus": 380
           }
         },
         {
           "prize_level": "五等奖",
           "prize_name": "五等奖",
           "require": "中4+1",
-          "winning_count": null,
-          "prize_amount": "150",
+          "winning_count": 79979,
+          "prize_amount": "200",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "五等奖",
             "require": "中4+1",
-            "num": 0,
-            "singlebonus": 150
+            "num": 79979,
+            "singlebonus": 200
           }
         },
         {
           "prize_level": "六等奖",
           "prize_name": "六等奖",
           "require": "中3+2",
-          "winning_count": null,
-          "prize_amount": "15",
+          "winning_count": 880696,
+          "prize_amount": "18",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "六等奖",
             "require": "中3+2",
-            "num": 0,
-            "singlebonus": 15
+            "num": 880696,
+            "singlebonus": 18
           }
         },
         {
           "prize_level": "七等奖",
           "prize_name": "七等奖",
           "require": "中4+0",
-          "winning_count": null,
-          "prize_amount": "5",
+          "winning_count": 8509919,
+          "prize_amount": "7",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "七等奖",
             "require": "中4+0",
-            "num": 0,
-            "singlebonus": 5
+            "num": 8509919,
+            "singlebonus": 7
           }
         }
       ],
@@ -177,7 +177,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=14",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-02T21:41:27+08:00"
+        "fetched_at": "2026-05-02T22:28:52+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -191,62 +191,62 @@
             "opendate": "2026-05-02",
             "officialopendate": "",
             "deadline": "2026-06-30",
-            "saleamount": 0,
-            "totalmoney": "0.00",
+            "saleamount": 301530437,
+            "totalmoney": "776088008.71",
             "prize": [
               {
                 "prizename": "一等奖",
                 "require": "中5+2",
-                "num": 0,
-                "singlebonus": 0
+                "num": 5,
+                "singlebonus": 7415209
               },
               {
                 "prizename": "追加一等奖",
                 "require": "中5+2",
-                "num": 0,
-                "singlebonus": 0
+                "num": 2,
+                "singlebonus": 5932167
               },
               {
                 "prizename": "二等奖",
                 "require": "中5+1",
-                "num": 0,
-                "singlebonus": 0
+                "num": 97,
+                "singlebonus": 139095
               },
               {
                 "prizename": "追加二等奖",
                 "require": "中5+1",
-                "num": 0,
-                "singlebonus": 0
+                "num": 22,
+                "singlebonus": 111276
               },
               {
                 "prizename": "三等奖",
                 "require": "中5+0",
-                "num": 0,
-                "singlebonus": 5000
+                "num": 1320,
+                "singlebonus": 6666
               },
               {
                 "prizename": "四等奖",
                 "require": "中4+2",
-                "num": 0,
-                "singlebonus": 300
+                "num": 20216,
+                "singlebonus": 380
               },
               {
                 "prizename": "五等奖",
                 "require": "中4+1",
-                "num": 0,
-                "singlebonus": 150
+                "num": 79979,
+                "singlebonus": 200
               },
               {
                 "prizename": "六等奖",
                 "require": "中3+2",
-                "num": 0,
-                "singlebonus": 15
+                "num": 880696,
+                "singlebonus": 18
               },
               {
                 "prizename": "七等奖",
                 "require": "中4+0",
-                "num": 0,
-                "singlebonus": 5
+                "num": 8509919,
+                "singlebonus": 7
               }
             ]
           }
@@ -259,62 +259,62 @@
           "opendate": "2026-05-02",
           "officialopendate": "",
           "deadline": "2026-06-30",
-          "saleamount": 0,
-          "totalmoney": "0.00",
+          "saleamount": 301530437,
+          "totalmoney": "776088008.71",
           "prize": [
             {
               "prizename": "一等奖",
               "require": "中5+2",
-              "num": 0,
-              "singlebonus": 0
+              "num": 5,
+              "singlebonus": 7415209
             },
             {
               "prizename": "追加一等奖",
               "require": "中5+2",
-              "num": 0,
-              "singlebonus": 0
+              "num": 2,
+              "singlebonus": 5932167
             },
             {
               "prizename": "二等奖",
               "require": "中5+1",
-              "num": 0,
-              "singlebonus": 0
+              "num": 97,
+              "singlebonus": 139095
             },
             {
               "prizename": "追加二等奖",
               "require": "中5+1",
-              "num": 0,
-              "singlebonus": 0
+              "num": 22,
+              "singlebonus": 111276
             },
             {
               "prizename": "三等奖",
               "require": "中5+0",
-              "num": 0,
-              "singlebonus": 5000
+              "num": 1320,
+              "singlebonus": 6666
             },
             {
               "prizename": "四等奖",
               "require": "中4+2",
-              "num": 0,
-              "singlebonus": 300
+              "num": 20216,
+              "singlebonus": 380
             },
             {
               "prizename": "五等奖",
               "require": "中4+1",
-              "num": 0,
-              "singlebonus": 150
+              "num": 79979,
+              "singlebonus": 200
             },
             {
               "prizename": "六等奖",
               "require": "中3+2",
-              "num": 0,
-              "singlebonus": 15
+              "num": 880696,
+              "singlebonus": 18
             },
             {
               "prizename": "七等奖",
               "require": "中4+0",
-              "num": 0,
-              "singlebonus": 5
+              "num": 8509919,
+              "singlebonus": 7
             }
           ]
         },
@@ -328,7 +328,7 @@
           "nextissueno": "26047"
         }
       },
-      "fetched_at": "2026-05-02T21:41:27+08:00"
+      "fetched_at": "2026-05-02T22:28:52+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
