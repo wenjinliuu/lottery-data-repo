@@ -3,8 +3,82 @@
   "version": 1,
   "lottery_type": "pl3",
   "year": "2026",
-  "updated_at": "2026-05-03T20:35:43+08:00",
+  "updated_at": "2026-05-03T21:42:52+08:00",
   "draws": [
+    {
+      "schema": "random_draw_agent_draw",
+      "version": 1,
+      "lottery_type": "pl3",
+      "lottery_name": "排列三",
+      "caipiaoid": 16,
+      "issue": "26113",
+      "draw_date": "2026-05-03",
+      "draw_time": "",
+      "deadline": "2026-07-01",
+      "numbers": {
+        "digits": [
+          9,
+          2,
+          5
+        ]
+      },
+      "number_raw": "9 2 5",
+      "refernumber_raw": "",
+      "prize_pool": "0.00",
+      "sales_amount": "",
+      "prize_details": [],
+      "next_issue": "26113",
+      "next_draw_date": "2026-05-03",
+      "next_open_time": "2026-05-03 21:25:00",
+      "next_buy_end_time": "2026-05-03 21:00:00",
+      "class_last_issue": "26112",
+      "source": {
+        "name": "jisuapi",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
+        "fetched_at": "2026-05-03T21:42:44+08:00"
+      },
+      "raw_public_json": {
+        "query_response": {
+          "status": 0,
+          "msg": "ok",
+          "result": {
+            "caipiaoid": 16,
+            "issueno": "26113",
+            "number": "9 2 5",
+            "refernumber": "",
+            "opendate": "2026-05-03",
+            "officialopendate": "",
+            "deadline": "2026-07-01",
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "prize": false
+          }
+        },
+        "query_result": {
+          "caipiaoid": 16,
+          "issueno": "26113",
+          "number": "9 2 5",
+          "refernumber": "",
+          "opendate": "2026-05-03",
+          "officialopendate": "",
+          "deadline": "2026-07-01",
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "prize": false
+        },
+        "class_info": {
+          "caipiaoid": 16,
+          "name": "排列三",
+          "parentid": 2,
+          "nextopentime": "2026-05-03 21:25:00",
+          "nextbuyendtime": "2026-05-03 21:00:00",
+          "lastissueno": "26112",
+          "nextissueno": "26113"
+        }
+      },
+      "fetched_at": "2026-05-03T21:42:44+08:00"
+    },
     {
       "schema": "random_draw_agent_draw",
       "version": 1,
