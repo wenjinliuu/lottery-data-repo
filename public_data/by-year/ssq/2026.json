@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "ssq",
   "year": "2026",
-  "updated_at": "2026-05-05T22:19:47+08:00",
+  "updated_at": "2026-05-06T03:58:30+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -30,19 +30,125 @@
       },
       "number_raw": "06 09 25 27 28 30",
       "refernumber_raw": "03",
-      "prize_pool": "0.00",
-      "sales_amount": "",
-      "prize_details": [],
-      "next_issue": "2026050",
-      "next_draw_date": "2026-05-05",
-      "next_open_time": "2026-05-05 21:15:00",
-      "next_buy_end_time": "2026-05-05 20:00:00",
-      "class_last_issue": "2026049",
+      "prize_pool": "1470262206.00",
+      "sales_amount": "368215788",
+      "prize_details": [
+        {
+          "prize_level": "一等奖",
+          "prize_name": "一等奖",
+          "require": "中6+1",
+          "winning_count": 4,
+          "prize_amount": "7220345",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "一等奖",
+            "require": "中6+1",
+            "num": 4,
+            "singlebonus": 7220345
+          }
+        },
+        {
+          "prize_level": "二等奖",
+          "prize_name": "二等奖",
+          "require": "中6+0",
+          "winning_count": 87,
+          "prize_amount": "408339",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "二等奖",
+            "require": "中6+0",
+            "num": 87,
+            "singlebonus": 408339
+          }
+        },
+        {
+          "prize_level": "三等奖",
+          "prize_name": "三等奖",
+          "require": "中5+1",
+          "winning_count": 1462,
+          "prize_amount": "3000",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "三等奖",
+            "require": "中5+1",
+            "num": 1462,
+            "singlebonus": 3000
+          }
+        },
+        {
+          "prize_level": "四等奖",
+          "prize_name": "四等奖",
+          "require": "中5+0/4+1",
+          "winning_count": 75625,
+          "prize_amount": "200",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "四等奖",
+            "require": "中5+0/4+1",
+            "num": 75625,
+            "singlebonus": 200
+          }
+        },
+        {
+          "prize_level": "五等奖",
+          "prize_name": "五等奖",
+          "require": "中4+0/3+1",
+          "winning_count": 1451006,
+          "prize_amount": "10",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "五等奖",
+            "require": "中4+0/3+1",
+            "num": 1451006,
+            "singlebonus": 10
+          }
+        },
+        {
+          "prize_level": "六等奖",
+          "prize_name": "六等奖",
+          "require": "中2+1/1+1/0+1",
+          "winning_count": 10695426,
+          "prize_amount": "5",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "六等奖",
+            "require": "中2+1/1+1/0+1",
+            "num": 10695426,
+            "singlebonus": 5
+          }
+        },
+        {
+          "prize_level": "福运奖",
+          "prize_name": "福运奖",
+          "require": "",
+          "winning_count": 9704126,
+          "prize_amount": "5",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "福运奖",
+            "require": "",
+            "num": 9704126,
+            "singlebonus": 5
+          }
+        }
+      ],
+      "next_issue": "2026051",
+      "next_draw_date": "2026-05-07",
+      "next_open_time": "2026-05-07 21:15:00",
+      "next_buy_end_time": "2026-05-07 20:00:00",
+      "class_last_issue": "2026050",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-05T22:19:44+08:00"
+        "fetched_at": "2026-05-06T03:58:27+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -56,9 +162,52 @@
             "opendate": "2026-05-05",
             "officialopendate": "",
             "deadline": "2026-07-03",
-            "saleamount": 0,
-            "totalmoney": "0.00",
-            "prize": false
+            "saleamount": 368215788,
+            "totalmoney": "1470262206.00",
+            "prize": [
+              {
+                "prizename": "一等奖",
+                "require": "中6+1",
+                "num": 4,
+                "singlebonus": 7220345
+              },
+              {
+                "prizename": "二等奖",
+                "require": "中6+0",
+                "num": 87,
+                "singlebonus": 408339
+              },
+              {
+                "prizename": "三等奖",
+                "require": "中5+1",
+                "num": 1462,
+                "singlebonus": 3000
+              },
+              {
+                "prizename": "四等奖",
+                "require": "中5+0/4+1",
+                "num": 75625,
+                "singlebonus": 200
+              },
+              {
+                "prizename": "五等奖",
+                "require": "中4+0/3+1",
+                "num": 1451006,
+                "singlebonus": 10
+              },
+              {
+                "prizename": "六等奖",
+                "require": "中2+1/1+1/0+1",
+                "num": 10695426,
+                "singlebonus": 5
+              },
+              {
+                "prizename": "福运奖",
+                "require": "",
+                "num": 9704126,
+                "singlebonus": 5
+              }
+            ]
           }
         },
         "query_result": {
@@ -69,21 +218,64 @@
           "opendate": "2026-05-05",
           "officialopendate": "",
           "deadline": "2026-07-03",
-          "saleamount": 0,
-          "totalmoney": "0.00",
-          "prize": false
+          "saleamount": 368215788,
+          "totalmoney": "1470262206.00",
+          "prize": [
+            {
+              "prizename": "一等奖",
+              "require": "中6+1",
+              "num": 4,
+              "singlebonus": 7220345
+            },
+            {
+              "prizename": "二等奖",
+              "require": "中6+0",
+              "num": 87,
+              "singlebonus": 408339
+            },
+            {
+              "prizename": "三等奖",
+              "require": "中5+1",
+              "num": 1462,
+              "singlebonus": 3000
+            },
+            {
+              "prizename": "四等奖",
+              "require": "中5+0/4+1",
+              "num": 75625,
+              "singlebonus": 200
+            },
+            {
+              "prizename": "五等奖",
+              "require": "中4+0/3+1",
+              "num": 1451006,
+              "singlebonus": 10
+            },
+            {
+              "prizename": "六等奖",
+              "require": "中2+1/1+1/0+1",
+              "num": 10695426,
+              "singlebonus": 5
+            },
+            {
+              "prizename": "福运奖",
+              "require": "",
+              "num": 9704126,
+              "singlebonus": 5
+            }
+          ]
         },
         "class_info": {
           "caipiaoid": 11,
           "name": "双色球",
           "parentid": 1,
-          "nextopentime": "2026-05-05 21:15:00",
-          "nextbuyendtime": "2026-05-05 20:00:00",
-          "lastissueno": "2026049",
-          "nextissueno": "2026050"
+          "nextopentime": "2026-05-07 21:15:00",
+          "nextbuyendtime": "2026-05-07 20:00:00",
+          "lastissueno": "2026050",
+          "nextissueno": "2026051"
         }
       },
-      "fetched_at": "2026-05-05T22:19:44+08:00"
+      "fetched_at": "2026-05-06T03:58:27+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
