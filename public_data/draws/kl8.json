@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "kl8",
-  "updated_at": "2026-05-06T03:58:38+08:00",
+  "updated_at": "2026-05-06T21:20:22+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -47,15 +47,15 @@
           "prize_level": "选十中10",
           "prize_name": "选十中10",
           "require": "",
-          "winning_count": 5000000,
-          "prize_amount": "10000000",
+          "winning_count": 2,
+          "prize_amount": "5000000",
           "additional_count": null,
           "additional_amount": "",
           "raw": {
             "prizename": "选十中10",
             "require": null,
-            "num": 5000000,
-            "singlebonus": 10000000
+            "num": 2,
+            "singlebonus": 5000000
           }
         },
         {
@@ -638,7 +638,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-06T03:58:27+08:00"
+        "fetched_at": "2026-05-06T21:20:08+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -650,7 +650,7 @@
             "number": "05 06 07 12 14 25 26 30 31 33 36 43 44 48 51 57 70 75 77 80",
             "refernumber": null,
             "opendate": "2026-05-05",
-            "officialopendate": "2026-05-06 02:30",
+            "officialopendate": "2026-05-06 21:20",
             "deadline": null,
             "saleamount": 98047482,
             "totalmoney": "82684407.00",
@@ -658,8 +658,8 @@
               {
                 "prizename": "选十中10",
                 "require": null,
-                "num": 5000000,
-                "singlebonus": 10000000
+                "num": 2,
+                "singlebonus": 5000000
               },
               {
                 "prizename": "选十中9",
@@ -898,7 +898,7 @@
           "number": "05 06 07 12 14 25 26 30 31 33 36 43 44 48 51 57 70 75 77 80",
           "refernumber": null,
           "opendate": "2026-05-05",
-          "officialopendate": "2026-05-06 02:30",
+          "officialopendate": "2026-05-06 21:20",
           "deadline": null,
           "saleamount": 98047482,
           "totalmoney": "82684407.00",
@@ -906,8 +906,8 @@
             {
               "prizename": "选十中10",
               "require": null,
-              "num": 5000000,
-              "singlebonus": 10000000
+              "num": 2,
+              "singlebonus": 5000000
             },
             {
               "prizename": "选十中9",
@@ -1149,7 +1149,7 @@
           "nextissueno": "2026116"
         }
       },
-      "fetched_at": "2026-05-06T03:58:27+08:00"
+      "fetched_at": "2026-05-06T21:20:08+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
