@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "pl3",
   "year": "2026",
-  "updated_at": "2026-05-10T21:49:23+08:00",
+  "updated_at": "2026-05-10T22:34:59+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -25,8 +25,54 @@
       "number_raw": "2 9 6",
       "refernumber_raw": "",
       "prize_pool": "0.00",
-      "sales_amount": "",
-      "prize_details": [],
+      "sales_amount": "37419262",
+      "prize_details": [
+        {
+          "prize_level": "直选奖",
+          "prize_name": "直选奖",
+          "require": "定位中3码",
+          "winning_count": 8275,
+          "prize_amount": "1040",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "直选奖",
+            "require": "定位中3码",
+            "num": 8275,
+            "singlebonus": 1040
+          }
+        },
+        {
+          "prize_level": "组选3奖",
+          "prize_name": "组选3奖",
+          "require": "2个数字相同且不定位中2码",
+          "winning_count": null,
+          "prize_amount": "346",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "组选3奖",
+            "require": "2个数字相同且不定位中2码",
+            "num": 0,
+            "singlebonus": 346
+          }
+        },
+        {
+          "prize_level": "组选6奖",
+          "prize_name": "组选6奖",
+          "require": "不定位中3码",
+          "winning_count": 28762,
+          "prize_amount": "173",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "组选6奖",
+            "require": "不定位中3码",
+            "num": 28762,
+            "singlebonus": 173
+          }
+        }
+      ],
       "next_issue": "26120",
       "next_draw_date": "2026-05-10",
       "next_open_time": "2026-05-10 21:25:00",
@@ -36,7 +82,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-10T21:49:13+08:00"
+        "fetched_at": "2026-05-10T22:34:51+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -50,9 +96,28 @@
             "opendate": "2026-05-10",
             "officialopendate": "",
             "deadline": "2026-07-08",
-            "saleamount": 0,
+            "saleamount": 37419262,
             "totalmoney": "0.00",
-            "prize": false
+            "prize": [
+              {
+                "prizename": "直选奖",
+                "require": "定位中3码",
+                "num": 8275,
+                "singlebonus": 1040
+              },
+              {
+                "prizename": "组选3奖",
+                "require": "2个数字相同且不定位中2码",
+                "num": 0,
+                "singlebonus": 346
+              },
+              {
+                "prizename": "组选6奖",
+                "require": "不定位中3码",
+                "num": 28762,
+                "singlebonus": 173
+              }
+            ]
           }
         },
         "query_result": {
@@ -63,9 +128,28 @@
           "opendate": "2026-05-10",
           "officialopendate": "",
           "deadline": "2026-07-08",
-          "saleamount": 0,
+          "saleamount": 37419262,
           "totalmoney": "0.00",
-          "prize": false
+          "prize": [
+            {
+              "prizename": "直选奖",
+              "require": "定位中3码",
+              "num": 8275,
+              "singlebonus": 1040
+            },
+            {
+              "prizename": "组选3奖",
+              "require": "2个数字相同且不定位中2码",
+              "num": 0,
+              "singlebonus": 346
+            },
+            {
+              "prizename": "组选6奖",
+              "require": "不定位中3码",
+              "num": 28762,
+              "singlebonus": 173
+            }
+          ]
         },
         "class_info": {
           "caipiaoid": 16,
@@ -77,7 +161,7 @@
           "nextissueno": "26120"
         }
       },
-      "fetched_at": "2026-05-10T21:49:13+08:00"
+      "fetched_at": "2026-05-10T22:34:51+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
