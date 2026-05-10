@@ -2,8 +2,86 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qxc",
-  "updated_at": "2026-05-10T20:41:38+08:00",
+  "updated_at": "2026-05-10T21:49:22+08:00",
   "draws": [
+    {
+      "schema": "random_draw_agent_draw",
+      "version": 1,
+      "lottery_type": "qxc",
+      "lottery_name": "七星彩",
+      "caipiaoid": 15,
+      "issue": "26052",
+      "draw_date": "2026-05-10",
+      "draw_time": "",
+      "deadline": "2026-07-08",
+      "numbers": {
+        "digits": [
+          2,
+          3,
+          5,
+          2,
+          5,
+          6,
+          12
+        ]
+      },
+      "number_raw": "2 3 5 2 5 6",
+      "refernumber_raw": "12",
+      "prize_pool": "0.00",
+      "sales_amount": "",
+      "prize_details": [],
+      "next_issue": "26052",
+      "next_draw_date": "2026-05-10",
+      "next_open_time": "2026-05-10 21:25:00",
+      "next_buy_end_time": "2026-05-10 21:00:00",
+      "class_last_issue": "26051",
+      "source": {
+        "name": "jisuapi",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
+        "fetched_at": "2026-05-10T21:49:13+08:00"
+      },
+      "raw_public_json": {
+        "query_response": {
+          "status": 0,
+          "msg": "ok",
+          "result": {
+            "caipiaoid": 15,
+            "issueno": "26052",
+            "number": "2 3 5 2 5 6",
+            "refernumber": "12",
+            "opendate": "2026-05-10",
+            "officialopendate": "",
+            "deadline": "2026-07-08",
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "prize": false
+          }
+        },
+        "query_result": {
+          "caipiaoid": 15,
+          "issueno": "26052",
+          "number": "2 3 5 2 5 6",
+          "refernumber": "12",
+          "opendate": "2026-05-10",
+          "officialopendate": "",
+          "deadline": "2026-07-08",
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "prize": false
+        },
+        "class_info": {
+          "caipiaoid": 15,
+          "name": "七星彩",
+          "parentid": 2,
+          "nextopentime": "2026-05-10 21:25:00",
+          "nextbuyendtime": "2026-05-10 21:00:00",
+          "lastissueno": "26051",
+          "nextissueno": "26052"
+        }
+      },
+      "fetched_at": "2026-05-10T21:49:13+08:00"
+    },
     {
       "schema": "random_draw_agent_draw",
       "version": 1,
