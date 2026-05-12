@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_latest",
   "version": 1,
-  "updated_at": "2026-05-12T04:20:16+08:00",
+  "updated_at": "2026-05-12T21:26:58+08:00",
   "timezone": "Asia/Shanghai",
   "draws": {
     "ssq": {
@@ -10,134 +10,28 @@
       "lottery_type": "ssq",
       "lottery_name": "双色球",
       "caipiaoid": 11,
-      "issue": "2026052",
-      "draw_date": "2026-05-10",
+      "issue": "2026053",
+      "draw_date": "2026-05-12",
       "draw_time": "",
-      "deadline": "2026-07-08",
+      "deadline": "2026-07-10",
       "numbers": {
         "red": [
           1,
+          2,
           3,
-          11,
-          22,
-          26,
-          31
+          8,
+          13,
+          14
         ],
         "blue": [
-          11
+          2
         ]
       },
-      "number_raw": "01 03 11 22 26 31",
-      "refernumber_raw": "11",
-      "prize_pool": "1306883761.00",
-      "sales_amount": "417267288",
-      "prize_details": [
-        {
-          "prize_level": "一等奖",
-          "prize_name": "一等奖",
-          "require": "中6+1",
-          "winning_count": 24,
-          "prize_amount": "4166666",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "一等奖",
-            "require": "中6+1",
-            "num": 24,
-            "singlebonus": 4166666
-          }
-        },
-        {
-          "prize_level": "二等奖",
-          "prize_name": "二等奖",
-          "require": "中6+0",
-          "winning_count": 257,
-          "prize_amount": "103058",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "二等奖",
-            "require": "中6+0",
-            "num": 257,
-            "singlebonus": 103058
-          }
-        },
-        {
-          "prize_level": "三等奖",
-          "prize_name": "三等奖",
-          "require": "中5+1",
-          "winning_count": 2670,
-          "prize_amount": "3000",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "三等奖",
-            "require": "中5+1",
-            "num": 2670,
-            "singlebonus": 3000
-          }
-        },
-        {
-          "prize_level": "四等奖",
-          "prize_name": "四等奖",
-          "require": "中5+0/4+1",
-          "winning_count": 116865,
-          "prize_amount": "200",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "四等奖",
-            "require": "中5+0/4+1",
-            "num": 116865,
-            "singlebonus": 200
-          }
-        },
-        {
-          "prize_level": "五等奖",
-          "prize_name": "五等奖",
-          "require": "中4+0/3+1",
-          "winning_count": 1905046,
-          "prize_amount": "10",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "五等奖",
-            "require": "中4+0/3+1",
-            "num": 1905046,
-            "singlebonus": 10
-          }
-        },
-        {
-          "prize_level": "六等奖",
-          "prize_name": "六等奖",
-          "require": "中2+1/1+1/0+1",
-          "winning_count": 13011591,
-          "prize_amount": "5",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "六等奖",
-            "require": "中2+1/1+1/0+1",
-            "num": 13011591,
-            "singlebonus": 5
-          }
-        },
-        {
-          "prize_level": "福运奖",
-          "prize_name": "福运奖",
-          "require": "",
-          "winning_count": 11172372,
-          "prize_amount": "5",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "福运奖",
-            "require": "",
-            "num": 11172372,
-            "singlebonus": 5
-          }
-        }
-      ],
+      "number_raw": "01 02 03 08 13 14",
+      "refernumber_raw": "02",
+      "prize_pool": "0.00",
+      "sales_amount": "",
+      "prize_details": [],
       "next_issue": "2026053",
       "next_draw_date": "2026-05-12",
       "next_open_time": "2026-05-12 21:15:00",
@@ -147,7 +41,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -155,114 +49,28 @@
           "msg": "ok",
           "result": {
             "caipiaoid": 11,
-            "issueno": "2026052",
-            "number": "01 03 11 22 26 31",
-            "refernumber": "11",
-            "opendate": "2026-05-10",
+            "issueno": "2026053",
+            "number": "01 02 03 08 13 14",
+            "refernumber": "02",
+            "opendate": "2026-05-12",
             "officialopendate": "",
-            "deadline": "2026-07-08",
-            "saleamount": 417267288,
-            "totalmoney": "1306883761.00",
-            "prize": [
-              {
-                "prizename": "一等奖",
-                "require": "中6+1",
-                "num": 24,
-                "singlebonus": 4166666
-              },
-              {
-                "prizename": "二等奖",
-                "require": "中6+0",
-                "num": 257,
-                "singlebonus": 103058
-              },
-              {
-                "prizename": "三等奖",
-                "require": "中5+1",
-                "num": 2670,
-                "singlebonus": 3000
-              },
-              {
-                "prizename": "四等奖",
-                "require": "中5+0/4+1",
-                "num": 116865,
-                "singlebonus": 200
-              },
-              {
-                "prizename": "五等奖",
-                "require": "中4+0/3+1",
-                "num": 1905046,
-                "singlebonus": 10
-              },
-              {
-                "prizename": "六等奖",
-                "require": "中2+1/1+1/0+1",
-                "num": 13011591,
-                "singlebonus": 5
-              },
-              {
-                "prizename": "福运奖",
-                "require": "",
-                "num": 11172372,
-                "singlebonus": 5
-              }
-            ]
+            "deadline": "2026-07-10",
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "prize": false
           }
         },
         "query_result": {
           "caipiaoid": 11,
-          "issueno": "2026052",
-          "number": "01 03 11 22 26 31",
-          "refernumber": "11",
-          "opendate": "2026-05-10",
+          "issueno": "2026053",
+          "number": "01 02 03 08 13 14",
+          "refernumber": "02",
+          "opendate": "2026-05-12",
           "officialopendate": "",
-          "deadline": "2026-07-08",
-          "saleamount": 417267288,
-          "totalmoney": "1306883761.00",
-          "prize": [
-            {
-              "prizename": "一等奖",
-              "require": "中6+1",
-              "num": 24,
-              "singlebonus": 4166666
-            },
-            {
-              "prizename": "二等奖",
-              "require": "中6+0",
-              "num": 257,
-              "singlebonus": 103058
-            },
-            {
-              "prizename": "三等奖",
-              "require": "中5+1",
-              "num": 2670,
-              "singlebonus": 3000
-            },
-            {
-              "prizename": "四等奖",
-              "require": "中5+0/4+1",
-              "num": 116865,
-              "singlebonus": 200
-            },
-            {
-              "prizename": "五等奖",
-              "require": "中4+0/3+1",
-              "num": 1905046,
-              "singlebonus": 10
-            },
-            {
-              "prizename": "六等奖",
-              "require": "中2+1/1+1/0+1",
-              "num": 13011591,
-              "singlebonus": 5
-            },
-            {
-              "prizename": "福运奖",
-              "require": "",
-              "num": 11172372,
-              "singlebonus": 5
-            }
-          ]
+          "deadline": "2026-07-10",
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "prize": false
         },
         "class_info": {
           "caipiaoid": 11,
@@ -274,7 +82,7 @@
           "nextissueno": "2026053"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "fc3d": {
       "schema": "random_draw_agent_draw",
@@ -353,7 +161,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -432,7 +240,7 @@
           "nextissueno": "2026122"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "qlc": {
       "schema": "random_draw_agent_draw",
@@ -576,7 +384,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=13",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -703,7 +511,7 @@
           "nextissueno": "2026053"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "dlt": {
       "schema": "random_draw_agent_draw",
@@ -953,7 +761,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=14",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1164,7 +972,7 @@
           "nextissueno": "26052"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "qxc": {
       "schema": "random_draw_agent_draw",
@@ -1292,7 +1100,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1407,7 +1215,7 @@
           "nextissueno": "26053"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "pl3": {
       "schema": "random_draw_agent_draw",
@@ -1486,7 +1294,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1565,7 +1373,7 @@
           "nextissueno": "26122"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "pl5": {
       "schema": "random_draw_agent_draw",
@@ -1616,7 +1424,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=17",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1671,7 +1479,7 @@
           "nextissueno": "26122"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     },
     "kl8": {
       "schema": "random_draw_agent_draw",
@@ -2307,7 +2115,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-12T04:20:08+08:00"
+        "fetched_at": "2026-05-12T21:26:44+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -2319,7 +2127,7 @@
             "number": "02 16 18 19 26 32 33 38 39 42 49 50 52 54 60 61 63 65 72 78",
             "refernumber": null,
             "opendate": "2026-05-11",
-            "officialopendate": "2026-05-12 02:30",
+            "officialopendate": "2026-05-12 21:20",
             "deadline": null,
             "saleamount": 100164536,
             "totalmoney": "104919198.00",
@@ -2567,7 +2375,7 @@
           "number": "02 16 18 19 26 32 33 38 39 42 49 50 52 54 60 61 63 65 72 78",
           "refernumber": null,
           "opendate": "2026-05-11",
-          "officialopendate": "2026-05-12 02:30",
+          "officialopendate": "2026-05-12 21:20",
           "deadline": null,
           "saleamount": 100164536,
           "totalmoney": "104919198.00",
@@ -2818,7 +2626,7 @@
           "nextissueno": "2026122"
         }
       },
-      "fetched_at": "2026-05-12T04:20:08+08:00"
+      "fetched_at": "2026-05-12T21:26:44+08:00"
     }
   }
 }
