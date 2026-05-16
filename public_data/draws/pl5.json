@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "pl5",
-  "updated_at": "2026-05-16T21:52:58+08:00",
+  "updated_at": "2026-05-16T22:38:56+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -25,9 +25,25 @@
       },
       "number_raw": "8 3 5 2 6",
       "refernumber_raw": "",
-      "prize_pool": "0.00",
-      "sales_amount": "",
-      "prize_details": [],
+      "prize_pool": "11594156.28",
+      "sales_amount": "22206948",
+      "prize_details": [
+        {
+          "prize_level": "一等奖",
+          "prize_name": "一等奖",
+          "require": "定位中5码",
+          "winning_count": 415,
+          "prize_amount": "100000",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "一等奖",
+            "require": "定位中5码",
+            "num": 415,
+            "singlebonus": 100000
+          }
+        }
+      ],
       "next_issue": "26126",
       "next_draw_date": "2026-05-16",
       "next_open_time": "2026-05-16 21:25:00",
@@ -37,7 +53,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=17",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-16T21:52:42+08:00"
+        "fetched_at": "2026-05-16T22:38:40+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -51,9 +67,16 @@
             "opendate": "2026-05-16",
             "officialopendate": "",
             "deadline": "2026-07-14",
-            "saleamount": 0,
-            "totalmoney": "0.00",
-            "prize": false
+            "saleamount": 22206948,
+            "totalmoney": "11594156.28",
+            "prize": [
+              {
+                "prizename": "一等奖",
+                "require": "定位中5码",
+                "num": 415,
+                "singlebonus": 100000
+              }
+            ]
           }
         },
         "query_result": {
@@ -64,9 +87,16 @@
           "opendate": "2026-05-16",
           "officialopendate": "",
           "deadline": "2026-07-14",
-          "saleamount": 0,
-          "totalmoney": "0.00",
-          "prize": false
+          "saleamount": 22206948,
+          "totalmoney": "11594156.28",
+          "prize": [
+            {
+              "prizename": "一等奖",
+              "require": "定位中5码",
+              "num": 415,
+              "singlebonus": 100000
+            }
+          ]
         },
         "class_info": {
           "caipiaoid": 17,
@@ -78,7 +108,7 @@
           "nextissueno": "26126"
         }
       },
-      "fetched_at": "2026-05-16T21:52:42+08:00"
+      "fetched_at": "2026-05-16T22:38:40+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
