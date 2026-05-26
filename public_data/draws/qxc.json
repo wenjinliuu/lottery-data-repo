@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qxc",
-  "updated_at": "2026-05-26T22:18:17+08:00",
+  "updated_at": "2026-05-27T00:03:04+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -121,16 +121,16 @@
           }
         }
       ],
-      "next_issue": "26059",
+      "next_issue": "26060",
       "next_draw_date": "2026-05-26",
       "next_open_time": "2026-05-26 21:25:00",
       "next_buy_end_time": "2026-05-26 21:00:00",
-      "class_last_issue": "26058",
+      "class_last_issue": "26059",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-26T22:18:06+08:00"
+        "fetched_at": "2026-05-27T00:02:58+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -241,11 +241,11 @@
           "parentid": 2,
           "nextopentime": "2026-05-26 21:25:00",
           "nextbuyendtime": "2026-05-26 21:00:00",
-          "lastissueno": "26058",
-          "nextissueno": "26059"
+          "lastissueno": "26059",
+          "nextissueno": "26060"
         }
       },
-      "fetched_at": "2026-05-26T22:18:06+08:00"
+      "fetched_at": "2026-05-27T00:02:58+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
