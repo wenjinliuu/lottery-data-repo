@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_latest",
   "version": 1,
-  "updated_at": "2026-06-14T23:24:15+08:00",
+  "updated_at": "2026-06-15T04:08:46+08:00",
   "timezone": "Asia/Shanghai",
   "draws": {
     "ssq": {
@@ -147,7 +147,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -274,7 +274,7 @@
           "nextissueno": "2026068"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "fc3d": {
       "schema": "random_draw_agent_draw",
@@ -353,7 +353,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -432,7 +432,7 @@
           "nextissueno": "2026156"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "qlc": {
       "schema": "random_draw_agent_draw",
@@ -576,7 +576,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=13",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -703,7 +703,7 @@
           "nextissueno": "2026067"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "dlt": {
       "schema": "random_draw_agent_draw",
@@ -953,7 +953,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=14",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1164,7 +1164,7 @@
           "nextissueno": "26066"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "qxc": {
       "schema": "random_draw_agent_draw",
@@ -1283,16 +1283,16 @@
           }
         }
       ],
-      "next_issue": "26067",
-      "next_draw_date": "2026-06-14",
-      "next_open_time": "2026-06-14 21:25:00",
-      "next_buy_end_time": "2026-06-14 21:00:00",
-      "class_last_issue": "26066",
+      "next_issue": "26068",
+      "next_draw_date": "2026-06-16",
+      "next_open_time": "2026-06-16 21:25:00",
+      "next_buy_end_time": "2026-06-16 21:00:00",
+      "class_last_issue": "26067",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1401,13 +1401,13 @@
           "caipiaoid": 15,
           "name": "七星彩",
           "parentid": 2,
-          "nextopentime": "2026-06-14 21:25:00",
-          "nextbuyendtime": "2026-06-14 21:00:00",
-          "lastissueno": "26066",
-          "nextissueno": "26067"
+          "nextopentime": "2026-06-16 21:25:00",
+          "nextbuyendtime": "2026-06-16 21:00:00",
+          "lastissueno": "26067",
+          "nextissueno": "26068"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "pl3": {
       "schema": "random_draw_agent_draw",
@@ -1477,16 +1477,16 @@
           }
         }
       ],
-      "next_issue": "26155",
-      "next_draw_date": "2026-06-14",
-      "next_open_time": "2026-06-14 21:25:00",
-      "next_buy_end_time": "2026-06-14 21:00:00",
-      "class_last_issue": "26154",
+      "next_issue": "26156",
+      "next_draw_date": "2026-06-15",
+      "next_open_time": "2026-06-15 21:25:00",
+      "next_buy_end_time": "2026-06-15 21:00:00",
+      "class_last_issue": "26155",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1559,13 +1559,13 @@
           "caipiaoid": 16,
           "name": "排列三",
           "parentid": 2,
-          "nextopentime": "2026-06-14 21:25:00",
-          "nextbuyendtime": "2026-06-14 21:00:00",
-          "lastissueno": "26154",
-          "nextissueno": "26155"
+          "nextopentime": "2026-06-15 21:25:00",
+          "nextbuyendtime": "2026-06-15 21:00:00",
+          "lastissueno": "26155",
+          "nextissueno": "26156"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "pl5": {
       "schema": "random_draw_agent_draw",
@@ -1607,16 +1607,16 @@
           }
         }
       ],
-      "next_issue": "26155",
-      "next_draw_date": "2026-06-14",
-      "next_open_time": "2026-06-14 21:25:00",
-      "next_buy_end_time": "2026-06-14 21:00:00",
-      "class_last_issue": "26154",
+      "next_issue": "26156",
+      "next_draw_date": "2026-06-15",
+      "next_open_time": "2026-06-15 21:25:00",
+      "next_buy_end_time": "2026-06-15 21:00:00",
+      "class_last_issue": "26155",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=17",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -1665,13 +1665,13 @@
           "caipiaoid": 17,
           "name": "排列五",
           "parentid": 2,
-          "nextopentime": "2026-06-14 21:25:00",
-          "nextbuyendtime": "2026-06-14 21:00:00",
-          "lastissueno": "26154",
-          "nextissueno": "26155"
+          "nextopentime": "2026-06-15 21:25:00",
+          "nextbuyendtime": "2026-06-15 21:00:00",
+          "lastissueno": "26155",
+          "nextissueno": "26156"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     },
     "kl8": {
       "schema": "random_draw_agent_draw",
@@ -2298,16 +2298,16 @@
           }
         }
       ],
-      "next_issue": "2026155",
-      "next_draw_date": "2026-06-14",
-      "next_open_time": "2026-06-14 21:30:00",
-      "next_buy_end_time": "2026-06-14 20:30:00",
-      "class_last_issue": "2026154",
+      "next_issue": "2026156",
+      "next_draw_date": "2026-06-15",
+      "next_open_time": "2026-06-15 21:30:00",
+      "next_buy_end_time": "2026-06-15 20:30:00",
+      "class_last_issue": "2026155",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-14T23:24:02+08:00"
+        "fetched_at": "2026-06-15T04:08:35+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -2319,7 +2319,7 @@
             "number": "07 10 11 12 17 18 24 27 30 31 32 34 42 49 54 59 64 65 71 72",
             "refernumber": null,
             "opendate": "2026-06-14",
-            "officialopendate": "2026-06-14 23:00",
+            "officialopendate": "2026-06-15 02:30",
             "deadline": null,
             "saleamount": 99855920,
             "totalmoney": "139316475.00",
@@ -2567,7 +2567,7 @@
           "number": "07 10 11 12 17 18 24 27 30 31 32 34 42 49 54 59 64 65 71 72",
           "refernumber": null,
           "opendate": "2026-06-14",
-          "officialopendate": "2026-06-14 23:00",
+          "officialopendate": "2026-06-15 02:30",
           "deadline": null,
           "saleamount": 99855920,
           "totalmoney": "139316475.00",
@@ -2812,13 +2812,13 @@
           "caipiaoid": 89,
           "name": "快乐8",
           "parentid": 1,
-          "nextopentime": "2026-06-14 21:30:00",
-          "nextbuyendtime": "2026-06-14 20:30:00",
-          "lastissueno": "2026154",
-          "nextissueno": "2026155"
+          "nextopentime": "2026-06-15 21:30:00",
+          "nextbuyendtime": "2026-06-15 20:30:00",
+          "lastissueno": "2026155",
+          "nextissueno": "2026156"
         }
       },
-      "fetched_at": "2026-06-14T23:24:02+08:00"
+      "fetched_at": "2026-06-15T04:08:35+08:00"
     }
   }
 }
