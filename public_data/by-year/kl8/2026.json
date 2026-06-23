@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "kl8",
   "year": "2026",
-  "updated_at": "2026-06-23T23:20:33+08:00",
+  "updated_at": "2026-06-24T00:08:17+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -630,16 +630,16 @@
           }
         }
       ],
-      "next_issue": "2026164",
-      "next_draw_date": "2026-06-23",
-      "next_open_time": "2026-06-23 21:30:00",
-      "next_buy_end_time": "2026-06-23 20:30:00",
-      "class_last_issue": "2026163",
+      "next_issue": "2026165",
+      "next_draw_date": "2026-06-24",
+      "next_open_time": "2026-06-24 21:30:00",
+      "next_buy_end_time": "2026-06-24 20:30:00",
+      "class_last_issue": "2026164",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-23T23:20:10+08:00"
+        "fetched_at": "2026-06-24T00:08:03+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -651,7 +651,7 @@
             "number": "01 03 04 05 13 17 19 25 30 34 38 46 56 58 59 60 63 69 76 80",
             "refernumber": null,
             "opendate": "2026-06-23",
-            "officialopendate": "2026-06-23 23:00",
+            "officialopendate": "2026-06-23 23:30",
             "deadline": null,
             "saleamount": 93841542,
             "totalmoney": "162589413.00",
@@ -899,7 +899,7 @@
           "number": "01 03 04 05 13 17 19 25 30 34 38 46 56 58 59 60 63 69 76 80",
           "refernumber": null,
           "opendate": "2026-06-23",
-          "officialopendate": "2026-06-23 23:00",
+          "officialopendate": "2026-06-23 23:30",
           "deadline": null,
           "saleamount": 93841542,
           "totalmoney": "162589413.00",
@@ -1144,13 +1144,13 @@
           "caipiaoid": 89,
           "name": "快乐8",
           "parentid": 1,
-          "nextopentime": "2026-06-23 21:30:00",
-          "nextbuyendtime": "2026-06-23 20:30:00",
-          "lastissueno": "2026163",
-          "nextissueno": "2026164"
+          "nextopentime": "2026-06-24 21:30:00",
+          "nextbuyendtime": "2026-06-24 20:30:00",
+          "lastissueno": "2026164",
+          "nextissueno": "2026165"
         }
       },
-      "fetched_at": "2026-06-23T23:20:10+08:00"
+      "fetched_at": "2026-06-24T00:08:03+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
