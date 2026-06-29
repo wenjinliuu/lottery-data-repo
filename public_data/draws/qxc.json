@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qxc",
-  "updated_at": "2026-06-30T00:07:42+08:00",
+  "updated_at": "2026-06-30T00:44:17+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -130,7 +130,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-06-30T00:07:31+08:00"
+        "fetched_at": "2026-06-30T00:43:57+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -245,7 +245,7 @@
           "nextissueno": "26074"
         }
       },
-      "fetched_at": "2026-06-30T00:07:31+08:00"
+      "fetched_at": "2026-06-30T00:43:57+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
