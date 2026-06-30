@@ -2,8 +2,88 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "ssq",
-  "updated_at": "2026-06-30T04:27:21+08:00",
+  "updated_at": "2026-06-30T21:29:27+08:00",
   "draws": [
+    {
+      "schema": "random_draw_agent_draw",
+      "version": 1,
+      "lottery_type": "ssq",
+      "lottery_name": "双色球",
+      "caipiaoid": 11,
+      "issue": "2026074",
+      "draw_date": "2026-06-30",
+      "draw_time": "",
+      "deadline": "2026-08-28",
+      "numbers": {
+        "red": [
+          2,
+          23,
+          24,
+          26,
+          28,
+          32
+        ],
+        "blue": [
+          4
+        ]
+      },
+      "number_raw": "02 23 24 26 28 32",
+      "refernumber_raw": "04",
+      "prize_pool": "0.00",
+      "sales_amount": "",
+      "prize_details": [],
+      "next_issue": "2026074",
+      "next_draw_date": "2026-06-30",
+      "next_open_time": "2026-06-30 21:15:00",
+      "next_buy_end_time": "2026-06-30 20:00:00",
+      "class_last_issue": "2026073",
+      "source": {
+        "name": "jisuapi",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
+        "fetched_at": "2026-06-30T21:29:24+08:00"
+      },
+      "raw_public_json": {
+        "query_response": {
+          "status": 0,
+          "msg": "ok",
+          "result": {
+            "caipiaoid": 11,
+            "issueno": "2026074",
+            "number": "02 23 24 26 28 32",
+            "refernumber": "04",
+            "opendate": "2026-06-30",
+            "officialopendate": "",
+            "deadline": "2026-08-28",
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "prize": false
+          }
+        },
+        "query_result": {
+          "caipiaoid": 11,
+          "issueno": "2026074",
+          "number": "02 23 24 26 28 32",
+          "refernumber": "04",
+          "opendate": "2026-06-30",
+          "officialopendate": "",
+          "deadline": "2026-08-28",
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "prize": false
+        },
+        "class_info": {
+          "caipiaoid": 11,
+          "name": "双色球",
+          "parentid": 1,
+          "nextopentime": "2026-06-30 21:15:00",
+          "nextbuyendtime": "2026-06-30 20:00:00",
+          "lastissueno": "2026073",
+          "nextissueno": "2026074"
+        }
+      },
+      "fetched_at": "2026-06-30T21:29:24+08:00"
+    },
     {
       "schema": "random_draw_agent_draw",
       "version": 1,
