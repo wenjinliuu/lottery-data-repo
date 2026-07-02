@@ -2,8 +2,166 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "pl3",
-  "updated_at": "2026-07-02T21:21:32+08:00",
+  "updated_at": "2026-07-02T22:24:34+08:00",
   "draws": [
+    {
+      "schema": "random_draw_agent_draw",
+      "version": 1,
+      "lottery_type": "pl3",
+      "lottery_name": "排列三",
+      "caipiaoid": 16,
+      "issue": "26173",
+      "draw_date": "2026-07-02",
+      "draw_time": "",
+      "deadline": "2026-08-30",
+      "numbers": {
+        "digits": [
+          2,
+          5,
+          9
+        ]
+      },
+      "number_raw": "2 5 9",
+      "refernumber_raw": "",
+      "prize_pool": "0.00",
+      "sales_amount": "43179078",
+      "prize_details": [
+        {
+          "prize_level": "直选奖",
+          "prize_name": "直选奖",
+          "require": "定位中3码",
+          "winning_count": 19877,
+          "prize_amount": "1040",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "直选奖",
+            "require": "定位中3码",
+            "num": 19877,
+            "singlebonus": 1040
+          }
+        },
+        {
+          "prize_level": "组选3奖",
+          "prize_name": "组选3奖",
+          "require": "2个数字相同且不定位中2码",
+          "winning_count": null,
+          "prize_amount": "346",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "组选3奖",
+            "require": "2个数字相同且不定位中2码",
+            "num": 0,
+            "singlebonus": 346
+          }
+        },
+        {
+          "prize_level": "组选6奖",
+          "prize_name": "组选6奖",
+          "require": "不定位中3码",
+          "winning_count": 49802,
+          "prize_amount": "173",
+          "additional_count": null,
+          "additional_amount": "",
+          "raw": {
+            "prizename": "组选6奖",
+            "require": "不定位中3码",
+            "num": 49802,
+            "singlebonus": 173
+          }
+        }
+      ],
+      "next_issue": "26173",
+      "next_draw_date": "2026-07-02",
+      "next_open_time": "2026-07-02 21:25:00",
+      "next_buy_end_time": "2026-07-02 21:00:00",
+      "class_last_issue": "26172",
+      "source": {
+        "name": "jisuapi",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
+        "fetched_at": "2026-07-02T22:24:20+08:00"
+      },
+      "raw_public_json": {
+        "query_response": {
+          "status": 0,
+          "msg": "ok",
+          "result": {
+            "caipiaoid": 16,
+            "issueno": "26173",
+            "number": "2 5 9",
+            "refernumber": "",
+            "opendate": "2026-07-02",
+            "officialopendate": "",
+            "deadline": "2026-08-30",
+            "saleamount": 43179078,
+            "totalmoney": "0.00",
+            "prize": [
+              {
+                "prizename": "直选奖",
+                "require": "定位中3码",
+                "num": 19877,
+                "singlebonus": 1040
+              },
+              {
+                "prizename": "组选3奖",
+                "require": "2个数字相同且不定位中2码",
+                "num": 0,
+                "singlebonus": 346
+              },
+              {
+                "prizename": "组选6奖",
+                "require": "不定位中3码",
+                "num": 49802,
+                "singlebonus": 173
+              }
+            ]
+          }
+        },
+        "query_result": {
+          "caipiaoid": 16,
+          "issueno": "26173",
+          "number": "2 5 9",
+          "refernumber": "",
+          "opendate": "2026-07-02",
+          "officialopendate": "",
+          "deadline": "2026-08-30",
+          "saleamount": 43179078,
+          "totalmoney": "0.00",
+          "prize": [
+            {
+              "prizename": "直选奖",
+              "require": "定位中3码",
+              "num": 19877,
+              "singlebonus": 1040
+            },
+            {
+              "prizename": "组选3奖",
+              "require": "2个数字相同且不定位中2码",
+              "num": 0,
+              "singlebonus": 346
+            },
+            {
+              "prizename": "组选6奖",
+              "require": "不定位中3码",
+              "num": 49802,
+              "singlebonus": 173
+            }
+          ]
+        },
+        "class_info": {
+          "caipiaoid": 16,
+          "name": "排列三",
+          "parentid": 2,
+          "nextopentime": "2026-07-02 21:25:00",
+          "nextbuyendtime": "2026-07-02 21:00:00",
+          "lastissueno": "26172",
+          "nextissueno": "26173"
+        }
+      },
+      "fetched_at": "2026-07-02T22:24:20+08:00"
+    },
     {
       "schema": "random_draw_agent_draw",
       "version": 1,
@@ -7745,164 +7903,6 @@
         }
       },
       "fetched_at": "2026-05-15T21:17:54+08:00"
-    },
-    {
-      "schema": "random_draw_agent_draw",
-      "version": 1,
-      "lottery_type": "pl3",
-      "lottery_name": "排列三",
-      "caipiaoid": 16,
-      "issue": "26123",
-      "draw_date": "2026-05-13",
-      "draw_time": "",
-      "deadline": "2026-07-11",
-      "numbers": {
-        "digits": [
-          9,
-          5,
-          5
-        ]
-      },
-      "number_raw": "9 5 5",
-      "refernumber_raw": "",
-      "prize_pool": "0.00",
-      "sales_amount": "38495204",
-      "prize_details": [
-        {
-          "prize_level": "直选奖",
-          "prize_name": "直选奖",
-          "require": "定位中3码",
-          "winning_count": 14904,
-          "prize_amount": "1040",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "直选奖",
-            "require": "定位中3码",
-            "num": 14904,
-            "singlebonus": 1040
-          }
-        },
-        {
-          "prize_level": "组选3奖",
-          "prize_name": "组选3奖",
-          "require": "2个数字相同且不定位中2码",
-          "winning_count": 18890,
-          "prize_amount": "346",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "组选3奖",
-            "require": "2个数字相同且不定位中2码",
-            "num": 18890,
-            "singlebonus": 346
-          }
-        },
-        {
-          "prize_level": "组选6奖",
-          "prize_name": "组选6奖",
-          "require": "不定位中3码",
-          "winning_count": null,
-          "prize_amount": "173",
-          "additional_count": null,
-          "additional_amount": "",
-          "raw": {
-            "prizename": "组选6奖",
-            "require": "不定位中3码",
-            "num": 0,
-            "singlebonus": 173
-          }
-        }
-      ],
-      "next_issue": "26124",
-      "next_draw_date": "2026-05-14",
-      "next_open_time": "2026-05-14 21:25:00",
-      "next_buy_end_time": "2026-05-14 21:00:00",
-      "class_last_issue": "26123",
-      "source": {
-        "name": "jisuapi",
-        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
-        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-05-14T21:18:59+08:00"
-      },
-      "raw_public_json": {
-        "query_response": {
-          "status": 0,
-          "msg": "ok",
-          "result": {
-            "caipiaoid": 16,
-            "issueno": "26123",
-            "number": "9 5 5",
-            "refernumber": "",
-            "opendate": "2026-05-13",
-            "officialopendate": "",
-            "deadline": "2026-07-11",
-            "saleamount": 38495204,
-            "totalmoney": "0.00",
-            "prize": [
-              {
-                "prizename": "直选奖",
-                "require": "定位中3码",
-                "num": 14904,
-                "singlebonus": 1040
-              },
-              {
-                "prizename": "组选3奖",
-                "require": "2个数字相同且不定位中2码",
-                "num": 18890,
-                "singlebonus": 346
-              },
-              {
-                "prizename": "组选6奖",
-                "require": "不定位中3码",
-                "num": 0,
-                "singlebonus": 173
-              }
-            ]
-          }
-        },
-        "query_result": {
-          "caipiaoid": 16,
-          "issueno": "26123",
-          "number": "9 5 5",
-          "refernumber": "",
-          "opendate": "2026-05-13",
-          "officialopendate": "",
-          "deadline": "2026-07-11",
-          "saleamount": 38495204,
-          "totalmoney": "0.00",
-          "prize": [
-            {
-              "prizename": "直选奖",
-              "require": "定位中3码",
-              "num": 14904,
-              "singlebonus": 1040
-            },
-            {
-              "prizename": "组选3奖",
-              "require": "2个数字相同且不定位中2码",
-              "num": 18890,
-              "singlebonus": 346
-            },
-            {
-              "prizename": "组选6奖",
-              "require": "不定位中3码",
-              "num": 0,
-              "singlebonus": 173
-            }
-          ]
-        },
-        "class_info": {
-          "caipiaoid": 16,
-          "name": "排列三",
-          "parentid": 2,
-          "nextopentime": "2026-05-14 21:25:00",
-          "nextbuyendtime": "2026-05-14 21:00:00",
-          "lastissueno": "26123",
-          "nextissueno": "26124"
-        }
-      },
-      "fetched_at": "2026-05-14T21:18:59+08:00"
     }
   ]
 }
