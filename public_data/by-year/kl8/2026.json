@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "kl8",
   "year": "2026",
-  "updated_at": "2026-07-06T22:45:17+08:00",
+  "updated_at": "2026-07-06T23:52:06+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -630,16 +630,16 @@
           }
         }
       ],
-      "next_issue": "2026177",
-      "next_draw_date": "2026-07-06",
-      "next_open_time": "2026-07-06 21:30:00",
-      "next_buy_end_time": "2026-07-06 20:30:00",
-      "class_last_issue": "2026176",
+      "next_issue": "2026178",
+      "next_draw_date": "2026-07-07",
+      "next_open_time": "2026-07-07 21:30:00",
+      "next_buy_end_time": "2026-07-07 20:30:00",
+      "class_last_issue": "2026177",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-07-06T22:45:02+08:00"
+        "fetched_at": "2026-07-06T23:51:54+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -651,7 +651,7 @@
             "number": "11 15 16 20 33 35 37 39 42 46 49 50 54 56 61 62 71 73 76 79",
             "refernumber": null,
             "opendate": "2026-07-06",
-            "officialopendate": "2026-07-06 22:40",
+            "officialopendate": "2026-07-06 23:30",
             "deadline": null,
             "saleamount": 100589422,
             "totalmoney": "154399554.00",
@@ -899,7 +899,7 @@
           "number": "11 15 16 20 33 35 37 39 42 46 49 50 54 56 61 62 71 73 76 79",
           "refernumber": null,
           "opendate": "2026-07-06",
-          "officialopendate": "2026-07-06 22:40",
+          "officialopendate": "2026-07-06 23:30",
           "deadline": null,
           "saleamount": 100589422,
           "totalmoney": "154399554.00",
@@ -1144,13 +1144,13 @@
           "caipiaoid": 89,
           "name": "快乐8",
           "parentid": 1,
-          "nextopentime": "2026-07-06 21:30:00",
-          "nextbuyendtime": "2026-07-06 20:30:00",
-          "lastissueno": "2026176",
-          "nextissueno": "2026177"
+          "nextopentime": "2026-07-07 21:30:00",
+          "nextbuyendtime": "2026-07-07 20:30:00",
+          "lastissueno": "2026177",
+          "nextissueno": "2026178"
         }
       },
-      "fetched_at": "2026-07-06T22:45:02+08:00"
+      "fetched_at": "2026-07-06T23:51:54+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
