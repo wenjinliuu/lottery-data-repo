@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "ssq",
   "year": "2026",
-  "updated_at": "2026-07-14T23:06:58+08:00",
+  "updated_at": "2026-07-15T03:52:08+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -125,15 +125,15 @@
         }
       ],
       "next_issue": "2026081",
-      "next_draw_date": "2026-07-14",
-      "next_open_time": "2026-07-14 21:15:00",
-      "next_buy_end_time": "2026-07-14 20:00:00",
+      "next_draw_date": "2026-07-16",
+      "next_open_time": "2026-07-16 21:15:00",
+      "next_buy_end_time": "2026-07-16 20:00:00",
       "class_last_issue": "2026080",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-07-14T23:06:54+08:00"
+        "fetched_at": "2026-07-15T03:52:07+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -242,13 +242,13 @@
           "caipiaoid": 11,
           "name": "双色球",
           "parentid": 1,
-          "nextopentime": "2026-07-14 21:15:00",
-          "nextbuyendtime": "2026-07-14 20:00:00",
+          "nextopentime": "2026-07-16 21:15:00",
+          "nextbuyendtime": "2026-07-16 20:00:00",
           "lastissueno": "2026080",
           "nextissueno": "2026081"
         }
       },
-      "fetched_at": "2026-07-14T23:06:54+08:00"
+      "fetched_at": "2026-07-15T03:52:07+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
