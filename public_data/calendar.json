@@ -10,7 +10,7 @@
       "draw_weekdays": [
         0,
         2,
-        6
+        4
       ],
       "draw_time": "21:15",
       "expected_publish_time": "21:45",
@@ -62,9 +62,9 @@
       "name": "七乐彩",
       "caipiaoid": 13,
       "draw_weekdays": [
-        0,
-        2,
-        4
+        1,
+        3,
+        5
       ],
       "draw_time": "21:15",
       "expected_publish_time": "21:45",
@@ -112,9 +112,9 @@
       "name": "七星彩",
       "caipiaoid": 15,
       "draw_weekdays": [
-        1,
-        4,
-        6
+        0,
+        2,
+        5
       ],
       "draw_time": "20:30",
       "expected_publish_time": "21:30",
