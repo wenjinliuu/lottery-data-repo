@@ -46,6 +46,29 @@ This means future parsers can recover fields that were not normalized yet.
 
 Sensitive values, especially API keys, must be replaced with `***`.
 
+## Prize Requirement Normalization
+
+`prize_details[].prize_amount` always keeps the amount returned for that draw.
+The normalized `require` field may be corrected against the currently effective
+official game rules when the upstream API returns an outdated or incomplete
+condition. The untouched upstream row remains available in
+`prize_details[].raw` and `raw_public_json` for auditing.
+
+For example, the 2026 Super Lotto (`dlt`) rules merge 13 winning combinations
+into seven prize levels, so third prize is normalized as:
+
+```json
+{
+  "prize_name": "三等奖",
+  "require": "中5+0/4+2",
+  "prize_amount": "5000"
+}
+```
+
+Temporary prizes are draw-specific. A client must only enable a temporary
+prize, such as `福运奖`, when that prize is present in the draw's
+`prize_details`.
+
 ## Long-Term Storage
 
 `latest.json` should remain small forever.
