@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
@@ -58,7 +59,30 @@ def main() -> None:
     assert isinstance(latest.get("draws"), dict)
     for lottery_type, weekdays in EXPECTED_WEEKDAYS.items():
         assert calendar["lotteries"][lottery_type]["draw_weekdays"] == weekdays
+    for lottery_type, entry in calendar["lotteries"].items():
+        status = entry.get("next_status")
+        if status is not None:
+            assert status in {"confirmed", "inferred", "unavailable"}
+            assert entry.get("next_source") in {"class_api", "schedule_inference", "none"}
+            assert isinstance(entry.get("next_confirmed"), bool)
+            if status in {"confirmed", "inferred"}:
+                assert entry.get("next_issue")
+                assert entry.get("next_open_time")
+                datetime.fromisoformat(str(entry["next_open_time"]).replace(" ", "T"))
+            if status == "confirmed":
+                assert entry.get("next_confirmed") is True
+            if status == "inferred":
+                assert entry.get("next_confirmed") is False
     for draw in latest["draws"].values():
+        status = draw.get("next_status")
+        if status is not None:
+            assert status in {"confirmed", "inferred", "unavailable"}
+            assert draw.get("next_source") in {"class_api", "schedule_inference", "none"}
+            assert isinstance(draw.get("next_confirmed"), bool)
+            if status in {"confirmed", "inferred"}:
+                assert draw.get("next_issue")
+                assert draw.get("next_open_time")
+                assert str(draw.get("next_issue")) != str(draw.get("issue"))
         for prize in draw.get("prize_details", []):
             raw_require = (prize.get("raw") or {}).get("require")
             assert prize.get("require", "") == ("" if raw_require is None else str(raw_require))
