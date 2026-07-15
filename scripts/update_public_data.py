@@ -15,20 +15,6 @@ from urllib.request import urlopen
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "lotteries.json"
 
-# 极速数据的大乐透 require 字段仍可能按旧奖级拆分返回。2026 年新规保留
-# 13 种中奖条件并合并为 7 个奖级，因此由仓库在标准化层修正中奖条件；
-# 当期具体奖金仍完全采用 API 返回值。
-DLT_CANONICAL_REQUIREMENTS = {
-    "一等奖": "中5+2",
-    "二等奖": "中5+1",
-    "三等奖": "中5+0/4+2",
-    "四等奖": "中4+1",
-    "五等奖": "中4+0/3+2",
-    "六等奖": "中3+1/2+2",
-    "七等奖": "中3+0/2+1/1+2/0+2",
-}
-
-
 def now_iso() -> str:
     return datetime.now(timezone(timedelta(hours=8))).replace(microsecond=0).isoformat()
 
@@ -101,12 +87,6 @@ def normalize_prize_details(lottery_type: str, value: Any) -> list[dict[str, Any
             item = {"value": item}
         prize_name = safe_text(item.get("prizename") or item.get("name") or "")
         require = safe_text(item.get("require"))
-        if lottery_type == "dlt" and prize_name in DLT_CANONICAL_REQUIREMENTS:
-            require = DLT_CANONICAL_REQUIREMENTS[prize_name]
-        elif lottery_type == "ssq" and prize_name == "福运奖":
-            # 官方规则为“任意 3 个红球”；3+1 已命中更高的五等奖，按最高奖级
-            # 兑付后，福运奖实际需要补充识别的是 3+0。
-            require = "中3+0"
         details.append(
             {
                 "prize_level": safe_text(item.get("prizename") or item.get("level") or item.get("name") or index),

@@ -14,17 +14,6 @@ EXPECTED_WEEKDAYS = {
     "dlt": [1, 3, 6],
     "qxc": [0, 2, 5],
 }
-DLT_EXPECTED_REQUIREMENTS = {
-    "一等奖": "中5+2",
-    "二等奖": "中5+1",
-    "三等奖": "中5+0/4+2",
-    "四等奖": "中4+1",
-    "五等奖": "中4+0/3+2",
-    "六等奖": "中3+1/2+2",
-    "七等奖": "中3+0/2+1/1+2/0+2",
-}
-
-
 def assert_range(values: list, count: int, low: int, high: int, *, unique: bool = False) -> None:
     assert len(values) == count
     assert all(isinstance(value, int) and low <= value <= high for value in values)
@@ -69,15 +58,10 @@ def main() -> None:
     assert isinstance(latest.get("draws"), dict)
     for lottery_type, weekdays in EXPECTED_WEEKDAYS.items():
         assert calendar["lotteries"][lottery_type]["draw_weekdays"] == weekdays
-    dlt_prizes = {
-        prize["prize_name"]: prize.get("require", "")
-        for prize in latest["draws"]["dlt"].get("prize_details", [])
-        if prize.get("prize_name") in DLT_EXPECTED_REQUIREMENTS
-    }
-    assert dlt_prizes == DLT_EXPECTED_REQUIREMENTS
-    for prize in latest["draws"]["ssq"].get("prize_details", []):
-        if prize.get("prize_name") == "福运奖":
-            assert prize.get("require") == "中3+0"
+    for draw in latest["draws"].values():
+        for prize in draw.get("prize_details", []):
+            raw_require = (prize.get("raw") or {}).get("require")
+            assert prize.get("require", "") == ("" if raw_require is None else str(raw_require))
     for lottery_type in LOTTERIES:
         path = PUBLIC_DATA / "draws" / f"{lottery_type}.json"
         if path.exists():
@@ -90,6 +74,9 @@ def main() -> None:
                 assert "numbers" in draw
                 validate_numbers(lottery_type, draw["numbers"])
                 assert "raw_public_json" in draw
+                for prize in draw.get("prize_details", []):
+                    raw_require = (prize.get("raw") or {}).get("require")
+                    assert prize.get("require", "") == ("" if raw_require is None else str(raw_require))
             issues = [str(draw["issue"]) for draw in payload["draws"]]
             assert len(issues) == len(set(issues))
             assert str(latest["draws"][lottery_type]["issue"]) == issues[0]
