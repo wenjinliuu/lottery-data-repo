@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import date, datetime, time, timezone, timedelta
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -14,9 +14,148 @@ from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "lotteries.json"
+BEIJING_TZ = timezone(timedelta(hours=8))
 
 def now_iso() -> str:
-    return datetime.now(timezone(timedelta(hours=8))).replace(microsecond=0).isoformat()
+    return datetime.now(BEIJING_TZ).replace(microsecond=0).isoformat()
+
+
+def parse_api_datetime(value: Any) -> datetime | None:
+    text = safe_text(value).strip()
+    if not text:
+        return None
+    normalized = text.replace("T", " ")
+    for pattern in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            parsed = datetime.strptime(normalized, pattern)
+            return parsed.replace(tzinfo=BEIJING_TZ)
+        except ValueError:
+            continue
+    return None
+
+
+def parse_clock(value: Any, fallback: str) -> time:
+    text = safe_text(value).strip() or fallback
+    for pattern in ("%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(text, pattern).time()
+        except ValueError:
+            continue
+    return datetime.strptime(fallback, "%H:%M").time()
+
+
+def next_scheduled_datetime(draw_date: str, weekdays: list[int], draw_time: str) -> datetime | None:
+    try:
+        current_date = date.fromisoformat(draw_date[:10])
+    except (TypeError, ValueError):
+        return None
+    configured_days = {int(item) for item in weekdays if isinstance(item, int) or str(item).isdigit()}
+    if not configured_days:
+        return None
+    clock = parse_clock(draw_time, "21:00")
+    for offset in range(1, 15):
+        candidate = current_date + timedelta(days=offset)
+        # Repository weekdays follow JavaScript: Sunday=0 ... Saturday=6.
+        js_weekday = (candidate.weekday() + 1) % 7
+        if js_weekday in configured_days:
+            return datetime.combine(candidate, clock, tzinfo=BEIJING_TZ)
+    return None
+
+
+def infer_next_issue(issue: str, draw_date: str, next_date: date) -> str:
+    issue_text = safe_text(issue).strip()
+    if not issue_text.isdigit():
+        return ""
+    try:
+        draw_year = date.fromisoformat(draw_date[:10]).year
+    except (TypeError, ValueError):
+        return str(int(issue_text) + 1).zfill(len(issue_text))
+    if next_date.year == draw_year:
+        return str(int(issue_text) + 1).zfill(len(issue_text))
+
+    full_year = str(draw_year)
+    short_year = full_year[-2:]
+    if issue_text.startswith(full_year) and len(issue_text) > 4:
+        suffix_width = len(issue_text) - 4
+        return f"{next_date.year}{1:0{suffix_width}d}"
+    if issue_text.startswith(short_year) and len(issue_text) > 2:
+        suffix_width = len(issue_text) - 2
+        return f"{str(next_date.year)[-2:]}{1:0{suffix_width}d}"
+    return str(int(issue_text) + 1).zfill(len(issue_text))
+
+
+def resolve_next_draw(
+    lottery_config: dict[str, Any],
+    issue: str,
+    draw_date: str,
+    class_info: dict[str, Any],
+    reference_now: datetime,
+) -> dict[str, Any]:
+    class_last_issue = safe_text(class_info.get("lastissueno"))
+    class_next_issue = safe_text(class_info.get("nextissueno"))
+    class_next_open_time = safe_text(class_info.get("nextopentime"))
+    class_next_buy_end_time = safe_text(class_info.get("nextbuyendtime"))
+    class_open_dt = parse_api_datetime(class_next_open_time)
+
+    class_is_current = bool(
+        issue
+        and class_last_issue == issue
+        and class_next_issue
+        and class_next_issue != issue
+        and class_open_dt
+        and class_open_dt > reference_now
+    )
+    if class_is_current:
+        normalized_buy_end_time = class_next_buy_end_time
+        if not parse_api_datetime(normalized_buy_end_time):
+            sale_close = parse_clock(lottery_config.get("sale_close_time"), "20:00")
+            normalized_buy_end_time = datetime.combine(class_open_dt.date(), sale_close, tzinfo=BEIJING_TZ).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        return {
+            "next_issue": class_next_issue,
+            "next_draw_date": class_open_dt.date().isoformat(),
+            "next_open_time": class_next_open_time,
+            "next_buy_end_time": normalized_buy_end_time,
+            "next_status": "confirmed",
+            "next_source": "class_api",
+            "next_confirmed": True,
+            "next_basis_issue": issue,
+            "next_resolution_reason": "class_matches_latest_draw",
+        }
+
+    inferred_open_dt = next_scheduled_datetime(
+        draw_date,
+        lottery_config.get("draw_weekdays", []),
+        safe_text(lottery_config.get("draw_time")),
+    )
+    inferred_issue = infer_next_issue(issue, draw_date, inferred_open_dt.date()) if inferred_open_dt else ""
+    if inferred_open_dt and inferred_open_dt > reference_now and inferred_issue and inferred_issue != issue:
+        sale_close = parse_clock(lottery_config.get("sale_close_time"), "20:00")
+        inferred_buy_end_dt = datetime.combine(inferred_open_dt.date(), sale_close, tzinfo=BEIJING_TZ)
+        return {
+            "next_issue": inferred_issue,
+            "next_draw_date": inferred_open_dt.date().isoformat(),
+            "next_open_time": inferred_open_dt.strftime("%Y-%m-%d %H:%M:%S"),
+            "next_buy_end_time": inferred_buy_end_dt.strftime("%Y-%m-%d %H:%M:%S"),
+            "next_status": "inferred",
+            "next_source": "schedule_inference",
+            "next_confirmed": False,
+            "next_basis_issue": issue,
+            "next_resolution_reason": "class_stale_or_incomplete",
+        }
+
+    return {
+        "next_issue": "",
+        "next_draw_date": "",
+        "next_open_time": "",
+        "next_buy_end_time": "",
+        "next_status": "unavailable",
+        "next_source": "none",
+        "next_confirmed": False,
+        "next_basis_issue": issue,
+        "next_resolution_reason": "no_future_confirmed_or_inferred_draw",
+    }
 
 
 def load_json(path: Path, default: Any = None) -> Any:
@@ -125,6 +264,7 @@ def build_public_draw(
     class_info: dict[str, Any],
     query_url_public: str,
     fetched_at: str,
+    reference_now: datetime,
 ) -> dict[str, Any]:
     query_result = query_payload.get("result") if isinstance(query_payload, dict) else None
     if not isinstance(query_result, dict):
@@ -133,8 +273,7 @@ def build_public_draw(
     if not issue:
         raise ValueError(f"{lottery_type} query API missing issue")
     open_date = safe_text(query_result.get("opendate") or query_result.get("officialopendate"))
-    next_open_time = safe_text(class_info.get("nextopentime"))
-    next_buy_end_time = safe_text(class_info.get("nextbuyendtime"))
+    next_draw = resolve_next_draw(lottery_config, issue, open_date, class_info, reference_now)
     return {
         "schema": "random_draw_agent_draw",
         "version": 1,
@@ -151,10 +290,7 @@ def build_public_draw(
         "prize_pool": safe_text(query_result.get("totalmoney") or query_result.get("poolmoney")),
         "sales_amount": safe_text(query_result.get("saleamount") or query_result.get("sales")),
         "prize_details": normalize_prize_details(lottery_type, query_result.get("prize")),
-        "next_issue": safe_text(class_info.get("nextissueno")),
-        "next_draw_date": next_open_time[:10],
-        "next_open_time": next_open_time,
-        "next_buy_end_time": next_buy_end_time,
+        **next_draw,
         "class_last_issue": safe_text(class_info.get("lastissueno")),
         "source": {
             "name": "jisuapi",
@@ -223,10 +359,17 @@ def upsert_year(output_dir: Path, lottery_type: str, draw: dict[str, Any]) -> No
     dump_json(path, payload)
 
 
-def write_calendar(output_dir: Path, config: dict[str, Any], class_by_id: dict[int, dict[str, Any]], updated_at: str) -> None:
+def write_calendar(
+    output_dir: Path,
+    config: dict[str, Any],
+    class_by_id: dict[int, dict[str, Any]],
+    latest: dict[str, dict[str, Any]],
+    updated_at: str,
+) -> None:
     lotteries = {}
     for lottery_type, item in config["lotteries"].items():
         class_info = class_by_id.get(int(item["caipiaoid"]), {})
+        resolved = latest.get(lottery_type, {})
         lotteries[lottery_type] = {
             "name": item["name"],
             "caipiaoid": item["caipiaoid"],
@@ -234,10 +377,17 @@ def write_calendar(output_dir: Path, config: dict[str, Any], class_by_id: dict[i
             "draw_time": item.get("draw_time", ""),
             "expected_publish_time": item.get("expected_publish_time", ""),
             "sale_close_time": item.get("sale_close_time", ""),
-            "last_issue": safe_text(class_info.get("lastissueno")),
-            "next_issue": safe_text(class_info.get("nextissueno")),
-            "next_open_time": safe_text(class_info.get("nextopentime")),
-            "next_buy_end_time": safe_text(class_info.get("nextbuyendtime")),
+            "last_issue": safe_text(resolved.get("issue")),
+            "class_last_issue": safe_text(class_info.get("lastissueno")),
+            "next_issue": safe_text(resolved.get("next_issue")),
+            "next_draw_date": safe_text(resolved.get("next_draw_date")),
+            "next_open_time": safe_text(resolved.get("next_open_time")),
+            "next_buy_end_time": safe_text(resolved.get("next_buy_end_time")),
+            "next_status": safe_text(resolved.get("next_status")),
+            "next_source": safe_text(resolved.get("next_source")),
+            "next_confirmed": bool(resolved.get("next_confirmed")),
+            "next_basis_issue": safe_text(resolved.get("next_basis_issue")),
+            "next_resolution_reason": safe_text(resolved.get("next_resolution_reason")),
             "raw_class_info": class_info,
         }
     dump_json(
@@ -296,7 +446,8 @@ def update_public_data(config_path: Path = CONFIG_PATH, output_dir: Path | None 
     output_dir.mkdir(parents=True, exist_ok=True)
 
     timeout = int(api.get("timeout_seconds", 15))
-    fetched_at = now_iso()
+    reference_now = datetime.now(BEIJING_TZ).replace(microsecond=0)
+    fetched_at = reference_now.isoformat()
     class_url = f"{api['class_url']}?{urlencode({'appkey': appkey})}"
     class_payload = sanitize_payload(fetch_json(class_url, timeout), appkey)
     class_by_id = normalize_class_payload(class_payload)
@@ -315,6 +466,7 @@ def update_public_data(config_path: Path = CONFIG_PATH, output_dir: Path | None 
             class_by_id.get(lottery_id, {}),
             public_query_url,
             fetched_at,
+            reference_now,
         )
         latest[lottery_type] = draw
         upsert_recent(output_dir, lottery_type, draw, int(config["export"].get("keep_recent_per_lottery", 120)))
@@ -333,7 +485,7 @@ def update_public_data(config_path: Path = CONFIG_PATH, output_dir: Path | None 
             "draws": latest,
         },
     )
-    write_calendar(output_dir, config, class_by_id, updated_at)
+    write_calendar(output_dir, config, class_by_id, latest, updated_at)
     write_index(output_dir, config, updated_at)
     write_health(output_dir, True, "updated", updated_at, results)
     return {"ok": True, "updated_at": updated_at, "results": results}

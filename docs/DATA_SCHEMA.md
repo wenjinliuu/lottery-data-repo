@@ -19,10 +19,15 @@ Important fields:
 - `prize_pool`: `totalmoney` or equivalent.
 - `sales_amount`: `saleamount` or equivalent.
 - `prize_details`: prize levels, winning count, single bonus, additional bonus, and raw prize row.
-- `next_issue`: next issue from class API.
-- `next_draw_date`: date part of `nextopentime`.
-- `next_open_time`: full `nextopentime`.
-- `next_buy_end_time`: full `nextbuyendtime`.
+- `next_issue`: normalized next issue from a confirmed class response or schedule inference.
+- `next_draw_date`: normalized next draw date.
+- `next_open_time`: normalized next draw date and time.
+- `next_buy_end_time`: normalized sales cutoff date and time.
+- `next_status`: `confirmed`, `inferred`, or `unavailable`.
+- `next_source`: `class_api`, `schedule_inference`, or `none`.
+- `next_confirmed`: whether the class API has confirmed the normalized next draw.
+- `next_basis_issue`: latest query issue used to confirm or infer the next draw.
+- `next_resolution_reason`: machine-readable reason for the selected next-draw state.
 - `class_last_issue`: `lastissueno` from class API.
 - `source`: sanitized source metadata.
 - `raw_public_json`: sanitized raw API response data.
@@ -45,6 +50,19 @@ The public data keeps:
 This means future parsers can recover fields that were not normalized yet.
 
 Sensitive values, especially API keys, must be replaced with `***`.
+
+## Next Draw Resolution
+
+The class response is accepted only when its `lastissueno` matches the latest
+query issue, its next issue differs from that latest issue, and its next draw
+time is still in the future. Otherwise the exporter calculates the immediately
+following scheduled draw from the latest query issue/date and the configured
+weekday/time. An inferred value is replaced by class data on a later run only
+after the class response passes the same consistency and current-time checks.
+In `calendar.json`, `last_issue` is the latest confirmed query issue, while
+`class_last_issue` preserves the class API's raw last issue for diagnostics.
+The calendar also exposes the resolved `next_draw_date` alongside the full
+`next_open_time` so clients do not need to parse a date-time string for labels.
 
 ## Prize Requirements
 
