@@ -3,8 +3,91 @@
   "version": 1,
   "lottery_type": "qxc",
   "year": "2026",
-  "updated_at": "2026-07-19T20:36:30+08:00",
+  "updated_at": "2026-07-19T21:44:50+08:00",
   "draws": [
+    {
+      "schema": "random_draw_agent_draw",
+      "version": 1,
+      "lottery_type": "qxc",
+      "lottery_name": "七星彩",
+      "caipiaoid": 15,
+      "issue": "26082",
+      "draw_date": "2026-07-19",
+      "draw_time": "",
+      "deadline": "2026-09-16",
+      "numbers": {
+        "digits": [
+          9,
+          4,
+          7,
+          1,
+          0,
+          4,
+          7
+        ]
+      },
+      "number_raw": "9 4 7 1 0 4",
+      "refernumber_raw": "7",
+      "prize_pool": "0.00",
+      "sales_amount": "",
+      "prize_details": [],
+      "next_issue": "26083",
+      "next_draw_date": "2026-07-21",
+      "next_open_time": "2026-07-21 20:30:00",
+      "next_buy_end_time": "2026-07-21 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
+      "next_basis_issue": "26082",
+      "next_resolution_reason": "class_stale_or_incomplete",
+      "class_last_issue": "26081",
+      "source": {
+        "name": "jisuapi",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=15",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
+        "fetched_at": "2026-07-19T21:44:42+08:00"
+      },
+      "raw_public_json": {
+        "query_response": {
+          "status": 0,
+          "msg": "ok",
+          "result": {
+            "caipiaoid": 15,
+            "issueno": "26082",
+            "number": "9 4 7 1 0 4",
+            "refernumber": "7",
+            "opendate": "2026-07-19",
+            "officialopendate": "",
+            "deadline": "2026-09-16",
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "prize": false
+          }
+        },
+        "query_result": {
+          "caipiaoid": 15,
+          "issueno": "26082",
+          "number": "9 4 7 1 0 4",
+          "refernumber": "7",
+          "opendate": "2026-07-19",
+          "officialopendate": "",
+          "deadline": "2026-09-16",
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "prize": false
+        },
+        "class_info": {
+          "caipiaoid": 15,
+          "name": "七星彩",
+          "parentid": 2,
+          "nextopentime": "2026-07-19 21:25:00",
+          "nextbuyendtime": "2026-07-19 21:00:00",
+          "lastissueno": "26081",
+          "nextissueno": "26082"
+        }
+      },
+      "fetched_at": "2026-07-19T21:44:42+08:00"
+    },
     {
       "schema": "random_draw_agent_draw",
       "version": 1,
