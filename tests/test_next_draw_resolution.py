@@ -16,7 +16,7 @@ from update_public_data import BEIJING_TZ, infer_next_issue, resolve_next_draw  
 DLT = {
     "draw_weekdays": [1, 3, 6],
     "draw_time": "21:25",
-    "sale_close_time": "20:00",
+    "sale_close_time": "21:00",
 }
 
 
@@ -54,9 +54,9 @@ class NextDrawResolutionTests(unittest.TestCase):
         self.assertEqual(result["next_status"], "inferred")
         self.assertEqual(result["next_issue"], "26080")
         self.assertEqual(result["next_open_time"], "2026-07-18 21:25:00")
-        self.assertEqual(result["next_buy_end_time"], "2026-07-18 20:00:00")
+        self.assertEqual(result["next_buy_end_time"], "2026-07-18 21:00:00")
 
-    def test_does_not_infer_when_immediate_next_draw_is_already_past(self) -> None:
+    def test_rolls_over_missed_draws_until_a_saleable_issue(self) -> None:
         result = resolve_next_draw(
             DLT,
             "26078",
@@ -64,8 +64,28 @@ class NextDrawResolutionTests(unittest.TestCase):
             {},
             datetime(2026, 7, 15, 23, 6, tzinfo=BEIJING_TZ),
         )
-        self.assertEqual(result["next_status"], "unavailable")
-        self.assertEqual(result["next_issue"], "")
+        self.assertEqual(result["next_status"], "inferred")
+        self.assertEqual(result["next_issue"], "26080")
+        self.assertEqual(result["next_open_time"], "2026-07-18 21:25:00")
+
+    def test_rolls_from_closed_class_candidate_before_result_is_published(self) -> None:
+        result = resolve_next_draw(
+            DLT,
+            "26080",
+            "2026-07-18",
+            {
+                "lastissueno": "26080",
+                "nextissueno": "26081",
+                "nextopentime": "2026-07-20 21:25:00",
+                "nextbuyendtime": "2026-07-20 21:00:00",
+            },
+            datetime(2026, 7, 20, 21, 1, tzinfo=BEIJING_TZ),
+        )
+        self.assertEqual(result["next_status"], "inferred")
+        self.assertEqual(result["next_issue"], "26082")
+        self.assertEqual(result["next_open_time"], "2026-07-22 21:25:00")
+        self.assertEqual(result["next_buy_end_time"], "2026-07-22 21:00:00")
+        self.assertEqual(result["next_resolution_reason"], "class_candidate_closed_schedule_rolled")
 
     def test_rolls_issue_prefix_at_new_year(self) -> None:
         self.assertEqual(infer_next_issue("26150", "2026-12-30", datetime(2027, 1, 2).date()), "27001")

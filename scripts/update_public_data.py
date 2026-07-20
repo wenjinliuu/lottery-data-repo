@@ -62,6 +62,41 @@ def next_scheduled_datetime(draw_date: str, weekdays: list[int], draw_time: str)
     return None
 
 
+def next_saleable_scheduled_draw(
+    issue: str,
+    draw_date: str,
+    weekdays: list[int],
+    draw_time: str,
+    sale_close_time: str,
+    reference_now: datetime,
+) -> tuple[str, datetime, datetime] | None:
+    """Return the first scheduled draw whose sales cutoff is still in the future.
+
+    A query result can lag by one or more draws.  Advancing only once from the
+    latest published draw leaves the calendar unavailable after that immediate
+    draw has closed.  Walk every scheduled occurrence, advancing the issue at
+    each step, until reaching the first draw that can still accept a record.
+    """
+    current_issue = safe_text(issue).strip()
+    current_date = safe_text(draw_date).strip()
+    if not current_issue or not current_date:
+        return None
+    close_clock = parse_clock(sale_close_time, "20:00")
+    for _ in range(370):
+        open_dt = next_scheduled_datetime(current_date, weekdays, draw_time)
+        if not open_dt:
+            return None
+        next_issue = infer_next_issue(current_issue, current_date, open_dt.date())
+        if not next_issue or next_issue == current_issue:
+            return None
+        buy_end_dt = datetime.combine(open_dt.date(), close_clock, tzinfo=BEIJING_TZ)
+        if buy_end_dt > reference_now:
+            return next_issue, open_dt, buy_end_dt
+        current_issue = next_issue
+        current_date = open_dt.date().isoformat()
+    return None
+
+
 def infer_next_issue(issue: str, draw_date: str, next_date: date) -> str:
     issue_text = safe_text(issue).strip()
     if not issue_text.isdigit():
@@ -97,13 +132,19 @@ def resolve_next_draw(
     class_next_buy_end_time = safe_text(class_info.get("nextbuyendtime"))
     class_open_dt = parse_api_datetime(class_next_open_time)
 
+    class_buy_end_dt = parse_api_datetime(class_next_buy_end_time)
+    if class_open_dt and not class_buy_end_dt:
+        sale_close = parse_clock(lottery_config.get("sale_close_time"), "20:00")
+        class_buy_end_dt = datetime.combine(class_open_dt.date(), sale_close, tzinfo=BEIJING_TZ)
+
     class_is_current = bool(
         issue
         and class_last_issue == issue
         and class_next_issue
         and class_next_issue != issue
         and class_open_dt
-        and class_open_dt > reference_now
+        and class_buy_end_dt
+        and class_buy_end_dt > reference_now
     )
     if class_is_current:
         normalized_buy_end_time = class_next_buy_end_time
@@ -124,15 +165,39 @@ def resolve_next_draw(
             "next_resolution_reason": "class_matches_latest_draw",
         }
 
-    inferred_open_dt = next_scheduled_datetime(
-        draw_date,
+    # Prefer the API candidate as the inference anchor.  Even when its sales
+    # cutoff has passed, its issue/date pair tells us exactly which occurrence
+    # follows the latest published query result (for example DLT 26081 today).
+    anchor_issue = issue
+    anchor_date = draw_date
+    sale_close_text = safe_text(lottery_config.get("sale_close_time")) or "20:00"
+    if class_next_issue and class_open_dt and class_last_issue == issue:
+        anchor_issue = class_next_issue
+        anchor_date = class_open_dt.date().isoformat()
+        if class_buy_end_dt:
+            sale_close_text = class_buy_end_dt.strftime("%H:%M")
+
+    inferred = next_saleable_scheduled_draw(
+        anchor_issue,
+        anchor_date,
         lottery_config.get("draw_weekdays", []),
         safe_text(lottery_config.get("draw_time")),
+        sale_close_text,
+        reference_now,
     )
-    inferred_issue = infer_next_issue(issue, draw_date, inferred_open_dt.date()) if inferred_open_dt else ""
-    if inferred_open_dt and inferred_open_dt > reference_now and inferred_issue and inferred_issue != issue:
-        sale_close = parse_clock(lottery_config.get("sale_close_time"), "20:00")
-        inferred_buy_end_dt = datetime.combine(inferred_open_dt.date(), sale_close, tzinfo=BEIJING_TZ)
+    # Without a usable class candidate, the latest published draw itself is the
+    # anchor and must also be advanced (possibly across several missed runs).
+    if not inferred and anchor_issue != issue:
+        inferred = next_saleable_scheduled_draw(
+            issue,
+            draw_date,
+            lottery_config.get("draw_weekdays", []),
+            safe_text(lottery_config.get("draw_time")),
+            safe_text(lottery_config.get("sale_close_time")) or "20:00",
+            reference_now,
+        )
+    if inferred:
+        inferred_issue, inferred_open_dt, inferred_buy_end_dt = inferred
         return {
             "next_issue": inferred_issue,
             "next_draw_date": inferred_open_dt.date().isoformat(),
@@ -142,7 +207,11 @@ def resolve_next_draw(
             "next_source": "schedule_inference",
             "next_confirmed": False,
             "next_basis_issue": issue,
-            "next_resolution_reason": "class_stale_or_incomplete",
+            "next_resolution_reason": (
+                "class_candidate_closed_schedule_rolled"
+                if anchor_issue != issue
+                else "class_stale_or_incomplete_schedule_rolled"
+            ),
         }
 
     return {
