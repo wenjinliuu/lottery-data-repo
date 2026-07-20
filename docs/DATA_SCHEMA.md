@@ -54,11 +54,13 @@ Sensitive values, especially API keys, must be replaced with `***`.
 ## Next Draw Resolution
 
 The class response is accepted only when its `lastissueno` matches the latest
-query issue, its next issue differs from that latest issue, and its next draw
-time is still in the future. Otherwise the exporter calculates the immediately
-following scheduled draw from the latest query issue/date and the configured
-weekday/time. An inferred value is replaced by class data on a later run only
-after the class response passes the same consistency and current-time checks.
+query issue, its next issue differs from that latest issue, and its sales cutoff
+is still in the future. Otherwise the exporter advances across scheduled draws
+until it finds the first issue whose sales cutoff has not passed. When possible,
+the raw class candidate supplies the issue/date and cutoff anchor; this lets a
+new future issue be inferred even while the current draw result is delayed. An
+inferred value is replaced by class data on a later run only after the class
+response passes the same consistency and current-time checks.
 In `calendar.json`, `last_issue` is the latest confirmed query issue, while
 `class_last_issue` preserves the class API's raw last issue for diagnostics.
 The calendar also exposes the resolved `next_draw_date` alongside the full
