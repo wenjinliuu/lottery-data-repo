@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "fc3d",
   "year": "2026",
-  "updated_at": "2026-07-26T22:47:08+08:00",
+  "updated_at": "2026-07-27T03:45:13+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -77,17 +77,17 @@
       "next_draw_date": "2026-07-27",
       "next_open_time": "2026-07-27 21:15:00",
       "next_buy_end_time": "2026-07-27 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "2026197",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
-      "class_last_issue": "2026196",
+      "next_resolution_reason": "class_matches_latest_draw",
+      "class_last_issue": "2026197",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-07-26T22:47:05+08:00"
+        "fetched_at": "2026-07-27T03:45:10+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -160,13 +160,13 @@
           "caipiaoid": 12,
           "name": "福彩3D",
           "parentid": 1,
-          "nextopentime": "2026-07-26 21:15:00",
-          "nextbuyendtime": "2026-07-26 20:00:00",
-          "lastissueno": "2026196",
-          "nextissueno": "2026197"
+          "nextopentime": "2026-07-27 21:15:00",
+          "nextbuyendtime": "2026-07-27 20:00:00",
+          "lastissueno": "2026197",
+          "nextissueno": "2026198"
         }
       },
-      "fetched_at": "2026-07-26T22:47:05+08:00"
+      "fetched_at": "2026-07-27T03:45:10+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
