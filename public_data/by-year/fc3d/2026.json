@@ -3,8 +3,87 @@
   "version": 1,
   "lottery_type": "fc3d",
   "year": "2026",
-  "updated_at": "2026-08-01T20:39:20+08:00",
+  "updated_at": "2026-08-01T21:46:24+08:00",
   "draws": [
+    {
+      "schema": "random_draw_agent_draw",
+      "version": 1,
+      "lottery_type": "fc3d",
+      "lottery_name": "福彩3D",
+      "caipiaoid": 12,
+      "issue": "2026203",
+      "draw_date": "2026-08-01",
+      "draw_time": "",
+      "deadline": "2026-09-29",
+      "numbers": {
+        "digits": [
+          4,
+          3,
+          5
+        ]
+      },
+      "number_raw": "4 3 5",
+      "refernumber_raw": "",
+      "prize_pool": "0.00",
+      "sales_amount": "",
+      "prize_details": [],
+      "next_issue": "2026204",
+      "next_draw_date": "2026-08-02",
+      "next_open_time": "2026-08-02 21:15:00",
+      "next_buy_end_time": "2026-08-02 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
+      "next_basis_issue": "2026203",
+      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
+      "class_last_issue": "2026202",
+      "source": {
+        "name": "jisuapi",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
+        "fetched_at": "2026-08-01T21:46:20+08:00"
+      },
+      "raw_public_json": {
+        "query_response": {
+          "status": 0,
+          "msg": "ok",
+          "result": {
+            "caipiaoid": 12,
+            "issueno": "2026203",
+            "number": "4 3 5",
+            "refernumber": "",
+            "opendate": "2026-08-01",
+            "officialopendate": "",
+            "deadline": "2026-09-29",
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "prize": false
+          }
+        },
+        "query_result": {
+          "caipiaoid": 12,
+          "issueno": "2026203",
+          "number": "4 3 5",
+          "refernumber": "",
+          "opendate": "2026-08-01",
+          "officialopendate": "",
+          "deadline": "2026-09-29",
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "prize": false
+        },
+        "class_info": {
+          "caipiaoid": 12,
+          "name": "福彩3D",
+          "parentid": 1,
+          "nextopentime": "2026-08-01 21:15:00",
+          "nextbuyendtime": "2026-08-01 20:00:00",
+          "lastissueno": "2026202",
+          "nextissueno": "2026203"
+        }
+      },
+      "fetched_at": "2026-08-01T21:46:20+08:00"
+    },
     {
       "schema": "random_draw_agent_draw",
       "version": 1,
