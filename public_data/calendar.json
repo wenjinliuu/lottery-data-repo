@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_calendar",
   "version": 1,
-  "updated_at": "2026-08-04T23:52:09+08:00",
+  "updated_at": "2026-08-05T04:10:12+08:00",
   "timezone": "Asia/Shanghai",
   "lotteries": {
     "ssq": {
@@ -17,21 +17,21 @@
       "sale_close_time": "20:00",
       "last_issue": "2026089",
       "class_last_issue": "2026089",
-      "next_issue": "2026091",
+      "next_issue": "2026090",
       "next_draw_date": "2026-08-06",
       "next_open_time": "2026-08-06 21:15:00",
       "next_buy_end_time": "2026-08-06 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "2026089",
-      "next_resolution_reason": "class_candidate_closed_schedule_rolled",
+      "next_resolution_reason": "class_matches_latest_draw",
       "raw_class_info": {
         "caipiaoid": 11,
         "name": "双色球",
         "parentid": 1,
-        "nextopentime": "2026-08-04 21:15:00",
-        "nextbuyendtime": "2026-08-04 20:00:00",
+        "nextopentime": "2026-08-06 21:15:00",
+        "nextbuyendtime": "2026-08-06 20:00:00",
         "lastissueno": "2026089",
         "nextissueno": "2026090"
       }
@@ -148,24 +148,24 @@
       "expected_publish_time": "21:30",
       "sale_close_time": "20:00",
       "last_issue": "26089",
-      "class_last_issue": "26088",
+      "class_last_issue": "26089",
       "next_issue": "26090",
       "next_draw_date": "2026-08-07",
-      "next_open_time": "2026-08-07 20:30:00",
-      "next_buy_end_time": "2026-08-07 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_open_time": "2026-08-07 21:25:00",
+      "next_buy_end_time": "2026-08-07 21:00:00",
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "26089",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
+      "next_resolution_reason": "class_matches_latest_draw",
       "raw_class_info": {
         "caipiaoid": 15,
         "name": "七星彩",
         "parentid": 2,
-        "nextopentime": "2026-08-04 21:25:00",
-        "nextbuyendtime": "2026-08-04 21:00:00",
-        "lastissueno": "26088",
-        "nextissueno": "26089"
+        "nextopentime": "2026-08-07 21:25:00",
+        "nextbuyendtime": "2026-08-07 21:00:00",
+        "lastissueno": "26089",
+        "nextissueno": "26090"
       }
     },
     "pl3": {
