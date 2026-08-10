@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qlc",
-  "updated_at": "2026-08-10T03:14:35+08:00",
+  "updated_at": "2026-08-10T20:31:21+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -137,21 +137,21 @@
           }
         }
       ],
-      "next_issue": "2026091",
-      "next_draw_date": "2026-08-10",
-      "next_open_time": "2026-08-10 21:15:00",
-      "next_buy_end_time": "2026-08-10 20:00:00",
-      "next_status": "confirmed",
-      "next_source": "class_api",
-      "next_confirmed": true,
+      "next_issue": "2026092",
+      "next_draw_date": "2026-08-12",
+      "next_open_time": "2026-08-12 21:15:00",
+      "next_buy_end_time": "2026-08-12 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
       "next_basis_issue": "2026090",
-      "next_resolution_reason": "class_matches_latest_draw",
+      "next_resolution_reason": "class_candidate_closed_schedule_rolled",
       "class_last_issue": "2026090",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=13",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-08-10T03:14:30+08:00"
+        "fetched_at": "2026-08-10T20:31:15+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -278,7 +278,7 @@
           "nextissueno": "2026091"
         }
       },
-      "fetched_at": "2026-08-10T03:14:30+08:00"
+      "fetched_at": "2026-08-10T20:31:15+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
