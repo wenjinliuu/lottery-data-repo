@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "kl8",
   "year": "2026",
-  "updated_at": "2026-08-26T20:02:47+08:00",
+  "updated_at": "2026-08-26T21:09:35+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -630,21 +630,21 @@
           }
         }
       ],
-      "next_issue": "2026228",
-      "next_draw_date": "2026-08-26",
-      "next_open_time": "2026-08-26 21:30:00",
-      "next_buy_end_time": "2026-08-26 20:30:00",
-      "next_status": "confirmed",
-      "next_source": "class_api",
-      "next_confirmed": true,
+      "next_issue": "2026229",
+      "next_draw_date": "2026-08-27",
+      "next_open_time": "2026-08-27 21:30:00",
+      "next_buy_end_time": "2026-08-27 20:30:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
       "next_basis_issue": "2026227",
-      "next_resolution_reason": "class_matches_latest_draw",
+      "next_resolution_reason": "class_candidate_closed_schedule_rolled",
       "class_last_issue": "2026227",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-08-26T20:02:33+08:00"
+        "fetched_at": "2026-08-26T21:09:21+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -656,7 +656,7 @@
             "number": "04 09 10 12 17 18 22 28 33 38 42 44 47 48 61 63 64 67 73 74",
             "refernumber": null,
             "opendate": "2026-08-25",
-            "officialopendate": "2026-08-26 20:00",
+            "officialopendate": "2026-08-26 21:00",
             "deadline": null,
             "saleamount": 101355274,
             "totalmoney": "54172107.00",
@@ -904,7 +904,7 @@
           "number": "04 09 10 12 17 18 22 28 33 38 42 44 47 48 61 63 64 67 73 74",
           "refernumber": null,
           "opendate": "2026-08-25",
-          "officialopendate": "2026-08-26 20:00",
+          "officialopendate": "2026-08-26 21:00",
           "deadline": null,
           "saleamount": 101355274,
           "totalmoney": "54172107.00",
@@ -1155,7 +1155,7 @@
           "nextissueno": "2026228"
         }
       },
-      "fetched_at": "2026-08-26T20:02:33+08:00"
+      "fetched_at": "2026-08-26T21:09:21+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
