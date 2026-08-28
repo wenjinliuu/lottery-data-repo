@@ -3,7 +3,7 @@
   "version": 1,
   "lottery_type": "fc3d",
   "year": "2026",
-  "updated_at": "2026-08-28T07:00:28+08:00",
+  "updated_at": "2026-08-28T10:17:23+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -87,7 +87,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-08-28T07:00:26+08:00"
+        "fetched_at": "2026-08-28T10:17:20+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -166,7 +166,7 @@
           "nextissueno": "2026230"
         }
       },
-      "fetched_at": "2026-08-28T07:00:26+08:00"
+      "fetched_at": "2026-08-28T10:17:20+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
