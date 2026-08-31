@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "pl3",
-  "updated_at": "2026-09-01T03:05:45+08:00",
+  "updated_at": "2026-09-01T03:33:18+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -86,7 +86,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=16",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-09-01T03:05:37+08:00"
+        "fetched_at": "2026-09-01T03:33:11+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -165,7 +165,7 @@
           "nextissueno": "26234"
         }
       },
-      "fetched_at": "2026-09-01T03:05:37+08:00"
+      "fetched_at": "2026-09-01T03:33:11+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
