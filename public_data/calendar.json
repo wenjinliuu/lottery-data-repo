@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_calendar",
   "version": 1,
-  "updated_at": "2026-09-03T23:11:03+08:00",
+  "updated_at": "2026-09-04T00:19:25+08:00",
   "timezone": "Asia/Shanghai",
   "lotteries": {
     "ssq": {
@@ -184,24 +184,24 @@
       "expected_publish_time": "21:30",
       "sale_close_time": "20:00",
       "last_issue": "26236",
-      "class_last_issue": "26235",
+      "class_last_issue": "26236",
       "next_issue": "26237",
       "next_draw_date": "2026-09-04",
-      "next_open_time": "2026-09-04 20:30:00",
-      "next_buy_end_time": "2026-09-04 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_open_time": "2026-09-04 21:25:00",
+      "next_buy_end_time": "2026-09-04 21:00:00",
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "26236",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
+      "next_resolution_reason": "class_matches_latest_draw",
       "raw_class_info": {
         "caipiaoid": 16,
         "name": "排列三",
         "parentid": 2,
-        "nextopentime": "2026-09-03 21:25:00",
-        "nextbuyendtime": "2026-09-03 21:00:00",
-        "lastissueno": "26235",
-        "nextissueno": "26236"
+        "nextopentime": "2026-09-04 21:25:00",
+        "nextbuyendtime": "2026-09-04 21:00:00",
+        "lastissueno": "26236",
+        "nextissueno": "26237"
       }
     },
     "pl5": {
@@ -220,24 +220,24 @@
       "expected_publish_time": "21:30",
       "sale_close_time": "20:00",
       "last_issue": "26236",
-      "class_last_issue": "26235",
+      "class_last_issue": "26236",
       "next_issue": "26237",
       "next_draw_date": "2026-09-04",
-      "next_open_time": "2026-09-04 20:30:00",
-      "next_buy_end_time": "2026-09-04 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_open_time": "2026-09-04 21:25:00",
+      "next_buy_end_time": "2026-09-04 21:00:00",
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "26236",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
+      "next_resolution_reason": "class_matches_latest_draw",
       "raw_class_info": {
         "caipiaoid": 17,
         "name": "排列五",
         "parentid": 2,
-        "nextopentime": "2026-09-03 21:25:00",
-        "nextbuyendtime": "2026-09-03 21:00:00",
-        "lastissueno": "26235",
-        "nextissueno": "26236"
+        "nextopentime": "2026-09-04 21:25:00",
+        "nextbuyendtime": "2026-09-04 21:00:00",
+        "lastissueno": "26236",
+        "nextissueno": "26237"
       }
     },
     "kl8": {
@@ -256,24 +256,24 @@
       "expected_publish_time": "22:00",
       "sale_close_time": "20:00",
       "last_issue": "2026236",
-      "class_last_issue": "2026235",
+      "class_last_issue": "2026236",
       "next_issue": "2026237",
       "next_draw_date": "2026-09-04",
       "next_open_time": "2026-09-04 21:30:00",
-      "next_buy_end_time": "2026-09-04 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_buy_end_time": "2026-09-04 20:30:00",
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "2026236",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
+      "next_resolution_reason": "class_matches_latest_draw",
       "raw_class_info": {
         "caipiaoid": 89,
         "name": "快乐8",
         "parentid": 1,
-        "nextopentime": "2026-09-03 21:30:00",
-        "nextbuyendtime": "2026-09-03 20:30:00",
-        "lastissueno": "2026235",
-        "nextissueno": "2026236"
+        "nextopentime": "2026-09-04 21:30:00",
+        "nextbuyendtime": "2026-09-04 20:30:00",
+        "lastissueno": "2026236",
+        "nextissueno": "2026237"
       }
     }
   }
