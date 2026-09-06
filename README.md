@@ -19,6 +19,9 @@ public_data/
 ├── latest.json
 ├── calendar.json
 ├── health.json
+├── calendar/
+│   ├── closures.json
+│   └── 2026.json
 ├── draws/
 │   ├── ssq.json
 │   ├── dlt.json
@@ -33,7 +36,9 @@ public_data/
 - `latest.json`：每个彩种最新一期，客户端默认优先读取。
 - `draws/{lottery_type}.json`：单个彩种最近 50 期。
 - `by-year/{lottery_type}/{year}.json`：按年份归档的长期历史。
-- `calendar.json`：开奖日历，以及 API 返回的下一期期号、开奖时间、截止购买时间。
+- `calendar.json`：开奖日历，以及 API 返回的下一期期号、开奖时间、截止购买时间（只覆盖下一期）。
+- `calendar/{year}.json`：**整年**的「期号 ↔ 开奖日期」绑定表，由 `scripts/build_draw_calendar.py` 推演生成。客户端补录旧票或跨期选号时用这个。
+- `calendar/closures.json`：休市日。国庆固定 10-01 至 10-04；春节 10 天每年由财政部在上一年 12 月公布后**手工更新这一个文件**，然后重跑生成脚本即可。
 - `health.json`：最近一次自动更新状态。
 - `index.json`：公共数据索引和 schema 信息。
 
@@ -106,8 +111,27 @@ Actions -> Update lottery public data -> Run workflow
 ```bash
 export JISU_APPKEY="your_appkey"
 python scripts/update_public_data.py
+python scripts/build_draw_calendar.py            # 生成当年的整年期次表
 python scripts/validate_public_data.py
+python -m unittest discover -s tests
 ```
+
+### 整年开奖日历
+
+`calendar/{year}.json` 把一整年每个彩种的期号和开奖日期一次性推演出来。
+推演规则已用 2026 年 750 期真实开奖记录**全量比对，零不符**：
+
+1. 各彩种按 `config/lotteries.json` 里的 `draw_weekdays` 开奖（0 = 周日）。
+2. 期号每年从 001 重新开始。
+3. 休市日不开奖、不发期号，期号**顺延**而不是跳号。
+   （反证：福彩3D 2026-04-28 的真实期号是 `2026108`，而那天是年内第 118 天，
+   差的正好是春节休市的 10 天。）
+4. 期号格式两系：福彩 `ssq / fc3d / qlc / kl8` 是 7 位 `YYYYNNN`；
+   体彩 `dlt / qxc / pl3 / pl5` 是 5 位 `YYNNN`。
+
+每年只需要做一件事：**春节休市日公布后改 `calendar/closures.json`，重跑脚本。**
+`tests/test_draw_calendar.py` 会在 CI 里把推演结果和真实数据再比对一遍，
+规则一旦对不上就直接失败。
 
 ## 公共读取地址
 

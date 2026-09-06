@@ -34,6 +34,9 @@ jobs:
           JISU_APPKEY: ${{ secrets.JISU_APPKEY }}
         run: python scripts/update_public_data.py
 
+      - name: Build draw calendar
+        run: python scripts/build_draw_calendar.py
+
       - name: Validate public data
         run: |
           python -m unittest discover -s tests
