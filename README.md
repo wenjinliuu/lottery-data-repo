@@ -133,6 +133,24 @@ python -m unittest discover -s tests
 `tests/test_draw_calendar.py` 会在 CI 里把推演结果和真实数据再比对一遍，
 规则一旦对不上就直接失败。
 
+#### 跨年操作（每年 12 月做一次）
+
+```bash
+# 1. 在 closures.json 的 years 下加一年，只有春节需要查，国庆固定 10-01 ~ 10-04
+#    "2027": [
+#      { "id": "spring_festival", "name": "春节", "start": "2027-…", "end": "2027-…", … },
+#      { "id": "national_day",    "name": "国庆", "start": "2027-10-01", "end": "2027-10-04", … }
+#    ]
+
+# 2. 生成
+python scripts/build_draw_calendar.py --year 2027
+
+# 3. 校验（次年有真实开奖数据之后再跑一次，会自动逐期比对）
+python -m unittest discover -s tests
+```
+
+漏填这一年的休市日时脚本会**直接报错退出**，不会悄悄生成一份期号全年错位的日历。
+
 ## 公共读取地址
 
 如果仓库地址是：

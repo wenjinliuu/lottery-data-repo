@@ -31,8 +31,20 @@ WIDE_ISSUE = {"ssq", "fc3d", "qlc", "kl8"}
 
 def load_closures(year):
     data = json.loads(CLOSURES.read_text(encoding="utf-8"))
+    items = data.get("years", {}).get(str(year), [])
+    # 任何一年都至少有国庆那 4 天。一条都没有，只可能是这一年的休市日还没填，
+    # 而不是「这年不休市」。这时候脚本要是照常跑完，会安安静静地多发十几期
+    # 期号，而且全年往后的期号全部错位 —— 所以这里必须硬失败。
+    if not items:
+        raise SystemExit(
+            f"closures.json 里没有 {year} 年的休市日。\n"
+            f"请先在 public_data/calendar/closures.json 的 years.{year} 下补上：\n"
+            f"  · 春节：财政部每年 12 月公布次年安排后手工填（约 10 天，日期不固定）\n"
+            f"  · 国庆：固定 {year}-10-01 至 {year}-10-04\n"
+            f"填完再重新运行本脚本。"
+        )
     spans = []
-    for item in data.get("years", {}).get(str(year), []):
+    for item in items:
         spans.append((
             dt.date.fromisoformat(item["start"]),
             dt.date.fromisoformat(item["end"]),
