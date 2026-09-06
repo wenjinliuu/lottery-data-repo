@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "kl8",
-  "updated_at": "2026-09-06T23:23:04+08:00",
+  "updated_at": "2026-09-07T00:23:36+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -632,18 +632,18 @@
       "next_issue": "2026240",
       "next_draw_date": "2026-09-07",
       "next_open_time": "2026-09-07 21:30:00",
-      "next_buy_end_time": "2026-09-07 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_buy_end_time": "2026-09-07 20:30:00",
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "2026239",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
-      "class_last_issue": "2026238",
+      "next_resolution_reason": "class_matches_latest_draw",
+      "class_last_issue": "2026239",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-09-06T23:22:50+08:00"
+        "fetched_at": "2026-09-07T00:23:25+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -655,7 +655,7 @@
             "number": "14 17 20 21 26 27 29 30 37 44 45 47 54 55 61 65 68 69 77 79",
             "refernumber": null,
             "opendate": "2026-09-06",
-            "officialopendate": "2026-09-06 23:00",
+            "officialopendate": "2026-09-06 23:30",
             "deadline": null,
             "saleamount": 135223474,
             "totalmoney": "72163384.00",
@@ -903,7 +903,7 @@
           "number": "14 17 20 21 26 27 29 30 37 44 45 47 54 55 61 65 68 69 77 79",
           "refernumber": null,
           "opendate": "2026-09-06",
-          "officialopendate": "2026-09-06 23:00",
+          "officialopendate": "2026-09-06 23:30",
           "deadline": null,
           "saleamount": 135223474,
           "totalmoney": "72163384.00",
@@ -1148,13 +1148,13 @@
           "caipiaoid": 89,
           "name": "快乐8",
           "parentid": 1,
-          "nextopentime": "2026-09-06 21:30:00",
-          "nextbuyendtime": "2026-09-06 20:30:00",
-          "lastissueno": "2026238",
-          "nextissueno": "2026239"
+          "nextopentime": "2026-09-07 21:30:00",
+          "nextbuyendtime": "2026-09-07 20:30:00",
+          "lastissueno": "2026239",
+          "nextissueno": "2026240"
         }
       },
-      "fetched_at": "2026-09-06T23:22:50+08:00"
+      "fetched_at": "2026-09-07T00:23:25+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
