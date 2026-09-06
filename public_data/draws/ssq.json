@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "ssq",
-  "updated_at": "2026-09-06T22:24:12+08:00",
+  "updated_at": "2026-09-06T23:22:53+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -127,17 +127,17 @@
       "next_draw_date": "2026-09-08",
       "next_open_time": "2026-09-08 21:15:00",
       "next_buy_end_time": "2026-09-08 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "2026103",
-      "next_resolution_reason": "class_stale_or_incomplete_schedule_rolled",
-      "class_last_issue": "2026102",
+      "next_resolution_reason": "class_matches_latest_draw",
+      "class_last_issue": "2026103",
       "source": {
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-09-06T22:24:10+08:00"
+        "fetched_at": "2026-09-06T23:22:50+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -246,13 +246,13 @@
           "caipiaoid": 11,
           "name": "双色球",
           "parentid": 1,
-          "nextopentime": "2026-09-06 21:15:00",
-          "nextbuyendtime": "2026-09-06 20:00:00",
-          "lastissueno": "2026102",
-          "nextissueno": "2026103"
+          "nextopentime": "2026-09-08 21:15:00",
+          "nextbuyendtime": "2026-09-08 20:00:00",
+          "lastissueno": "2026103",
+          "nextissueno": "2026104"
         }
       },
-      "fetched_at": "2026-09-06T22:24:10+08:00"
+      "fetched_at": "2026-09-06T23:22:50+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
