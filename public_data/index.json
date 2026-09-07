@@ -8,7 +8,9 @@
     "calendar": "calendar.json",
     "health": "health.json",
     "draws": "draws/{lottery_type}.json",
-    "by_year": "by-year/{lottery_type}/{year}.json"
+    "by_year": "by-year/{lottery_type}/{year}.json",
+    "draw_calendar": "calendar/{year}.json",
+    "closures": "calendar/closures.json"
   },
   "lotteries": [
     "ssq",

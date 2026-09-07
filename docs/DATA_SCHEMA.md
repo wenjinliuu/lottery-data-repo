@@ -100,3 +100,32 @@ public_data/by-year/dlt/2027.json
 ```
 
 This layout is intended to run for years without one huge JSON file.
+
+
+## calendar/closures.json
+
+休市日。命中的日期不开奖、不发期号，期号顺延。
+
+| 字段 | 说明 |
+| --- | --- |
+| `years.{year}[].id` | `spring_festival` / `national_day` |
+| `years.{year}[].start` / `end` | 休市首尾日，闭区间 |
+| `years.{year}[].days` | 天数，方便核对 |
+| `years.{year}[].source` | `fixed`（国庆固定）/ `manual`（春节每年公布后手填） |
+| `years.{year}[].verified` | 是否已用真实开奖数据反向验证过 |
+
+## calendar/{year}.json
+
+整年的「期号 ↔ 开奖日期」绑定表，由 `scripts/build_draw_calendar.py` 生成。
+
+| 字段 | 说明 |
+| --- | --- |
+| `year` | 年份 |
+| `closures` | 这一年参与推演的休市区间 |
+| `lotteries.{key}.draw_weekdays` | 开奖星期，0 = 周日 |
+| `lotteries.{key}.count` | 全年期数 |
+| `lotteries.{key}.issues[].issue` | 期号。福彩 7 位 `YYYYNNN`，体彩 5 位 `YYNNN` |
+| `lotteries.{key}.issues[].draw_date` | 开奖日 `YYYY-MM-DD` |
+| `lotteries.{key}.issues[].weekday` | 星期，0 = 周日 |
+| `lotteries.{key}.issues[].draw_time` | 开奖时刻 `YYYY-MM-DD HH:MM:SS` |
+| `lotteries.{key}.issues[].sale_close_time` | 停售时刻 |

@@ -1,0 +1,30 @@
+{
+  "schema": "lottery_closures",
+  "version": 1,
+  "note": "全年休市日。命中这些日期的当天不开奖、不发期号，期号顺延到下一个开奖日。国庆固定 10-01 至 10-04；春节每年由财政部在上一年 12 月公布后手工更新。",
+  "timezone": "Asia/Shanghai",
+  "years": {
+    "2026": [
+      {
+        "id": "spring_festival",
+        "name": "春节",
+        "start": "2026-02-14",
+        "end": "2026-02-23",
+        "days": 10,
+        "source": "manual",
+        "verified": true,
+        "note": "已用 2026 年真实开奖数据反向验证：福彩3D 2026-04-28 的实际期号 2026108，与年内第 118 天扣掉这 10 天完全吻合。"
+      },
+      {
+        "id": "national_day",
+        "name": "国庆",
+        "start": "2026-10-01",
+        "end": "2026-10-04",
+        "days": 4,
+        "source": "fixed",
+        "verified": false,
+        "note": "每年固定 4 天。2026-10-01 尚未到来，暂无实测数据可验证。"
+      }
+    ]
+  }
+}
