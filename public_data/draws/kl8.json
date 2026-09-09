@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "kl8",
-  "updated_at": "2026-09-10T01:12:20+08:00",
+  "updated_at": "2026-09-10T05:06:50+08:00",
   "draws": [
     {
       "schema": "random_draw_agent_draw",
@@ -643,7 +643,7 @@
         "name": "jisuapi",
         "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=89",
         "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "fetched_at": "2026-09-10T01:12:12+08:00"
+        "fetched_at": "2026-09-10T05:06:42+08:00"
       },
       "raw_public_json": {
         "query_response": {
@@ -655,7 +655,7 @@
             "number": "04 20 28 32 35 37 39 44 48 50 52 53 55 56 57 63 71 72 76 77",
             "refernumber": null,
             "opendate": "2026-09-09",
-            "officialopendate": "2026-09-09 23:30",
+            "officialopendate": "2026-09-10 02:30",
             "deadline": null,
             "saleamount": 136047160,
             "totalmoney": "72474531.00",
@@ -903,7 +903,7 @@
           "number": "04 20 28 32 35 37 39 44 48 50 52 53 55 56 57 63 71 72 76 77",
           "refernumber": null,
           "opendate": "2026-09-09",
-          "officialopendate": "2026-09-09 23:30",
+          "officialopendate": "2026-09-10 02:30",
           "deadline": null,
           "saleamount": 136047160,
           "totalmoney": "72474531.00",
@@ -1154,7 +1154,7 @@
           "nextissueno": "2026243"
         }
       },
-      "fetched_at": "2026-09-10T01:12:12+08:00"
+      "fetched_at": "2026-09-10T05:06:42+08:00"
     },
     {
       "schema": "random_draw_agent_draw",
