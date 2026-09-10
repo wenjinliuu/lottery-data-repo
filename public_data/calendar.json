@@ -1,7 +1,7 @@
 {
   "schema": "random_draw_agent_calendar",
   "version": 1,
-  "updated_at": "2026-09-11T01:03:18+08:00",
+  "updated_at": "2026-09-11T05:08:16+08:00",
   "timezone": "Asia/Shanghai",
   "lotteries": {
     "ssq": {
@@ -17,21 +17,21 @@
       "sale_close_time": "20:00",
       "last_issue": "2026105",
       "class_last_issue": "2026105",
-      "next_issue": "2026107",
+      "next_issue": "2026106",
       "next_draw_date": "2026-09-13",
       "next_open_time": "2026-09-13 21:15:00",
       "next_buy_end_time": "2026-09-13 20:00:00",
-      "next_status": "inferred",
-      "next_source": "schedule_inference",
-      "next_confirmed": false,
+      "next_status": "confirmed",
+      "next_source": "class_api",
+      "next_confirmed": true,
       "next_basis_issue": "2026105",
-      "next_resolution_reason": "class_candidate_closed_schedule_rolled",
+      "next_resolution_reason": "class_matches_latest_draw",
       "raw_class_info": {
         "caipiaoid": 11,
         "name": "双色球",
         "parentid": 1,
-        "nextopentime": "2026-09-10 21:15:00",
-        "nextbuyendtime": "2026-09-10 20:00:00",
+        "nextopentime": "2026-09-13 21:15:00",
+        "nextbuyendtime": "2026-09-13 20:00:00",
         "lastissueno": "2026105",
         "nextissueno": "2026106"
       }
