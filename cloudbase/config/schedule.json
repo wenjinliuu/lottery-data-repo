@@ -1,0 +1,49 @@
+{
+  "timezone": "Asia/Shanghai",
+  "provider": "jisuapi",
+  "provider_sync_assumption_minutes": 10,
+  "automatic_daily_call_limit": 50,
+  "slots": {
+    "welfare_early": {
+      "beijing_time": "21:34",
+      "target_day_offset": 0,
+      "lotteries": ["ssq", "fc3d", "qlc"]
+    },
+    "all_first": {
+      "beijing_time": "21:44",
+      "target_day_offset": 0,
+      "lotteries": "all_due"
+    },
+    "all_retry_1": {
+      "beijing_time": "21:54",
+      "target_day_offset": 0,
+      "lotteries": "all_due"
+    },
+    "all_retry_2": {
+      "beijing_time": "22:14",
+      "target_day_offset": 0,
+      "lotteries": "all_due"
+    },
+    "all_retry_3": {
+      "beijing_time": "22:34",
+      "target_day_offset": 0,
+      "lotteries": "all_due"
+    },
+    "overnight_recovery": {
+      "beijing_time": "00:34",
+      "target_day_offset": -1,
+      "lotteries": "all_due"
+    },
+    "cloudbase_final": {
+      "beijing_time": "02:44",
+      "target_day_offset": -1,
+      "lotteries": "all_due"
+    },
+    "github_fallback": {
+      "beijing_time": "08:14",
+      "target_day_offset": -1,
+      "lotteries": "all_due",
+      "runner": "github"
+    }
+  }
+}
