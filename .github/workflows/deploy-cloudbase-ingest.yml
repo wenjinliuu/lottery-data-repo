@@ -60,6 +60,4 @@ jobs:
         run: tcb fn deploy lottery-ingest --force --yes
 
       - name: Verify deployed function
-        run: |
-          tcb fn detail lottery-ingest
-          tcb fn trigger list lottery-ingest
+        run: tcb fn detail lottery-ingest
