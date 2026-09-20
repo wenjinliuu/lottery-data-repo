@@ -1,54 +1,62 @@
-import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import pg from "pg";
+import { semanticChecksum } from "../src/normalize.mjs";
+import { createCloudBaseDatabase } from "../src/repository.mjs";
 
-const { Pool } = pg;
 const here = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(here, "../..");
-
-function checksum(draw) {
-  return createHash("sha256").update(JSON.stringify({
-    lottery_type: draw.lottery_type,
-    issue: String(draw.issue),
-    draw_date: draw.draw_date,
-    numbers: draw.numbers,
-    prize_pool: draw.prize_pool ?? "",
-    sales_amount: draw.sales_amount ?? "",
-    prize_details: draw.prize_details ?? [],
-  })).digest("hex");
-}
+const packageRoot = path.resolve(here, "..");
+const root = existsSync(path.join(packageRoot, "public_data"))
+  ? packageRoot
+  : path.resolve(packageRoot, "..");
+const BATCH_SIZE = 100;
 
 async function readJson(file) {
   return JSON.parse(await readFile(file, "utf8"));
 }
 
-async function importCalendars(pool) {
+function assertSuccess(result, operation) {
+  if (result?.error) {
+    throw new Error(`${operation}: ${result.error.message ?? JSON.stringify(result.error)}`);
+  }
+}
+
+async function upsertBatches(db, table, rows, onConflict) {
+  for (let index = 0; index < rows.length; index += BATCH_SIZE) {
+    const batch = rows.slice(index, index + BATCH_SIZE);
+    assertSuccess(
+      await db.from(table).upsert(batch, { onConflict }),
+      `import ${table} rows ${index + 1}-${index + batch.length}`,
+    );
+  }
+}
+
+async function importCalendars(db) {
   const directory = path.join(root, "public_data/calendar");
   const files = (await readdir(directory)).filter((name) => /^\d{4}\.json$/.test(name));
-  let count = 0;
+  const rows = [];
   for (const file of files) {
     const payload = await readJson(path.join(directory, file));
     for (const [lotteryType, game] of Object.entries(payload.lotteries ?? {})) {
       for (const item of game.issues ?? []) {
-        await pool.query(
-          `INSERT INTO lottery_calendar
-             (lottery_type, issue, draw_date, draw_time, sale_close_time, source)
-           VALUES ($1,$2,$3,NULLIF($4,'')::time,NULLIF($5,'')::time,'github_history')
-           ON CONFLICT (lottery_type, issue) DO UPDATE SET
-             draw_date=EXCLUDED.draw_date, draw_time=EXCLUDED.draw_time,
-             sale_close_time=EXCLUDED.sale_close_time, updated_at=NOW()`,
-          [lotteryType, String(item.issue), item.draw_date, item.draw_time?.slice(-8) ?? "", item.sale_close_time?.slice(-8) ?? ""],
-        );
-        count += 1;
+        rows.push({
+          lottery_type: lotteryType,
+          issue: String(item.issue),
+          draw_date: item.draw_date,
+          draw_time: item.draw_time?.slice(-8) || null,
+          sale_close_time: item.sale_close_time?.slice(-8) || null,
+          source: "github_history",
+          updated_at: new Date().toISOString(),
+        });
       }
     }
   }
-  return count;
+  await upsertBatches(db, "lottery_calendar", rows, "lottery_type,issue");
+  return rows.length;
 }
 
-async function importDraws(pool) {
+async function importDraws(db) {
   const directory = path.join(root, "public_data/by-year");
   const lotteryTypes = await readdir(directory);
   let count = 0;
@@ -57,41 +65,37 @@ async function importDraws(pool) {
     const files = (await readdir(gameDirectory)).filter((name) => name.endsWith(".json"));
     for (const file of files) {
       const payload = await readJson(path.join(gameDirectory, file));
-      for (const draw of payload.draws ?? []) {
-        await pool.query(
-          `INSERT INTO lottery_draws (
-             lottery_type, issue, draw_date, draw_time, numbers, prize_pool,
-             sales_amount, prize_details, semantic_checksum, compatibility_payload,
-             source_payload, source_fetched_at
-           ) VALUES ($1,$2,$3,NULLIF($4,'')::time,$5,$6,$7,$8,$9,$10,$11,$12)
-           ON CONFLICT (lottery_type, issue) DO UPDATE SET
-             semantic_checksum=EXCLUDED.semantic_checksum,
-             compatibility_payload=EXCLUDED.compatibility_payload,
-             source_payload=EXCLUDED.source_payload, updated_at=NOW()`,
-          [
-            lotteryType, String(draw.issue), draw.draw_date, draw.draw_time ?? "",
-            draw.numbers ?? {}, draw.prize_pool ?? "", draw.sales_amount ?? "",
-            draw.prize_details ?? [], checksum(draw), draw,
-            draw.raw_public_json ?? null, draw.fetched_at || null,
-          ],
-        );
-        count += 1;
-      }
+      const rows = (payload.draws ?? []).map((draw) => {
+        const normalized = { ...draw, lottery_type: lotteryType };
+        return {
+          lottery_type: lotteryType,
+          issue: String(draw.issue),
+          draw_date: draw.draw_date,
+          draw_time: draw.draw_time || null,
+          numbers: draw.numbers ?? {},
+          prize_pool: draw.prize_pool ?? "",
+          sales_amount: draw.sales_amount ?? "",
+          prize_details: draw.prize_details ?? [],
+          semantic_checksum: semanticChecksum(normalized),
+          compatibility_payload: draw,
+          source_payload: draw.raw_public_json ?? null,
+          source_fetched_at: draw.fetched_at || null,
+          updated_at: new Date().toISOString(),
+        };
+      });
+      await upsertBatches(db, "lottery_draws", rows, "lottery_type,issue");
+      count += rows.length;
     }
   }
   return count;
 }
 
-async function main() {
-  if (!process.env.DATABASE_URL) throw new Error("Missing DATABASE_URL");
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
-  try {
-    const calendarRows = await importCalendars(pool);
-    const drawRows = await importDraws(pool);
-    console.log(JSON.stringify({ ok: true, calendar_rows: calendarRows, draw_rows: drawRows }));
-  } finally {
-    await pool.end();
-  }
+export async function importHistory(db = createCloudBaseDatabase()) {
+  const calendarRows = await importCalendars(db);
+  const drawRows = await importDraws(db);
+  return { ok: true, calendar_rows: calendarRows, draw_rows: drawRows };
 }
 
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  console.log(JSON.stringify(await importHistory()));
+}

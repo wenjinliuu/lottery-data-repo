@@ -1,6 +1,7 @@
 # CloudBase migration
 
-Status: preparation branch only. The existing `main` workflow and public JSON paths remain unchanged.
+Status: database baseline and historical import complete; production ingest deployment is waiting
+for function credentials. The existing `main` workflow and public JSON paths remain unchanged.
 
 ## Frozen baseline
 
@@ -40,10 +41,27 @@ The minutes intentionally avoid the assumed upstream `:00/:10/:20/:30/:40/:50` s
 
 ## Deployment order
 
-1. Apply `cloudbase/sql/001_initial.sql` to the existing CloudBase PostgreSQL instance.
-2. Set `DATABASE_URL` locally or in a one-off private job and run `npm run import:history` from `cloudbase/`.
+1. Apply `cloudbase/migrations/20260920143500_lottery_schema_baseline.sql`.
+2. Import GitHub history with `npm run import:history` from `cloudbase/`.
 3. Compare imported row counts and semantic checksums with `public_data/by-year`.
-4. Deploy the Node.js 20 function with `JISU_APPKEY` and `DATABASE_URL` as secrets.
+4. Deploy the Node.js 20 ingest function with `JISU_APPKEY`, `CLOUDBASE_API_KEY`, and
+   `CLOUDBASE_ENV_ID` as secrets/environment variables.
 5. Create seven CloudBase triggers using the slot names in `cloudbase/config/schedule.json`.
 6. Shadow-run without changing the App or `main` GitHub workflow.
 7. Add compatibility export, diff reports, and the 08:14 GitHub fallback before cutover.
+
+## Live migration state (2026-09-20)
+
+- Environment: `wenjin-cloudbase-d1empq882391ac1`, PostgreSQL, `ap-shanghai`.
+- Migration `20260920143500_lottery_schema_baseline` is applied and recorded.
+- `lottery_calendar`: 2,006 rows.
+- `lottery_draws`: 830 rows. Per-lottery counts and semantic checksums match the current
+  `main/public_data/by-year` files.
+- Public clients have SELECT only on `lottery_calendar` and `lottery_draws`.
+- Internal quota, target, and run tables are not exposed to `anon` or `authenticated`.
+- The one-off `lottery-history-import` function has no trigger.
+- CloudBase Direct V2 cloud mode cannot upload a local function ZIP. It can manage an already
+  deployed function and its triggers, but code deployment needs a local MCP/CLI path or another
+  supported deployment channel.
+- Do not create production timer triggers until both `JISU_APPKEY` and a dedicated environment
+  `CLOUDBASE_API_KEY` are configured and a single manual ingest succeeds.

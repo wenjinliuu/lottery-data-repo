@@ -1,4 +1,5 @@
-import lotteryConfig from "../../config/lotteries.json" with { type: "json" };
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { JisuClient } from "./jisu-client.mjs";
 import { assertExpectedDraw, normalizeQueryPayload } from "./normalize.mjs";
 import { LotteryRepository } from "./repository.mjs";
@@ -7,6 +8,14 @@ import {
   automaticDailyLimit,
   targetDateForSlot,
 } from "./schedule.mjs";
+
+const configUrl = [
+  new URL("../config/lotteries.json", import.meta.url),
+  new URL("../../config/lotteries.json", import.meta.url),
+].find((candidate) => existsSync(fileURLToPath(candidate)));
+
+if (!configUrl) throw new Error("Missing config/lotteries.json");
+const lotteryConfig = JSON.parse(readFileSync(configUrl, "utf8"));
 
 export async function runIngest({
   slot,
@@ -54,7 +63,11 @@ export async function runIngest({
 }
 
 export async function main(event = {}) {
-  return runIngest({ slot: event.slot ?? process.env.SCHEDULE_SLOT, runner: event.runner ?? "cloudbase" });
+  const slot = event.slot
+    ?? event.TriggerName
+    ?? event.triggerName
+    ?? process.env.SCHEDULE_SLOT;
+  return runIngest({ slot, runner: event.runner ?? "cloudbase" });
 }
 
 export default main;

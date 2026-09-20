@@ -2,7 +2,6 @@
   "name": "duigehao-cloudbase-ingest",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "engines": {
     "node": ">=20.19"
   },
@@ -11,6 +10,6 @@
     "import:history": "node scripts/import-history.mjs"
   },
   "dependencies": {
-    "pg": "^8.16.3"
+    "@cloudbase/node-sdk": "^3.18.3"
   }
 }
