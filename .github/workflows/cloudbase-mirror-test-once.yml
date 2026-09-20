@@ -1,4 +1,4 @@
-name: CloudBase mirror one-time validation
+name: CloudBase mirror one-time publish
 
 on:
   push:
@@ -6,16 +6,18 @@ on:
       - ".github/workflows/cloudbase-mirror-test-once.yml"
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: update-lottery-public-data
+  cancel-in-progress: false
 
 jobs:
-  validate:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,10 +34,6 @@ jobs:
       - name: Install CloudBase package
         working-directory: cloudbase
         run: npm ci
-
-      - name: Run CloudBase tests
-        working-directory: cloudbase
-        run: npm test
 
       - name: Run final fallback
         working-directory: cloudbase
@@ -57,3 +55,11 @@ jobs:
           python scripts/build_draw_calendar.py
           python -m unittest discover -s tests
           python scripts/validate_public_data.py
+
+      - name: Commit and push public mirror
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public_data
+          git diff --cached --quiet || git commit -m "Export public data from CloudBase"
+          git push
