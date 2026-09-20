@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qxc",
-  "updated_at": "2026-09-21T00:35:33.104+08:00",
+  "updated_at": "2026-09-21T00:52:29.144+08:00",
   "draws": [
     {
       "issue": "26109",
@@ -71,13 +71,13 @@
       "semantic_checksum": "f3813c654277c97410c8f7f78f38eb39f08178ac38623429481196052140b4e7",
       "next_issue": "26110",
       "next_draw_date": "2026-09-22",
-      "next_open_time": "2026-09-22 21:25:00",
-      "next_buy_end_time": "2026-09-22 21:00:00",
-      "next_status": "confirmed",
-      "next_source": "class_api",
-      "next_confirmed": true,
+      "next_open_time": "2026-09-22 20:30:00",
+      "next_buy_end_time": "2026-09-22 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
       "next_basis_issue": "26109",
-      "next_resolution_reason": "class_matches_latest_draw",
+      "next_resolution_reason": "cloudbase_calendar_next_saleable_issue",
       "class_last_issue": "26109"
     },
     {

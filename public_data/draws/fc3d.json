@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "fc3d",
-  "updated_at": "2026-09-21T00:35:33.104+08:00",
+  "updated_at": "2026-09-21T00:52:29.144+08:00",
   "draws": [
     {
       "issue": "2026253",
@@ -69,11 +69,11 @@
       "next_draw_date": "2026-09-21",
       "next_open_time": "2026-09-21 21:15:00",
       "next_buy_end_time": "2026-09-21 20:00:00",
-      "next_status": "confirmed",
-      "next_source": "class_api",
-      "next_confirmed": true,
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
       "next_basis_issue": "2026253",
-      "next_resolution_reason": "class_matches_latest_draw",
+      "next_resolution_reason": "cloudbase_calendar_next_saleable_issue",
       "class_last_issue": "2026253"
     },
     {
