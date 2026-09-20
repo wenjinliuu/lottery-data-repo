@@ -32,12 +32,4 @@ export function automaticDailyLimit() {
   return schedule.automatic_daily_call_limit;
 }
 
-export function classDailyLimit() {
-  return schedule.class_daily_call_limit;
-}
-
-export function shouldSyncClass(slotName) {
-  return schedule.class_sync_slots.includes(slotName);
-}
-
 export { schedule };

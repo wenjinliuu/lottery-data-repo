@@ -27,7 +27,7 @@ test("v2 draw removes compatibility and raw upstream fields", () => {
   assert.equal("source_payload" in draw, false);
 });
 
-test("confirmed class data wins only when it matches the latest issue", () => {
+test("next draw is inferred from the first saleable calendar entry", () => {
   const latest = { issue: "2026108", draw_date: "2026-09-20" };
   const lottery = { draw_time: "21:15", sale_close_time: "20:00" };
   const calendar = [{
@@ -36,20 +36,7 @@ test("confirmed class data wins only when it matches the latest issue", () => {
     draw_time: "21:15",
     sale_close_time: "20:00",
   }];
-  const confirmed = resolveNextMetadata(latest, lottery, calendar, {
-    last_issue: "2026108",
-    next_issue: "2026109",
-    next_open_time: "2026-09-22 21:15:00",
-    next_buy_end_time: "2026-09-22 20:00:00",
-  }, "2026-09-21 08:14:00");
-  assert.equal(confirmed.next_status, "confirmed");
-
-  const inferred = resolveNextMetadata(latest, lottery, calendar, {
-    last_issue: "2026107",
-    next_issue: "2026108",
-    next_open_time: "2026-09-20 21:15:00",
-    next_buy_end_time: "2026-09-20 20:00:00",
-  }, "2026-09-21 08:14:00");
+  const inferred = resolveNextMetadata(latest, lottery, calendar, "2026-09-21 08:14:00");
   assert.equal(inferred.next_status, "inferred");
   assert.equal(inferred.next_issue, "2026109");
 });
