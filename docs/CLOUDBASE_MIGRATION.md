@@ -1,7 +1,8 @@
 # CloudBase migration
 
-Status: database baseline and historical import complete; production ingest deployment is waiting
-for function credentials. The existing `main` workflow and public JSON paths remain unchanged.
+Status: production ingest, seven CloudBase timers, the GitHub final fallback, and the
+CloudBase-to-`public_data` compatibility mirror are active. The App still reads the existing
+`public_data/` paths, so no client cutover is required yet.
 
 ## Frozen baseline
 
@@ -50,6 +51,8 @@ The minutes intentionally avoid the assumed upstream `:00/:10/:20/:30/:40/:50` s
 6. Shadow-run without changing the App or `main` GitHub workflow.
 7. Add compatibility export, diff reports, and the 08:14 GitHub fallback before cutover.
 
+All seven steps are complete.
+
 ## Live migration state (2026-09-20)
 
 - Environment: `wenjin-cloudbase-d1empq882391ac1`, PostgreSQL, `ap-shanghai`.
@@ -59,9 +62,11 @@ The minutes intentionally avoid the assumed upstream `:00/:10/:20/:30/:40/:50` s
   `main/public_data/by-year` files.
 - Public clients have SELECT only on `lottery_calendar` and `lottery_draws`.
 - Internal quota, target, and run tables are not exposed to `anon` or `authenticated`.
-- The one-off `lottery-history-import` function has no trigger.
-- CloudBase Direct V2 cloud mode cannot upload a local function ZIP. It can manage an already
-  deployed function and its triggers, but code deployment needs a local MCP/CLI path or another
-  supported deployment channel.
-- Do not create production timer triggers until both `JISU_APPKEY` and a dedicated environment
-  `CLOUDBASE_API_KEY` are configured and a single manual ingest succeeds.
+- `lottery-ingest` is active on Node.js 20.19 with seven Beijing-time timer triggers.
+- GitHub Actions deploys function code and owns the 08:14 final fallback/export job.
+- A live shadow fetch and a full GitHub fallback/export validation both succeeded. The five
+  2026-09-19 draws retained the same semantic checksums as the pre-migration files.
+- The first committed CloudBase mirror was exported at 2026-09-20 19:23 Beijing time and passed
+  all Node/Python tests, the 830-draw calendar comparison, and public schema validation.
+- Test usage for target date 2026-09-19 was 6 provider calls, below the 50-call automatic cap.
+- The one-off `lottery-history-import` function remains inactive with no trigger.
