@@ -22,6 +22,6 @@ test("early slot only includes due welfare lotteries", () => {
   );
 });
 
-test("automatic API budget is capped at 50", () => {
-  assert.equal(automaticDailyLimit(), 50);
+test("automatic API budget is capped at 60", () => {
+  assert.equal(automaticDailyLimit(), 60);
 });

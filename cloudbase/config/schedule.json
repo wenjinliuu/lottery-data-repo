@@ -2,7 +2,7 @@
   "timezone": "Asia/Shanghai",
   "provider": "jisuapi",
   "provider_sync_assumption_minutes": 10,
-  "automatic_daily_call_limit": 50,
+  "automatic_daily_call_limit": 60,
   "slots": {
     "welfare_early": {
       "beijing_time": "21:34",
