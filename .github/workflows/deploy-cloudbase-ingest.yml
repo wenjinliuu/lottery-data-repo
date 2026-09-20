@@ -2,6 +2,12 @@ name: Deploy CloudBase ingest
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "cloudbase/**"
+      - "cloudbaserc.json"
+      - ".github/workflows/deploy-cloudbase-ingest.yml"
 
 permissions:
   contents: read
