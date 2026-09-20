@@ -115,33 +115,8 @@ function nextSaleableCalendar(calendarAsc, lotteryConfig, referenceLocal) {
   });
 }
 
-export function resolveNextMetadata(latestRow, lotteryConfig, calendarAsc, classStatus, referenceLocal) {
+export function resolveNextMetadata(latestRow, lotteryConfig, calendarAsc, referenceLocal) {
   const latestIssue = String(latestRow.issue);
-  const classBuyEnd = String(classStatus?.next_buy_end_time ?? "");
-  const classIsCurrent = Boolean(
-    classStatus
-    && String(classStatus.last_issue) === latestIssue
-    && classStatus.next_issue
-    && String(classStatus.next_issue) !== latestIssue
-    && classStatus.next_open_time
-    && classBuyEnd
-    && classBuyEnd > referenceLocal
-  );
-  if (classIsCurrent) {
-    return {
-      next_issue: String(classStatus.next_issue),
-      next_draw_date: dateText(classStatus.next_open_time),
-      next_open_time: String(classStatus.next_open_time),
-      next_buy_end_time: classBuyEnd,
-      next_status: "confirmed",
-      next_source: "class_api",
-      next_confirmed: true,
-      next_basis_issue: latestIssue,
-      next_resolution_reason: "class_matches_latest_draw",
-      class_last_issue: latestIssue,
-    };
-  }
-
   const nextCalendar = nextSaleableCalendar(calendarAsc, lotteryConfig, referenceLocal);
   if (nextCalendar) {
     const nextDate = dateText(nextCalendar.draw_date);
@@ -215,17 +190,6 @@ async function selectAll(db, table, columns, lotteryType) {
   }
 }
 
-async function selectNextStatus(db, lotteryType) {
-  return ensureSuccess(
-    await db
-      .from("lottery_next_status")
-      .select("lottery_type,last_issue,next_issue,next_open_time,next_buy_end_time,source_fetched_at")
-      .eq("lottery_type", lotteryType)
-      .limit(1),
-    `read lottery_next_status/${lotteryType}`,
-  )[0] ?? null;
-}
-
 async function writeJson(file, value, pretty = true) {
   await mkdir(path.dirname(file), { recursive: true });
   const body = pretty ? JSON.stringify(value, null, 2) : JSON.stringify(value);
@@ -244,7 +208,7 @@ async function main() {
   const keepRecent = Number(config.export.keep_recent_per_lottery ?? 50);
 
   for (const [lotteryType, lotteryConfig] of Object.entries(config.lotteries)) {
-    const [rows, calendar, classStatus] = await Promise.all([
+    const [rows, calendar] = await Promise.all([
       selectAll(
         db,
         "lottery_draws",
@@ -257,7 +221,6 @@ async function main() {
         "issue,draw_date,draw_time,sale_close_time",
         lotteryType,
       ),
-      selectNextStatus(db, lotteryType),
     ]);
     const calendarAsc = [...calendar].sort((a, b) => (
       dateText(a.draw_date).localeCompare(dateText(b.draw_date))
@@ -269,7 +232,7 @@ async function main() {
     });
     if (!draws.length) throw new Error(`No CloudBase draws for ${lotteryType}`);
 
-    const next = resolveNextMetadata(rows[0], lotteryConfig, calendarAsc, classStatus, referenceLocal);
+    const next = resolveNextMetadata(rows[0], lotteryConfig, calendarAsc, referenceLocal);
     Object.assign(draws[0], next);
     latest[lotteryType] = draws[0];
     v2Latest[lotteryType] = materializeV2Draw(rows[0]);

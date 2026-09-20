@@ -1,5 +1,4 @@
 const QUERY_URL = "https://api.jisuapi.com/caipiao/query";
-const CLASS_URL = "https://api.jisuapi.com/caipiao/class";
 
 async function fetchJson(url, timeoutMs = 15000) {
   const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
@@ -18,12 +17,6 @@ export class JisuClient {
     const url = new URL(QUERY_URL);
     url.searchParams.set("appkey", this.appkey);
     url.searchParams.set("caipiaoid", String(caipiaoid));
-    return fetchJson(url, this.timeoutMs);
-  }
-
-  getClass() {
-    const url = new URL(CLASS_URL);
-    url.searchParams.set("appkey", this.appkey);
     return fetchJson(url, this.timeoutMs);
   }
 }
