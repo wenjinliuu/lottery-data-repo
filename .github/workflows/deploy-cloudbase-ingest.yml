@@ -1,4 +1,4 @@
-name: Deploy CloudBase ingest
+name: Deploy CloudBase lottery functions
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-cloudbase-ingest
+  group: deploy-cloudbase-lottery-functions
   cancel-in-progress: false
 
 jobs:
@@ -41,6 +41,7 @@ jobs:
           npm ci
           npm test
           node -e "import('./src/handler.mjs').then(() => console.log('handler import ok'))"
+          node -e "import('./src/api-handler.mjs').then(() => console.log('api handler import ok'))"
 
       - name: Install CloudBase CLI
         run: npm install --global @cloudbase/cli@3.8.3
@@ -59,5 +60,10 @@ jobs:
       - name: Deploy ingest function without triggers
         run: tcb fn deploy lottery-ingest --force --yes
 
-      - name: Verify deployed function
-        run: tcb fn detail lottery-ingest
+      - name: Deploy read-only API function
+        run: tcb fn deploy lottery-api --force --yes
+
+      - name: Verify deployed functions
+        run: |
+          tcb fn detail lottery-ingest
+          tcb fn detail lottery-api
