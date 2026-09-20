@@ -3,6 +3,8 @@
   "provider": "jisuapi",
   "provider_sync_assumption_minutes": 10,
   "automatic_daily_call_limit": 60,
+  "class_daily_call_limit": 2,
+  "class_sync_slots": ["overnight_recovery", "cloudbase_final"],
   "slots": {
     "welfare_early": {
       "beijing_time": "21:34",

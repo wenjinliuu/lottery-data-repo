@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import {
   allowedLotteriesForSlot,
   automaticDailyLimit,
+  classDailyLimit,
+  shouldSyncClass,
   targetDateForSlot,
 } from "../src/schedule.mjs";
 
@@ -22,6 +24,14 @@ test("early slot only includes due welfare lotteries", () => {
   );
 });
 
-test("automatic API budget is capped at 60", () => {
+test("automatic and class API budgets are explicit", () => {
   assert.equal(automaticDailyLimit(), 60);
+  assert.equal(classDailyLimit(), 2);
+});
+
+test("class sync only runs in the final two CloudBase slots", () => {
+  assert.equal(shouldSyncClass("overnight_recovery"), true);
+  assert.equal(shouldSyncClass("cloudbase_final"), true);
+  assert.equal(shouldSyncClass("all_retry_3"), false);
+  assert.equal(shouldSyncClass("github_fallback"), false);
 });
