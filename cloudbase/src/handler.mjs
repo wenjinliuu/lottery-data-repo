@@ -21,6 +21,7 @@ export async function runIngest({
   slot,
   now = new Date(),
   runner = "cloudbase",
+  lotteryTypes,
   repository = new LotteryRepository(),
   client = new JisuClient(process.env.JISU_APPKEY),
 } = {}) {
@@ -28,7 +29,11 @@ export async function runIngest({
   const targetDate = targetDateForSlot(slot, now);
   const usageDate = targetDate;
   const allDue = await repository.allDueLotteryTypes(targetDate);
-  const allowed = allowedLotteriesForSlot(slot, allDue);
+  const scheduled = allowedLotteriesForSlot(slot, allDue);
+  const requested = Array.isArray(lotteryTypes) ? new Set(lotteryTypes) : null;
+  const allowed = requested
+    ? scheduled.filter((lotteryType) => requested.has(lotteryType))
+    : scheduled;
   const pending = await repository.dueTargets(targetDate, allowed);
   const results = [];
 
@@ -67,7 +72,11 @@ export async function main(event = {}) {
     ?? event.TriggerName
     ?? event.triggerName
     ?? process.env.SCHEDULE_SLOT;
-  return runIngest({ slot, runner: event.runner ?? "cloudbase" });
+  return runIngest({
+    slot,
+    runner: event.runner ?? "cloudbase",
+    lotteryTypes: event.lottery_types ?? event.lotteryTypes,
+  });
 }
 
 export default main;

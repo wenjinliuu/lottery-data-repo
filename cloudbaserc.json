@@ -1,0 +1,30 @@
+{
+  "version": "2.0",
+  "envId": "wenjin-cloudbase-d1empq882391ac1",
+  "functionRoot": ".",
+  "functions": [
+    {
+      "name": "lottery-ingest",
+      "dir": "cloudbase",
+      "handler": "index.main",
+      "runtime": "Nodejs20.19",
+      "timeout": 120,
+      "memorySize": 256,
+      "installDependency": true,
+      "envVariables": {
+        "CLOUDBASE_ENV_ID": "wenjin-cloudbase-d1empq882391ac1",
+        "CLOUDBASE_API_KEY": "{{env.CLOUDBASE_API_KEY}}",
+        "JISU_APPKEY": "{{env.JISU_APPKEY}}"
+      },
+      "triggers": [],
+      "ignore": [
+        "node_modules/**",
+        "test/**",
+        "scripts/**",
+        "migrations/**",
+        "sql/**",
+        "functions/**"
+      ]
+    }
+  ]
+}
