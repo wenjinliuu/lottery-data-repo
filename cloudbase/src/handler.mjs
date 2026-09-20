@@ -68,19 +68,14 @@ export async function runIngest({
 }
 
 export function resolveIngestEvent(event = {}) {
-  const triggerName = event.TriggerName ?? event.triggerName;
-  const oneTimeDltShadow = triggerName === "shadow_dlt_once";
   const slot = event.slot
-    ?? (oneTimeDltShadow ? "overnight_recovery" : undefined)
     ?? event.TriggerName
     ?? event.triggerName
     ?? process.env.SCHEDULE_SLOT;
   return {
     slot,
     runner: event.runner ?? "cloudbase",
-    lotteryTypes: oneTimeDltShadow
-      ? ["dlt"]
-      : (event.lottery_types ?? event.lotteryTypes),
+    lotteryTypes: event.lottery_types ?? event.lotteryTypes,
   };
 }
 
