@@ -11,6 +11,11 @@ function nowTimestamp() {
   return new Date().toISOString();
 }
 
+const CLASS_SLOT_COLUMNS = {
+  overnight_recovery: "class_overnight_called",
+  cloudbase_final: "class_final_called",
+};
+
 export function createCloudBaseDatabase(
   env = process.env.CLOUDBASE_ENV_ID,
   accessKey = process.env.CLOUDBASE_API_KEY,
@@ -81,7 +86,7 @@ export class LotteryRepository {
     return rows.map((row) => row.lottery_type);
   }
 
-  async reserveApiCall(usageDate, provider, limit, classCall = false) {
+  async initializeApiUsage(usageDate, provider) {
     ensureSuccess(
       await this.db.from("lottery_api_usage_daily").upsert(
         { usage_date: usageDate, provider },
@@ -89,38 +94,116 @@ export class LotteryRepository {
       ),
       "initialize API usage",
     );
+  }
 
+  async reserveApiCall(usageDate, provider, limit) {
+    await this.initializeApiUsage(usageDate, provider);
     for (let attempt = 0; attempt < 6; attempt += 1) {
       const [usage] = ensureSuccess(
         await this.db
           .from("lottery_api_usage_daily")
-          .select("call_count,class_call_count")
+          .select("call_count")
           .eq("usage_date", usageDate)
           .eq("provider", provider)
           .limit(1),
         "read API usage",
       );
-      if (!usage || usage.call_count >= limit || (classCall && usage.class_call_count > 0)) {
-        return null;
-      }
-      let query = this.db
-        .from("lottery_api_usage_daily")
-        .update({
-          call_count: usage.call_count + 1,
-          class_call_count: usage.class_call_count + (classCall ? 1 : 0),
-          updated_at: nowTimestamp(),
-        })
-        .eq("usage_date", usageDate)
-        .eq("provider", provider)
-        .eq("call_count", usage.call_count)
-        .eq("class_call_count", usage.class_call_count)
-        .lt("call_count", limit)
-        .select("call_count,class_call_count");
-      if (classCall) query = query.eq("class_call_count", 0);
-      const updated = ensureSuccess(await query, "reserve API usage");
+      if (!usage || usage.call_count >= limit) return null;
+      const updated = ensureSuccess(
+        await this.db
+          .from("lottery_api_usage_daily")
+          .update({
+            call_count: usage.call_count + 1,
+            updated_at: nowTimestamp(),
+          })
+          .eq("usage_date", usageDate)
+          .eq("provider", provider)
+          .eq("call_count", usage.call_count)
+          .lt("call_count", limit)
+          .select("call_count,class_call_count"),
+        "reserve API usage",
+      );
       if (updated.length) return updated[0];
     }
     throw new Error("reserve API usage: concurrent update retry limit reached");
+  }
+
+  async reserveClassCall(usageDate, provider, limit, classLimit, slot) {
+    const slotColumn = CLASS_SLOT_COLUMNS[slot];
+    if (!slotColumn) throw new Error(`Class sync is not allowed for slot: ${slot}`);
+    await this.initializeApiUsage(usageDate, provider);
+
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const [usage] = ensureSuccess(
+        await this.db
+          .from("lottery_api_usage_daily")
+          .select(`call_count,class_call_count,${slotColumn}`)
+          .eq("usage_date", usageDate)
+          .eq("provider", provider)
+          .limit(1),
+        "read class API usage",
+      );
+      if (
+        !usage
+        || usage.call_count >= limit
+        || usage.class_call_count >= classLimit
+        || usage[slotColumn]
+      ) return null;
+
+      const updated = ensureSuccess(
+        await this.db
+          .from("lottery_api_usage_daily")
+          .update({
+            call_count: usage.call_count + 1,
+            class_call_count: usage.class_call_count + 1,
+            [slotColumn]: true,
+            updated_at: nowTimestamp(),
+          })
+          .eq("usage_date", usageDate)
+          .eq("provider", provider)
+          .eq("call_count", usage.call_count)
+          .eq("class_call_count", usage.class_call_count)
+          .eq(slotColumn, false)
+          .lt("call_count", limit)
+          .lt("class_call_count", classLimit)
+          .select(`call_count,class_call_count,${slotColumn}`),
+        "reserve class API usage",
+      );
+      if (updated.length) return updated[0];
+    }
+    throw new Error("reserve class API usage: concurrent update retry limit reached");
+  }
+
+  async latestDraws(lotteryTypes) {
+    const output = {};
+    await Promise.all(lotteryTypes.map(async (lotteryType) => {
+      const [row] = ensureSuccess(
+        await this.db
+          .from("lottery_draws")
+          .select("lottery_type,issue,draw_date")
+          .eq("lottery_type", lotteryType)
+          .order("draw_date", { ascending: false })
+          .order("issue", { ascending: false })
+          .limit(1),
+        `read latest draw/${lotteryType}`,
+      );
+      if (row) {
+        output[lotteryType] = {
+          ...row,
+          issue: String(row.issue),
+          draw_date: String(row.draw_date).slice(0, 10),
+        };
+      }
+    }));
+    return output;
+  }
+
+  async saveClassStatuses(rows) {
+    if (!rows.length) return;
+    ensureSuccess(
+      await this.db.from("lottery_next_status").upsert(rows, { onConflict: "lottery_type" }),
+      "upsert lottery next status",
+    );
   }
 
   async recordFailure(targetDate, lotteryType, returnedIssue, error) {
