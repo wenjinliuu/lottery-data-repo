@@ -1,0 +1,38 @@
+name: One-time CloudBase ingest shadow test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/cloudbase-shadow-test-once.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-test:
+    runs-on: ubuntu-latest
+    env:
+      TCB_DISABLE_REPORT: "1"
+      CLOUDBASE_ENV_ID: wenjin-cloudbase-d1empq882391ac1
+      CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+
+      - name: Install CloudBase CLI
+        run: npm install --global @cloudbase/cli@3.8.3
+
+      - name: Authenticate
+        run: |
+          tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
+          tcb env use "$CLOUDBASE_ENV_ID" --yes
+
+      - name: Invoke one DLT shadow ingest
+        run: |
+          tcb fn invoke lottery-ingest --params '{"slot":"overnight_recovery","lottery_types":["dlt"],"runner":"cloudbase-shadow"}' --json
