@@ -7,7 +7,9 @@
   },
   "scripts": {
     "test": "node --test",
-    "import:history": "node scripts/import-history.mjs"
+    "import:history": "node scripts/import-history.mjs",
+    "fallback:github": "node scripts/github-fallback.mjs",
+    "export:public": "node scripts/export-public-data.mjs"
   },
   "dependencies": {
     "@cloudbase/node-sdk": "^3.18.3"
