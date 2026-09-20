@@ -27,3 +27,37 @@ test("old upstream issue remains pending", () => {
     /stale_issue/,
   );
 });
+
+test("zero-value prize fields match the existing Python public-data contract", () => {
+  const draw = normalizeQueryPayload("pl3", config, {
+    result: {
+      ...payload.result,
+      prize: [{
+        prizename: "一等奖",
+        require: "命中",
+        num: 0,
+        singlebonus: 0,
+        addnum: 0,
+        addbonus: 0,
+      }],
+    },
+  });
+
+  assert.deepEqual(draw.prize_details[0], {
+    prize_level: "一等奖",
+    prize_name: "一等奖",
+    require: "命中",
+    winning_count: null,
+    prize_amount: "",
+    additional_count: null,
+    additional_amount: "",
+    raw: {
+      prizename: "一等奖",
+      require: "命中",
+      num: 0,
+      singlebonus: 0,
+      addnum: 0,
+      addbonus: 0,
+    },
+  });
+});

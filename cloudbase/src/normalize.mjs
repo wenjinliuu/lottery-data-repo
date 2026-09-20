@@ -35,13 +35,13 @@ function normalizePrizeDetails(value) {
   return value.map((raw, index) => {
     const item = raw && typeof raw === "object" ? raw : { value: raw };
     return {
-      prize_level: text(item.prizename ?? item.level ?? item.name ?? index + 1),
-      prize_name: text(item.prizename ?? item.name),
+      prize_level: text(item.prizename || item.level || item.name || index + 1),
+      prize_name: text(item.prizename || item.name || ""),
       require: text(item.require),
-      winning_count: safeInteger(item.num ?? item.winning_count),
-      prize_amount: text(item.singlebonus ?? item.bonus ?? item.prize),
-      additional_count: safeInteger(item.addnum ?? item.additional_count),
-      additional_amount: text(item.addbonus ?? item.additional_amount),
+      winning_count: safeInteger(item.num || item.winning_count),
+      prize_amount: text(item.singlebonus || item.bonus || item.prize),
+      additional_count: safeInteger(item.addnum || item.additional_count),
+      additional_amount: text(item.addbonus || item.additional_amount),
       raw: item,
     };
   });
