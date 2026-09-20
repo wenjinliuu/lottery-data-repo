@@ -2,8 +2,80 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "fc3d",
-  "updated_at": "2026-09-20T19:23:31.685+08:00",
+  "updated_at": "2026-09-21T00:21:54.068+08:00",
   "draws": [
+    {
+      "issue": "2026253",
+      "schema": "random_draw_agent_draw",
+      "source": {
+        "name": "jisuapi",
+        "fetched_at": "2026-09-20T21:34:05.418+08:00",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***"
+      },
+      "numbers": {
+        "digits": [
+          0,
+          3,
+          4
+        ]
+      },
+      "version": 1,
+      "deadline": "2026-11-18",
+      "caipiaoid": 12,
+      "draw_date": "2026-09-20",
+      "draw_time": "",
+      "fetched_at": "2026-09-20T21:34:05.418+08:00",
+      "number_raw": "0 3 4",
+      "prize_pool": "0.00",
+      "lottery_name": "福彩3D",
+      "lottery_type": "fc3d",
+      "sales_amount": "0",
+      "prize_details": [],
+      "raw_public_json": {
+        "query_result": {
+          "prize": false,
+          "number": "0 3 4",
+          "issueno": "2026253",
+          "deadline": "2026-11-18",
+          "opendate": "2026-09-20",
+          "caipiaoid": 12,
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "refernumber": "",
+          "officialopendate": ""
+        },
+        "query_response": {
+          "msg": "ok",
+          "result": {
+            "prize": false,
+            "number": "0 3 4",
+            "issueno": "2026253",
+            "deadline": "2026-11-18",
+            "opendate": "2026-09-20",
+            "caipiaoid": 12,
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "refernumber": "",
+            "officialopendate": ""
+          },
+          "status": 0
+        },
+        "class_info": {}
+      },
+      "refernumber_raw": "",
+      "semantic_checksum": "8833c7e5877bb186aa36e154aa004161c2d7207ea82ad0ee92b87ac43e47f642",
+      "next_issue": "2026254",
+      "next_draw_date": "2026-09-21",
+      "next_open_time": "2026-09-21 21:15:00",
+      "next_buy_end_time": "2026-09-21 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
+      "next_basis_issue": "2026253",
+      "next_resolution_reason": "cloudbase_calendar_next_saleable_issue",
+      "class_last_issue": "2026253"
+    },
     {
       "issue": "2026252",
       "schema": "random_draw_agent_draw",
@@ -7983,169 +8055,6 @@
       "next_basis_issue": "2026204",
       "next_buy_end_time": "2026-08-03 20:00:00",
       "next_resolution_reason": "class_matches_latest_draw"
-    },
-    {
-      "issue": "2026203",
-      "schema": "random_draw_agent_draw",
-      "source": {
-        "name": "jisuapi",
-        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***",
-        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
-        "fetched_at": "2026-08-02T20:42:05+08:00"
-      },
-      "numbers": {
-        "digits": [
-          4,
-          3,
-          5
-        ]
-      },
-      "version": 1,
-      "deadline": "2026-09-29",
-      "caipiaoid": 12,
-      "draw_date": "2026-08-01",
-      "draw_time": "",
-      "fetched_at": "2026-08-02T20:42:05+08:00",
-      "next_issue": "2026205",
-      "number_raw": "4 3 5",
-      "prize_pool": "0.00",
-      "next_source": "schedule_inference",
-      "next_status": "inferred",
-      "lottery_name": "福彩3D",
-      "lottery_type": "fc3d",
-      "sales_amount": "105017956",
-      "prize_details": [
-        {
-          "raw": {
-            "num": 0,
-            "require": "定位中3码",
-            "prizename": "直选",
-            "singlebonus": 1040
-          },
-          "require": "定位中3码",
-          "prize_name": "直选",
-          "prize_level": "直选",
-          "prize_amount": "1040",
-          "winning_count": null,
-          "additional_count": null,
-          "additional_amount": ""
-        },
-        {
-          "raw": {
-            "num": 0,
-            "require": "不定位中3码",
-            "prizename": "组三",
-            "singlebonus": 346
-          },
-          "require": "不定位中3码",
-          "prize_name": "组三",
-          "prize_level": "组三",
-          "prize_amount": "346",
-          "winning_count": null,
-          "additional_count": null,
-          "additional_amount": ""
-        },
-        {
-          "raw": {
-            "num": 0,
-            "require": "不定位中3码",
-            "prizename": "组六",
-            "singlebonus": 173
-          },
-          "require": "不定位中3码",
-          "prize_name": "组六",
-          "prize_level": "组六",
-          "prize_amount": "173",
-          "winning_count": null,
-          "additional_count": null,
-          "additional_amount": ""
-        }
-      ],
-      "next_confirmed": false,
-      "next_draw_date": "2026-08-03",
-      "next_open_time": "2026-08-03 21:15:00",
-      "raw_public_json": {
-        "class_info": {
-          "name": "福彩3D",
-          "parentid": 1,
-          "caipiaoid": 12,
-          "lastissueno": "2026203",
-          "nextissueno": "2026204",
-          "nextopentime": "2026-08-02 21:15:00",
-          "nextbuyendtime": "2026-08-02 20:00:00"
-        },
-        "query_result": {
-          "prize": [
-            {
-              "num": 0,
-              "require": "定位中3码",
-              "prizename": "直选",
-              "singlebonus": 1040
-            },
-            {
-              "num": 0,
-              "require": "不定位中3码",
-              "prizename": "组三",
-              "singlebonus": 346
-            },
-            {
-              "num": 0,
-              "require": "不定位中3码",
-              "prizename": "组六",
-              "singlebonus": 173
-            }
-          ],
-          "number": "4 3 5",
-          "issueno": "2026203",
-          "deadline": "2026-09-29",
-          "opendate": "2026-08-01",
-          "caipiaoid": 12,
-          "saleamount": 105017956,
-          "totalmoney": "0.00",
-          "refernumber": "",
-          "officialopendate": ""
-        },
-        "query_response": {
-          "msg": "ok",
-          "result": {
-            "prize": [
-              {
-                "num": 0,
-                "require": "定位中3码",
-                "prizename": "直选",
-                "singlebonus": 1040
-              },
-              {
-                "num": 0,
-                "require": "不定位中3码",
-                "prizename": "组三",
-                "singlebonus": 346
-              },
-              {
-                "num": 0,
-                "require": "不定位中3码",
-                "prizename": "组六",
-                "singlebonus": 173
-              }
-            ],
-            "number": "4 3 5",
-            "issueno": "2026203",
-            "deadline": "2026-09-29",
-            "opendate": "2026-08-01",
-            "caipiaoid": 12,
-            "saleamount": 105017956,
-            "totalmoney": "0.00",
-            "refernumber": "",
-            "officialopendate": ""
-          },
-          "status": 0
-        }
-      },
-      "refernumber_raw": "",
-      "class_last_issue": "2026203",
-      "next_basis_issue": "2026203",
-      "next_buy_end_time": "2026-08-03 20:00:00",
-      "next_resolution_reason": "class_candidate_closed_schedule_rolled"
     }
   ]
 }

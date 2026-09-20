@@ -3,8 +3,86 @@
   "version": 1,
   "lottery_type": "ssq",
   "year": "2026",
-  "updated_at": "2026-09-20T19:23:31.685+08:00",
+  "updated_at": "2026-09-21T00:21:54.068+08:00",
   "draws": [
+    {
+      "issue": "2026109",
+      "schema": "random_draw_agent_draw",
+      "source": {
+        "name": "jisuapi",
+        "fetched_at": "2026-09-20T21:34:06.201+08:00",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=11",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***"
+      },
+      "numbers": {
+        "red": [
+          9,
+          12,
+          15,
+          26,
+          30,
+          33
+        ],
+        "blue": [
+          6
+        ]
+      },
+      "version": 1,
+      "deadline": "2026-11-18",
+      "caipiaoid": 11,
+      "draw_date": "2026-09-20",
+      "draw_time": "",
+      "fetched_at": "2026-09-20T21:34:06.201+08:00",
+      "number_raw": "09 12 15 26 30 33",
+      "prize_pool": "0.00",
+      "lottery_name": "双色球",
+      "lottery_type": "ssq",
+      "sales_amount": "0",
+      "prize_details": [],
+      "raw_public_json": {
+        "query_result": {
+          "prize": false,
+          "number": "09 12 15 26 30 33",
+          "issueno": "2026109",
+          "deadline": "2026-11-18",
+          "opendate": "2026-09-20",
+          "caipiaoid": 11,
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "refernumber": "06",
+          "officialopendate": ""
+        },
+        "query_response": {
+          "msg": "ok",
+          "result": {
+            "prize": false,
+            "number": "09 12 15 26 30 33",
+            "issueno": "2026109",
+            "deadline": "2026-11-18",
+            "opendate": "2026-09-20",
+            "caipiaoid": 11,
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "refernumber": "06",
+            "officialopendate": ""
+          },
+          "status": 0
+        },
+        "class_info": {}
+      },
+      "refernumber_raw": "06",
+      "semantic_checksum": "b21d8c4a37e2c8a539613c7d0c594d3e2a941fd16a5c9ec264d7ecebd7e05f04",
+      "next_issue": "2026110",
+      "next_draw_date": "2026-09-22",
+      "next_open_time": "2026-09-22 21:15:00",
+      "next_buy_end_time": "2026-09-22 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
+      "next_basis_issue": "2026109",
+      "next_resolution_reason": "cloudbase_calendar_next_saleable_issue",
+      "class_last_issue": "2026109"
+    },
     {
       "issue": "2026108",
       "schema": "random_draw_agent_draw",

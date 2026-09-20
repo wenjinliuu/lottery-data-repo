@@ -2,7 +2,7 @@
   "schema": "random_draw_agent_lottery_draws",
   "version": 1,
   "lottery_type": "qlc",
-  "updated_at": "2026-09-20T19:23:31.685+08:00",
+  "updated_at": "2026-09-21T00:21:54.068+08:00",
   "draws": [
     {
       "issue": "2026108",
@@ -34,8 +34,8 @@
       "next_issue": "2026109",
       "number_raw": "11 13 19 20 25 28 29",
       "prize_pool": "1518862.00",
-      "next_source": "class_api",
-      "next_status": "confirmed",
+      "next_source": "schedule_inference",
+      "next_status": "inferred",
       "lottery_name": "七乐彩",
       "lottery_type": "qlc",
       "sales_amount": "4058672",
@@ -146,7 +146,7 @@
           "additional_amount": ""
         }
       ],
-      "next_confirmed": true,
+      "next_confirmed": false,
       "next_draw_date": "2026-09-21",
       "next_open_time": "2026-09-21 21:15:00",
       "raw_public_json": {
@@ -278,7 +278,7 @@
       "class_last_issue": "2026108",
       "next_basis_issue": "2026108",
       "next_buy_end_time": "2026-09-21 20:00:00",
-      "next_resolution_reason": "class_matches_latest_draw"
+      "next_resolution_reason": "cloudbase_calendar_next_saleable_issue"
     },
     {
       "issue": "2026107",

@@ -3,8 +3,80 @@
   "version": 1,
   "lottery_type": "fc3d",
   "year": "2026",
-  "updated_at": "2026-09-20T19:23:31.685+08:00",
+  "updated_at": "2026-09-21T00:21:54.068+08:00",
   "draws": [
+    {
+      "issue": "2026253",
+      "schema": "random_draw_agent_draw",
+      "source": {
+        "name": "jisuapi",
+        "fetched_at": "2026-09-20T21:34:05.418+08:00",
+        "query_url": "https://api.jisuapi.com/caipiao/query?appkey=***&caipiaoid=12",
+        "class_url": "https://api.jisuapi.com/caipiao/class?appkey=***"
+      },
+      "numbers": {
+        "digits": [
+          0,
+          3,
+          4
+        ]
+      },
+      "version": 1,
+      "deadline": "2026-11-18",
+      "caipiaoid": 12,
+      "draw_date": "2026-09-20",
+      "draw_time": "",
+      "fetched_at": "2026-09-20T21:34:05.418+08:00",
+      "number_raw": "0 3 4",
+      "prize_pool": "0.00",
+      "lottery_name": "福彩3D",
+      "lottery_type": "fc3d",
+      "sales_amount": "0",
+      "prize_details": [],
+      "raw_public_json": {
+        "query_result": {
+          "prize": false,
+          "number": "0 3 4",
+          "issueno": "2026253",
+          "deadline": "2026-11-18",
+          "opendate": "2026-09-20",
+          "caipiaoid": 12,
+          "saleamount": 0,
+          "totalmoney": "0.00",
+          "refernumber": "",
+          "officialopendate": ""
+        },
+        "query_response": {
+          "msg": "ok",
+          "result": {
+            "prize": false,
+            "number": "0 3 4",
+            "issueno": "2026253",
+            "deadline": "2026-11-18",
+            "opendate": "2026-09-20",
+            "caipiaoid": 12,
+            "saleamount": 0,
+            "totalmoney": "0.00",
+            "refernumber": "",
+            "officialopendate": ""
+          },
+          "status": 0
+        },
+        "class_info": {}
+      },
+      "refernumber_raw": "",
+      "semantic_checksum": "8833c7e5877bb186aa36e154aa004161c2d7207ea82ad0ee92b87ac43e47f642",
+      "next_issue": "2026254",
+      "next_draw_date": "2026-09-21",
+      "next_open_time": "2026-09-21 21:15:00",
+      "next_buy_end_time": "2026-09-21 20:00:00",
+      "next_status": "inferred",
+      "next_source": "schedule_inference",
+      "next_confirmed": false,
+      "next_basis_issue": "2026253",
+      "next_resolution_reason": "cloudbase_calendar_next_saleable_issue",
+      "class_last_issue": "2026253"
+    },
     {
       "issue": "2026252",
       "schema": "random_draw_agent_draw",
