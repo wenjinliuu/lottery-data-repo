@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runIngest } from "../src/handler.mjs";
+import { resolveIngestEvent, runIngest } from "../src/handler.mjs";
 
 test("manual lottery filter limits a shadow run to one due lottery", async () => {
   const seen = [];
@@ -24,4 +24,12 @@ test("manual lottery filter limits a shadow run to one due lottery", async () =>
   assert.deepEqual(seen, ["dlt"]);
   assert.equal(result.target_date, "2026-09-19");
   assert.deepEqual(result.results, []);
+});
+
+test("one-time timer trigger maps to previous-day DLT shadow run", async () => {
+  assert.deepEqual(resolveIngestEvent({ TriggerName: "shadow_dlt_once" }), {
+    slot: "overnight_recovery",
+    runner: "cloudbase",
+    lotteryTypes: ["dlt"],
+  });
 });
