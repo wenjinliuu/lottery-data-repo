@@ -13,18 +13,35 @@ jobs:
   repair:
     runs-on: ubuntu-latest
     env:
-      TCB_DISABLE_REPORT: "1"
       CLOUDBASE_ENV_ID: wenjin-cloudbase-d1empq882391ac1
       CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
+      JISU_APPKEY: ${{ secrets.JISU_APPKEY }}
     steps:
-      - name: Install CloudBase CLI
-        run: npm install --global @cloudbase/cli@3.8.3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Authenticate
-        run: |
-          tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
-          tcb env use "$CLOUDBASE_ENV_ID" --yes
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+          cache: npm
+          cache-dependency-path: cloudbase/package-lock.json
 
-      - name: Re-fetch affected draws
+      - name: Re-fetch affected draws through the production handler
+        working-directory: cloudbase
         run: |
-          tcb fn invoke lottery-ingest --json --params '{"slot":"all_first","runner":"github_repair","target_date":"2026-09-20","lottery_types":["ssq","fc3d","kl8","pl3","pl5","qxc"]}'
+          npm ci
+          node --input-type=module <<'EOF'
+          import { main } from "./src/handler.mjs";
+
+          const result = await main({
+            slot: "all_first",
+            runner: "github_repair",
+            target_date: "2026-09-20",
+            lottery_types: ["ssq", "fc3d", "kl8", "pl3", "pl5", "qxc"],
+          });
+          console.log(JSON.stringify(result, null, 2));
+          if (!result.ok || result.results.some((item) => item.status !== "updated")) {
+            process.exitCode = 1;
+          }
+          EOF
