@@ -2,13 +2,13 @@
 """按年推演全部彩种的「期号 ↔ 开奖日期」绑定表。
 
 客户端原来只能靠 API 返回的 `next_issue` 拿到下一期，跨期或补录旧票时无从选起。
-这个脚本把一整年的期次一次性算出来，写进 `public_data/calendar/{year}.json`。
+这个脚本把一整年的期次一次性算出来，写进 `public_data/v2/calendar/{year}.json`。
 
 推演规则（已用 2026 年 746 期真实数据全量验证，零不符）：
 
 1. 每个彩种有固定的开奖星期（`config/lotteries.json` 的 `draw_weekdays`，0 = 周日）。
 2. 期号每年从 001 重新开始，按开奖日顺序递增。
-3. 休市日（`calendar/closures.json`）**不开奖也不发期号，期号顺延**——
+3. 休市日（`config/closures.json`）**不开奖也不发期号，期号顺延**——
    不是跳号。福彩3D 2026-04-28 的真实期号是 2026108，而那天是年内第 118 天，
    差的正好是春节休市的 10 天，这条规则由此确证。
 4. 期号格式分两系：
@@ -22,8 +22,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "config/lotteries.json"
-CLOSURES = ROOT / "public_data/calendar/closures.json"
-OUT_DIR = ROOT / "public_data/calendar"
+CLOSURES = ROOT / "config/closures.json"
+OUT_DIR = ROOT / "public_data/v2/calendar"
 
 # 期号 7 位（含完整年份）的彩种，其余为 5 位（年份取后两位）
 WIDE_ISSUE = {"ssq", "fc3d", "qlc", "kl8"}
@@ -38,7 +38,7 @@ def load_closures(year):
     if not items:
         raise SystemExit(
             f"closures.json 里没有 {year} 年的休市日。\n"
-            f"请先在 public_data/calendar/closures.json 的 years.{year} 下补上：\n"
+            f"请先在 config/closures.json 的 years.{year} 下补上：\n"
             f"  · 春节：财政部每年 12 月公布次年安排后手工填（约 10 天，日期不固定）\n"
             f"  · 国庆：固定 {year}-10-01 至 {year}-10-04\n"
             f"填完再重新运行本脚本。"
@@ -65,10 +65,9 @@ def build(year):
     lotteries = json.loads(CONFIG.read_text(encoding="utf-8"))["lotteries"]
     spans = load_closures(year)
 
-    result = {}
+    entries = []
     for key, conf in lotteries.items():
         weekdays = set(conf["draw_weekdays"])
-        entries = []
         seq = 0
         day = dt.date(year, 1, 1)
         end = dt.date(year, 12, 31)
@@ -78,33 +77,23 @@ def build(year):
             if weekday in weekdays and not is_closed(day, spans):
                 seq += 1
                 entries.append({
+                    "lottery_type": key,
                     "issue": format_issue(key, year, seq),
-                    "draw_date": day.isoformat(),
-                    "weekday": weekday,
-                    "draw_time": f"{day.isoformat()} {conf['draw_time']}:00",
-                    "sale_close_time": f"{day.isoformat()} {conf['sale_close_time']}:00",
+                    "date": day.isoformat(),
+                    "draw_time": f"{conf['draw_time']}:00",
+                    "sale_close_time": f"{conf['sale_close_time']}:00",
                 })
             day += dt.timedelta(days=1)
-        result[key] = {
-            "name": conf["name"],
-            "draw_weekdays": sorted(weekdays),
-            "draw_time": conf["draw_time"],
-            "sale_close_time": conf["sale_close_time"],
-            "count": len(entries),
-            "issues": entries,
-        }
+    entries.sort(key=lambda item: (item["date"], item["lottery_type"]))
 
     return {
-        "schema": "lottery_draw_calendar",
-        "version": 1,
+        "schema": "duigehao.lottery.calendar",
+        "version": 2,
         "year": year,
-        "timezone": "Asia/Shanghai",
-        "generated_by": "scripts/build_draw_calendar.py",
-        "closures": [
-            {"name": name, "start": start.isoformat(), "end": end.isoformat()}
-            for start, end, name in spans
-        ],
-        "lotteries": result,
+        "generated_at": dt.datetime.now(
+            dt.timezone(dt.timedelta(hours=8))
+        ).isoformat(timespec="seconds"),
+        "entries": entries,
     }
 
 
@@ -112,15 +101,18 @@ def verify(year, payload):
     """拿 by-year 的真实开奖记录逐条比对推演结果。"""
     problems = []
     checked = 0
-    for key, block in payload["lotteries"].items():
-        path = ROOT / f"public_data/by-year/{key}/{year}.json"
+    by_type = {}
+    for item in payload["entries"]:
+        by_type.setdefault(item["lottery_type"], []).append(item)
+    for key, entries in by_type.items():
+        path = ROOT / f"public_data/v2/by-year/{key}/{year}.json"
         if not path.exists():
             continue
         real = json.loads(path.read_text(encoding="utf-8"))
         rows = real.get("draws", real if isinstance(real, list) else [])
-        table = {item["draw_date"]: item["issue"] for item in block["issues"]}
+        table = {item["date"]: item["issue"] for item in entries}
         for row in rows:
-            date, issue = row.get("draw_date"), str(row.get("issue") or "")
+            date, issue = row.get("date"), str(row.get("issue") or "")
             if not date or not issue:
                 continue
             checked += 1
@@ -138,10 +130,14 @@ if __name__ == "__main__":
     payload = build(args.year)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     target = OUT_DIR / f"{args.year}.json"
-    target.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    target.write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
 
-    total = sum(block["count"] for block in payload["lotteries"].values())
-    print(f"已写出 {target}（{len(payload['lotteries'])} 个彩种，共 {total} 期）")
+    total = len(payload["entries"])
+    lottery_count = len({item["lottery_type"] for item in payload["entries"]})
+    print(f"已写出 {target}（{lottery_count} 个彩种，共 {total} 期）")
 
     if not args.no_verify:
         checked, problems = verify(args.year, payload)

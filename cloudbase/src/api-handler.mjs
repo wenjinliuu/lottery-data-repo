@@ -5,7 +5,6 @@ import {
   LOTTERY_TYPES,
   RECENT_LIMIT,
   materializeCalendarEntry,
-  materializeV1Draw,
   materializeV2Draw,
   nextMetadata,
 } from "./api-contract.mjs";
@@ -19,7 +18,7 @@ const config = JSON.parse(readFileSync(configUrl, "utf8"));
 
 const DRAW_COLUMNS = [
   "issue", "draw_date", "draw_time", "numbers", "prize_pool", "sales_amount",
-  "prize_details", "compatibility_payload", "source_fetched_at",
+  "prize_details", "source_fetched_at",
 ].join(",");
 const CALENDAR_COLUMNS = "lottery_type,issue,draw_date,draw_time,sale_close_time";
 
@@ -208,123 +207,6 @@ export class LotteryApiService {
     };
   }
 
-  async v1Latest() {
-    const generatedAt = beijingClock(this.now()).iso;
-    const pairs = await Promise.all(
-      LOTTERY_TYPES.map(async (type) => [type, await this.latestAndNext(type)]),
-    );
-    return {
-      schema: "random_draw_agent_latest",
-      version: 1,
-      updated_at: generatedAt,
-      timezone: "Asia/Shanghai",
-      draws: Object.fromEntries(pairs.map(([type, value]) => [
-        type,
-        materializeV1Draw(value.row, type, config.lotteries[type], value.next),
-      ])),
-    };
-  }
-
-  async v1Calendar() {
-    const bootstrap = await this.bootstrap();
-    return {
-      schema: "random_draw_agent_calendar",
-      version: 1,
-      updated_at: bootstrap.generated_at,
-      timezone: "Asia/Shanghai",
-      lotteries: Object.fromEntries(Object.entries(bootstrap.schedule).map(([type, item]) => [
-        type,
-        {
-          name: item.name,
-          caipiaoid: config.lotteries[type].caipiaoid,
-          draw_weekdays: item.weekdays,
-          draw_time: item.draw_time,
-          sale_close_time: item.sale_close_time,
-          last_issue: bootstrap.latest[type].issue,
-          next_issue: item.next.issue,
-          next_draw_date: item.next.date,
-          next_open_time: item.next.open_time,
-          next_buy_end_time: item.next.buy_end_time,
-          next_status: item.next.status,
-          next_source: item.next.source,
-          next_confirmed: item.next.confirmed,
-          next_basis_issue: item.next.basis_issue,
-          next_resolution_reason: item.next.status === "inferred"
-            ? "cloudbase_calendar_next_saleable_issue"
-            : "no_future_calendar_issue",
-        },
-      ])),
-    };
-  }
-
-  async v1Recent(lotteryType, limit = 50) {
-    const rows = await this.drawRows(lotteryType, limit);
-    return {
-      schema: "random_draw_agent_lottery_draws",
-      version: 1,
-      lottery_type: lotteryType,
-      updated_at: beijingClock(this.now()).iso,
-      draws: rows.map((row) => materializeV1Draw(
-        row,
-        lotteryType,
-        config.lotteries[lotteryType],
-      )),
-    };
-  }
-
-  async v1ByYear(lotteryType, year) {
-    const rows = await this.drawRows(lotteryType, 500, year);
-    return {
-      schema: "random_draw_agent_year_draws",
-      version: 1,
-      lottery_type: lotteryType,
-      year: String(year),
-      updated_at: beijingClock(this.now()).iso,
-      draws: rows.map((row) => materializeV1Draw(
-        row,
-        lotteryType,
-        config.lotteries[lotteryType],
-      )),
-    };
-  }
-
-  async v1YearCalendar(year) {
-    const rows = await this.calendarRows(year);
-    const lotteries = {};
-    for (const type of LOTTERY_TYPES) {
-      const item = config.lotteries[type];
-      const issues = rows
-        .filter((row) => row.lottery_type === type)
-        .map((row) => {
-          const date = String(row.draw_date).slice(0, 10);
-          const draw = String(row.draw_time ?? item.draw_time);
-          const close = String(row.sale_close_time ?? item.sale_close_time);
-          return {
-            issue: String(row.issue),
-            draw_date: date,
-            weekday: new Date(`${date}T00:00:00Z`).getUTCDay(),
-            draw_time: `${date} ${draw.length === 5 ? `${draw}:00` : draw}`,
-            sale_close_time: `${date} ${close.length === 5 ? `${close}:00` : close}`,
-          };
-        });
-      lotteries[type] = {
-        name: item.name,
-        draw_weekdays: item.draw_weekdays ?? [],
-        draw_time: item.draw_time ?? "",
-        sale_close_time: item.sale_close_time ?? "",
-        count: issues.length,
-        issues,
-      };
-    }
-    return {
-      schema: "lottery_draw_calendar",
-      version: 1,
-      year,
-      timezone: "Asia/Shanghai",
-      generated_by: "cloudbase_lottery_api",
-      lotteries,
-    };
-  }
 }
 
 function methodOf(event) {
@@ -438,48 +320,6 @@ export async function handleHttp(event = {}, service = new LotteryApiService()) 
       return response(200, await service.calendar(year), { head, cache: 86400 });
     }
 
-    if (path === "/v1/latest.json") {
-      return response(200, await service.v1Latest(), { head, cache: 60 });
-    }
-    if (path === "/v1/calendar.json") {
-      return response(200, await service.v1Calendar(), { head, cache: 300 });
-    }
-    if (path === "/v1/health.json") {
-      const health = await service.health();
-      return response(200, {
-        schema: "random_draw_agent_public_data_health",
-        version: 1,
-        ok: health.ok,
-        updated_at: health.generated_at,
-        message: "served_from_cloudbase",
-        results: Object.entries(health.latest).map(([lottery_type, item]) => ({
-          lottery_type,
-          issue: item?.issue ?? "",
-          draw_date: item?.date ?? "",
-        })),
-      }, { head, cache: 30 });
-    }
-    match = /^\/v1\/calendar\/(\d{4})\.json$/.exec(path);
-    if (match) {
-      const year = validYear(match[1]);
-      if (year === null) return response(404, { error: "not_found" }, { cache: 300 });
-      return response(200, await service.v1YearCalendar(year), { head, cache: 86400 });
-    }
-    match = /^\/v1\/draws\/([a-z0-9]+)\.json$/.exec(path);
-    if (match) {
-      if (!validLotteryType(match[1])) {
-        return response(404, { error: "unknown_lottery_type" }, { cache: 300 });
-      }
-      return response(200, await service.v1Recent(match[1]), { head, cache: 60 });
-    }
-    match = /^\/v1\/by-year\/([a-z0-9]+)\/(\d{4})\.json$/.exec(path);
-    if (match) {
-      const year = validYear(match[2]);
-      if (!validLotteryType(match[1]) || year === null) {
-        return response(404, { error: "not_found" }, { cache: 300 });
-      }
-      return response(200, await service.v1ByYear(match[1], year), { head, cache: 3600 });
-    }
     return response(404, { error: "not_found" }, { cache: 300 });
   } catch (error) {
     console.error("lottery-api", { path, error: String(error) });

@@ -1,73 +1,43 @@
-# CloudBase migration
+# CloudBase V2 生产状态
 
-Status: production ingest, seven CloudBase timers, the GitHub final fallback, and the
-CloudBase-to-`public_data` compatibility mirror are active. The App still reads the existing
-v1 paths. A slim v2 mirror is generated in parallel for the upcoming App cutover.
+迁移已经完成，当前只维护 V2 公共契约。
 
-## Source of truth and compatibility
+## 数据真相与镜像
 
-CloudBase PostgreSQL is the production source of truth. GitHub is the delayed mirror, independent
-final fallback, and source repository. Existing files under `public_data/` remain v1-compatible.
-New clients should use the slim files under `public_data/v2/`.
+CloudBase PostgreSQL 是生产数据真相。CloudBase 七个定时器负责抓取与补抓，GitHub Actions 在北京时间 08:14 做最后兜底并导出 public_data/v2。
 
-Historical upstream payloads stay in the database for audit and compatibility export. V2 never
-publishes `source_payload`, `compatibility_payload`, raw API responses, duplicated prize objects,
-or repeated next-draw metadata on historical rows.
+这不是逐次同步：21:34 至 02:44 的每一次 CloudBase 抓取只更新 PostgreSQL；GitHub 镜像通常在 08:14 才统一更新。
 
-## Confirmed schedule (Beijing time)
+## 生产资源
 
-| Runner | Slot | Target date |
-| --- | --- | --- |
-| CloudBase | 21:34 welfare early | same day |
-| CloudBase | 21:44 all due | same day |
-| CloudBase | 21:54 pending only | same day |
-| CloudBase | 22:14 pending only | same day |
-| CloudBase | 22:34 pending only | same day |
-| CloudBase | 00:34 recovery | previous day |
-| CloudBase | 02:44 final recovery | previous day |
-| GitHub | 08:14 final fallback/export | previous day |
+- 环境：wenjin-cloudbase-d1empq882391ac1
+- 地域：ap-shanghai
+- 数据库：CloudBase PostgreSQL
+- 抓取函数：lottery-ingest
+- 只读函数：lottery-api、lottery-api-http
+- 自动调用上限：每个目标开奖日 60 次
+- GitHub 镜像：public_data/v2
 
-The 00:34 and 02:44 invocations are draw-recovery slots only. Next-issue metadata is inferred from
-the normalized annual `lottery_calendar`; no separate class endpoint is called.
+## 数据库迁移历史
 
-## API quota rules
+- 20260920143500_lottery_schema_baseline
+- 20260920233000_lottery_class_sync：历史迁移，class 功能已废止
+- 20260921005000_remove_class_sync：删除 class 同步表和字段
 
-- Provider plan: 100 calls/day.
-- Automatic hard limit shared by CloudBase and GitHub: 60 calls per target date.
-- Every draw query reserves from the same atomic counter.
-- GitHub 08:14 retries only pending draws and shares the same 60-call protection.
+迁移文件是数据库演进记录，不得删除、改写或重新编号。废止功能通过后续迁移前向清理。
 
-## Public data contracts
+## 已删除内容
 
-V1 remains unchanged for released App versions:
+- /caipiao/class 同步链路
+- lottery_next_status
+- CloudBase /v1/* 路由
+- GitHub V1 静态文件
+- GitHub 直接抓取的旧 Python 主流程
+- 最近 50 期契约
 
-- `public_data/latest.json`
-- `public_data/calendar.json`
-- `public_data/draws/{lottery_type}.json` (50)
-- `public_data/by-year/{lottery_type}/{year}.json`
+## 当前客户端
 
-Slim v2 is intended for lazy loading:
+- iOS：CloudBase V2 → GitHub V2 → 本地缓存。
+- Web：GitHub V2 → Service Worker 缓存。
 
-- `public_data/v2/bootstrap.json`: latest draw plus compact schedule/next information.
-- `public_data/v2/draws/{lottery_type}.json`: recent 30 for one lottery.
-- `public_data/v2/by-year/{lottery_type}/{year}.json`: one lottery and one year.
-- `public_data/v2/calendar/{year}.json`: normalized annual draw calendar.
-
-There is intentionally no `public_data/v2/health.json`. The health endpoint reports whether the
-CloudBase read path itself is healthy; a GitHub mirror cannot answer that question and must not be
-used as a health fallback.
-
-V2 files are minified and contain normalized App fields only.
-
-## Live migration state
-
-- Environment: `wenjin-cloudbase-d1empq882391ac1`, PostgreSQL, `ap-shanghai`.
-- Baseline migration: `20260920143500_lottery_schema_baseline`.
-- Class/v2 migration: `20260920233000_lottery_class_sync` (superseded for class sync; v2 retained).
-- Class cleanup migration: `20260921005000_remove_class_sync`.
-- `lottery_calendar`: 2,006 baseline rows.
-- `lottery_draws`: 830 baseline rows.
-- `lottery-ingest`: Node.js 20.19, seven timer triggers.
-- GitHub Actions deploys function code and owns the 08:14 final fallback/export.
-- The trigger schedule itself is unchanged. `overnight_recovery` and `cloudbase_final` only retry
-  pending draw queries.
+V2 health 仅存在于 CloudBase /v2/health，不生成 GitHub health 镜像。

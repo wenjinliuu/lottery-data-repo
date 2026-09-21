@@ -33,23 +33,21 @@ async function upsertBatches(db, table, rows, onConflict) {
 }
 
 async function importCalendars(db) {
-  const directory = path.join(root, "public_data/calendar");
+  const directory = path.join(root, "public_data/v2/calendar");
   const files = (await readdir(directory)).filter((name) => /^\d{4}\.json$/.test(name));
   const rows = [];
   for (const file of files) {
     const payload = await readJson(path.join(directory, file));
-    for (const [lotteryType, game] of Object.entries(payload.lotteries ?? {})) {
-      for (const item of game.issues ?? []) {
-        rows.push({
-          lottery_type: lotteryType,
-          issue: String(item.issue),
-          draw_date: item.draw_date,
-          draw_time: item.draw_time?.slice(-8) || null,
-          sale_close_time: item.sale_close_time?.slice(-8) || null,
-          source: "github_history",
-          updated_at: new Date().toISOString(),
-        });
-      }
+    for (const item of payload.entries ?? []) {
+      rows.push({
+        lottery_type: item.lottery_type,
+        issue: String(item.issue),
+        draw_date: item.date,
+        draw_time: item.draw_time || null,
+        sale_close_time: item.sale_close_time || null,
+        source: "github_v2_history",
+        updated_at: new Date().toISOString(),
+      });
     }
   }
   await upsertBatches(db, "lottery_calendar", rows, "lottery_type,issue");
@@ -57,7 +55,7 @@ async function importCalendars(db) {
 }
 
 async function importDraws(db) {
-  const directory = path.join(root, "public_data/by-year");
+  const directory = path.join(root, "public_data/v2/by-year");
   const lotteryTypes = await readdir(directory);
   let count = 0;
   for (const lotteryType of lotteryTypes) {
@@ -66,19 +64,29 @@ async function importDraws(db) {
     for (const file of files) {
       const payload = await readJson(path.join(gameDirectory, file));
       const rows = (payload.draws ?? []).map((draw) => {
-        const normalized = { ...draw, lottery_type: lotteryType };
-        return {
+        const prizeDetails = (draw.prizes ?? []).map((item) => ({
+          prize_name: item.name ?? "",
+          require: item.match ?? "",
+          winning_count: item.winners ?? "",
+          prize_amount: item.amount ?? "",
+          additional_count: item.extra_winners ?? "",
+          additional_amount: item.extra_amount ?? "",
+        }));
+        const normalized = {
           lottery_type: lotteryType,
           issue: String(draw.issue),
-          draw_date: draw.draw_date,
-          draw_time: draw.draw_time || null,
+          draw_date: draw.date,
+          draw_time: draw.time || null,
           numbers: draw.numbers ?? {},
-          prize_pool: draw.prize_pool ?? "",
-          sales_amount: draw.sales_amount ?? "",
-          prize_details: draw.prize_details ?? [],
+          prize_pool: draw.pool ?? "",
+          sales_amount: draw.sales ?? "",
+          prize_details: prizeDetails,
+        };
+        return {
+          ...normalized,
           semantic_checksum: semanticChecksum(normalized),
-          compatibility_payload: draw,
-          source_payload: draw.raw_public_json ?? null,
+          compatibility_payload: {},
+          source_payload: null,
           source_fetched_at: draw.fetched_at || null,
           updated_at: new Date().toISOString(),
         };

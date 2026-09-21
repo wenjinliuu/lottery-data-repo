@@ -10,24 +10,37 @@ const checksumJson = process.argv.includes("--checksum-json");
 if (!lotteryType) throw new Error("Usage: node generate-upsert-sql.mjs LOTTERY_TYPE [AFTER_DATE]");
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const file = path.resolve(here, `../../public_data/by-year/${lotteryType}/2026.json`);
+const file = path.resolve(here, `../../public_data/v2/by-year/${lotteryType}/2026.json`);
 const payload = JSON.parse(await readFile(file, "utf8"));
 const rows = (payload.draws ?? [])
-  .filter((draw) => String(draw.draw_date) > afterDate)
-  .map((draw) => ({
-    lottery_type: lotteryType,
-    issue: String(draw.issue),
-    draw_date: draw.draw_date,
-    draw_time: draw.draw_time || null,
-    numbers: draw.numbers ?? {},
-    prize_pool: draw.prize_pool ?? "",
-    sales_amount: draw.sales_amount ?? "",
-    prize_details: draw.prize_details ?? [],
-    semantic_checksum: semanticChecksum({ ...draw, lottery_type: lotteryType }),
-    compatibility_payload: draw,
-    source_payload: draw.raw_public_json ?? null,
-    source_fetched_at: draw.fetched_at || null,
-  }));
+  .filter((draw) => String(draw.date) > afterDate)
+  .map((draw) => {
+    const prizeDetails = (draw.prizes ?? []).map((item) => ({
+      prize_name: item.name ?? "",
+      require: item.match ?? "",
+      winning_count: item.winners ?? "",
+      prize_amount: item.amount ?? "",
+      additional_count: item.extra_winners ?? "",
+      additional_amount: item.extra_amount ?? "",
+    }));
+    const normalized = {
+      lottery_type: lotteryType,
+      issue: String(draw.issue),
+      draw_date: draw.date,
+      draw_time: draw.time || null,
+      numbers: draw.numbers ?? {},
+      prize_pool: draw.pool ?? "",
+      sales_amount: draw.sales ?? "",
+      prize_details: prizeDetails,
+    };
+    return {
+      ...normalized,
+      semantic_checksum: semanticChecksum(normalized),
+      compatibility_payload: {},
+      source_payload: null,
+      source_fetched_at: draw.fetched_at || null,
+    };
+  });
 
 const json = JSON.stringify(rows);
 if (json.includes("$lottery_payload$")) throw new Error("Unexpected SQL delimiter in payload");
@@ -86,7 +99,7 @@ INSERT INTO public.lottery_draws (
 SELECT
   lottery_type, issue, draw_date::date, NULLIF(draw_time, '')::time, numbers,
   prize_pool, sales_amount, prize_details, semantic_checksum,
-  compatibility_payload, source_payload, 'github_history',
+  compatibility_payload, source_payload, 'github_v2_history',
   NULLIF(source_fetched_at, '')::timestamptz, NOW()
 FROM payload
 ON CONFLICT (lottery_type, issue) DO UPDATE SET

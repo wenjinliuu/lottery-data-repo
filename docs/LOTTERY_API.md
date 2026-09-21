@@ -1,69 +1,42 @@
-# Lottery read-only API
+# Lottery API V2
 
-The API is the primary read path for the Duigehao iOS App. CloudBase PostgreSQL remains the
-source of truth; the GitHub `public_data` tree remains the delayed mirror and client fallback.
+基础地址：
 
-## Base URL
+    https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
 
-```text
-https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
-```
+## 路由
 
-Only `GET`, `HEAD`, and CORS preflight `OPTIONS` are accepted. The function never exposes
-database credentials or upstream lottery-provider credentials.
+    GET|HEAD /v2
+    GET|HEAD /v2/bootstrap
+    GET|HEAD /v2/draws/{lottery_type}
+    GET|HEAD /v2/by-year/{lottery_type}/{year}
+    GET|HEAD /v2/calendar/{year}
+    GET|HEAD /v2/health
+    OPTIONS /v2/*
 
-## V2 routes
+支持彩种：ssq、dlt、kl8、fc3d、pl3、qlc、qxc、pl5。
 
-| Route | Purpose | Cache |
-| --- | --- | --- |
-| `GET /v2` | API index and supported lotteries | 1 hour |
-| `GET /v2/bootstrap` | Latest draw for all lotteries plus schedule/next issue | 1 minute |
-| `GET /v2/draws/{lottery_type}` | Recent draws; default and maximum 30 | 1 minute |
-| `GET /v2/by-year/{lottery_type}/{year}` | One lottery and one calendar year | 1 hour |
-| `GET /v2/calendar/{year}` | Normalized annual draw calendar | 1 day |
-| `GET /v2/health` | Read-path health and latest issue summary | 30 seconds |
+规则：
 
-Supported lottery types are `ssq`, `dlt`, `kl8`, `fc3d`, `pl3`, `qlc`, `qxc`, and
-`pl5`. The iOS App continues to map its local `k8` key to remote `kl8`.
+- 最近开奖最多返回 30 期。
+- 年份范围为 2000 至 2100。
+- 只允许 GET、HEAD、OPTIONS；其它方法返回 405。
+- 未知彩种和非法年份返回 404。
+- /v1/* 已删除并返回 404。
+- 所有响应允许跨域读取。
 
-## V1 compatibility routes
+## GitHub 静态镜像
 
-These routes preserve the current iOS decoders while the App migrates to lazy V2 loading:
+基础地址：
 
-- `GET /v1/latest.json`
-- `GET /v1/calendar.json`
-- `GET /v1/health.json`
-- `GET /v1/draws/{lottery_type}.json`
-- `GET /v1/by-year/{lottery_type}/{year}.json`
-- `GET /v1/calendar/{year}.json`
+    https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/v2
 
-## Intended App loading order
+| CloudBase | GitHub |
+| --- | --- |
+| /v2/bootstrap | /bootstrap.json |
+| /v2/draws/{type} | /draws/{type}.json |
+| /v2/by-year/{type}/{year} | /by-year/{type}/{year}.json |
+| /v2/calendar/{year} | /calendar/{year}.json |
+| /v2/health | 无镜像 |
 
-1. Cold start: request only `/v2/bootstrap`.
-2. When the user opens one lottery's history: request `/v2/draws/{lottery_type}`.
-3. When the user asks for all history: request the current year through
-   `/v2/by-year/{lottery_type}/{year}`; request earlier years only when needed.
-4. Cache `/v2/calendar/{year}` locally. Near New Year, also request the following year.
-5. If a CloudBase request fails, retry the matching GitHub `public_data/v2` path, then use the
-   most recent local disk cache. This fallback applies to bootstrap, recent draws, by-year data,
-   and annual calendars. It does not apply to `/v2/health`: health reports CloudBase itself, so
-   there is intentionally no `public_data/v2/health.json`.
-
-## V2 response contract details
-
-- Recent-draw responses use `schema: "duigehao.lottery.recent"`.
-- By-year responses use `schema: "duigehao.lottery.year"`.
-- `year` and `earliest_year` are JSON integers. `earliest_year` is the earliest year currently
-  available for that lottery, even when the requested year's `draws` array is empty. Clients
-  should use it instead of treating one empty intermediate year as the end of all history.
-- A draw's `time` is optional and is omitted when the source draw row has no exact time. For the
-  normal advertised draw time, use `bootstrap.schedule.{lottery_type}.draw_time`.
-- Calendar `entries` are a flat array. Each entry has `date` plus time-only `draw_time` and
-  `sale_close_time` fields; combine the date and time in the `Asia/Shanghai` timezone before
-  comparing instants. Calendar entries intentionally do not include `weekday`; derive it from
-  `date` when needed.
-- `/v2/health` returns `schema: "duigehao.lottery.health"`, `version: 2`, Boolean `ok`,
-  `generated_at`, `source: "cloudbase_postgresql"`, and a per-lottery `latest` summary.
-  It has no GitHub mirror and should not block App startup.
-
-The App must not embed `CLOUDBASE_API_KEY` or `JISU_APPKEY`.
+GitHub 镜像由每天 08:14 的 Actions 工作流导出，不保证与每一次 CloudBase 抓取实时同步。

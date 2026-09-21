@@ -1,131 +1,62 @@
-# Public Data Schema
+# V2 数据契约
 
-## Draw Record
+所有公共响应使用 version: 2，时间语义按 Asia/Shanghai。
 
-Each draw record is stored in `latest.json`, `draws/{lottery_type}.json`, and `by-year/{lottery_type}/{year}.json`.
+## bootstrap
 
-Important fields:
+字段：schema、version、generated_at、timezone、latest、schedule。
 
-- `lottery_type`: internal key, such as `dlt`.
-- `lottery_name`: display name.
-- `caipiaoid`: Jisu API lottery id.
-- `issue`: draw issue.
-- `draw_date`: draw date, `YYYY-MM-DD`.
-- `draw_time`: draw time when available.
-- `deadline`: prize claim deadline from query API.
-- `numbers`: structured numbers for machine reading.
-- `number_raw`: original `number` string from query API.
-- `refernumber_raw`: original `refernumber` string from query API.
-- `prize_pool`: `totalmoney` or equivalent.
-- `sales_amount`: `saleamount` or equivalent.
-- `prize_details`: prize levels, winning count, single bonus, additional bonus, and raw prize row.
-- `next_issue`: normalized next issue from a confirmed class response or schedule inference.
-- `next_draw_date`: normalized next draw date.
-- `next_open_time`: normalized next draw date and time.
-- `next_buy_end_time`: normalized sales cutoff date and time.
-- `next_status`: `confirmed`, `inferred`, or `unavailable`.
-- `next_source`: `class_api`, `schedule_inference`, or `none`.
-- `next_confirmed`: whether the class API has confirmed the normalized next draw.
-- `next_basis_issue`: latest query issue used to confirm or infer the next draw.
-- `next_resolution_reason`: machine-readable reason for the selected next-draw state.
-- `class_last_issue`: `lastissueno` from class API.
-- `source`: sanitized source metadata.
-- `raw_public_json`: sanitized raw API response data.
-- `fetched_at`: update time.
+latest.<type> 是单条 V2 开奖；schedule.<type> 包含 weekdays、draw_time、sale_close_time 和 next。
 
-## Raw API Preservation
+latest.<type>.time 允许省略。常规开奖时刻读取 schedule.<type>.draw_time。
 
-The public data keeps:
+## 开奖对象
 
-```json
-{
-  "raw_public_json": {
-    "query_response": {},
-    "query_result": {},
-    "class_info": {}
-  }
-}
-```
+字段：
 
-This means future parsers can recover fields that were not normalized yet.
+- issue：期号字符串。
+- date：开奖日期。
+- time：可选开奖时刻。
+- numbers：按彩种变化的号码对象。
+- pool、sales：可选金额字符串。
+- prizes：奖级数组。
+- fetched_at：可选抓取时间。
 
-Sensitive values, especially API keys, must be replaced with `***`.
+奖级字段为 name、match、winners、amount、extra_winners、extra_amount。
 
-## Next Draw Resolution
+空值可能省略。winners: 0 表示接口明确返回零注；字段缺失表示该奖级尚未完整返回，二者不能混为一谈。
 
-The class response is accepted only when its `lastissueno` matches the latest
-query issue, its next issue differs from that latest issue, and its sales cutoff
-is still in the future. Otherwise the exporter advances across scheduled draws
-until it finds the first issue whose sales cutoff has not passed. When possible,
-the raw class candidate supplies the issue/date and cutoff anchor; this lets a
-new future issue be inferred even while the current draw result is delayed. An
-inferred value is replaced by class data on a later run only after the class
-response passes the same consistency and current-time checks.
-In `calendar.json`, `last_issue` is the latest confirmed query issue, while
-`class_last_issue` preserves the class API's raw last issue for diagnostics.
-The calendar also exposes the resolved `next_draw_date` alongside the full
-`next_open_time` so clients do not need to parse a date-time string for labels.
+## 最近 30 期
 
-## Prize Requirements
+- schema：duigehao.lottery.recent
+- version：2
+- lottery_type
+- generated_at
+- limit：30
+- draws
 
-`prize_details[].require` and `prize_details[].prize_amount` preserve the values
-returned by the upstream API for that draw. The data repository does not rewrite
-winning conditions. Client applications are responsible for applying their own
-versioned game rules when evaluating a ticket.
+## 按年历史
 
-The untouched upstream row also remains available in `prize_details[].raw` and
-`raw_public_json` for auditing. Temporary prizes are draw-specific; a client
-should only enable a temporary prize when that prize is present in the draw's
-`prize_details`.
+- schema：duigehao.lottery.year
+- version：2
+- lottery_type
+- year：JSON 数字
+- earliest_year：JSON 数字
+- generated_at
+- draws
 
-## Long-Term Storage
+## 年度日历
 
-`latest.json` should remain small forever.
+- schema：duigehao.lottery.calendar
+- version：2
+- year：JSON 数字
+- generated_at
+- entries：扁平数组
 
-`draws/{lottery_type}.json` keeps recent draws only. The retention count is configured by:
+每条日历记录包含 lottery_type、issue、date、draw_time、sale_close_time。日历没有 weekday；两个时间字段只有时刻，客户端比较前必须与 date 按北京时间组合。
 
-```json
-{
-  "export": {
-    "keep_recent_per_lottery": 50
-  }
-}
-```
+## health
 
-Long-term history is stored in yearly files:
+字段为 schema、version、ok、generated_at、source、latest。schema 固定为 duigehao.lottery.health，source 固定为 cloudbase_postgresql。
 
-```text
-public_data/by-year/dlt/2026.json
-public_data/by-year/dlt/2027.json
-```
-
-This layout is intended to run for years without one huge JSON file.
-
-
-## calendar/closures.json
-
-休市日。命中的日期不开奖、不发期号，期号顺延。
-
-| 字段 | 说明 |
-| --- | --- |
-| `years.{year}[].id` | `spring_festival` / `national_day` |
-| `years.{year}[].start` / `end` | 休市首尾日，闭区间 |
-| `years.{year}[].days` | 天数，方便核对 |
-| `years.{year}[].source` | `fixed`（国庆固定）/ `manual`（春节每年公布后手填） |
-| `years.{year}[].verified` | 是否已用真实开奖数据反向验证过 |
-
-## calendar/{year}.json
-
-整年的「期号 ↔ 开奖日期」绑定表，由 `scripts/build_draw_calendar.py` 生成。
-
-| 字段 | 说明 |
-| --- | --- |
-| `year` | 年份 |
-| `closures` | 这一年参与推演的休市区间 |
-| `lotteries.{key}.draw_weekdays` | 开奖星期，0 = 周日 |
-| `lotteries.{key}.count` | 全年期数 |
-| `lotteries.{key}.issues[].issue` | 期号。福彩 7 位 `YYYYNNN`，体彩 5 位 `YYNNN` |
-| `lotteries.{key}.issues[].draw_date` | 开奖日 `YYYY-MM-DD` |
-| `lotteries.{key}.issues[].weekday` | 星期，0 = 周日 |
-| `lotteries.{key}.issues[].draw_time` | 开奖时刻 `YYYY-MM-DD HH:MM:SS` |
-| `lotteries.{key}.issues[].sale_close_time` | 停售时刻 |
+health 只存在于 CloudBase，不生成 GitHub文件。

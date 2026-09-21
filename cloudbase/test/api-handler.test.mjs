@@ -9,11 +9,6 @@ function service() {
     recent: async (type, limit) => ({ type, limit }),
     byYear: async (type, year) => ({ type, year }),
     calendar: async (year) => ({ year }),
-    v1Latest: async () => ({ schema: "latest" }),
-    v1Calendar: async () => ({ schema: "calendar" }),
-    v1YearCalendar: async (year) => ({ year }),
-    v1Recent: async (type) => ({ type }),
-    v1ByYear: async (type, year) => ({ type, year }),
   };
 }
 
@@ -34,16 +29,13 @@ test("rejects writes and unknown lotteries", async () => {
   assert.equal(unknown.statusCode, 404);
 });
 
-test("supports HEAD and v1 compatibility paths", async () => {
-  const head = await handleHttp({ httpMethod: "HEAD", path: "/lottery/v1/latest.json" }, service());
+test("supports HEAD on V2 and rejects removed V1 paths", async () => {
+  const head = await handleHttp({ httpMethod: "HEAD", path: "/lottery/v2/bootstrap" }, service());
   assert.equal(head.statusCode, 200);
   assert.equal(head.body, "");
   assert.match(head.headers["cache-control"], /max-age=60/);
-  const year = await handleHttp({
-    httpMethod: "GET",
-    path: "/lottery/v1/calendar/2026.json",
-  }, service());
-  assert.deepEqual(JSON.parse(year.body), { year: 2026 });
+  const removed = await handleHttp({ httpMethod: "GET", path: "/lottery/v1/latest.json" }, service());
+  assert.equal(removed.statusCode, 404);
 });
 
 
