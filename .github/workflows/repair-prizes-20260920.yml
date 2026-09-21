@@ -1,0 +1,30 @@
+name: One-time repair for 2026-09-20 prize data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/repair-prizes-20260920.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    env:
+      TCB_DISABLE_REPORT: "1"
+      CLOUDBASE_ENV_ID: wenjin-cloudbase-d1empq882391ac1
+      CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
+    steps:
+      - name: Install CloudBase CLI
+        run: npm install --global @cloudbase/cli@3.8.3
+
+      - name: Authenticate
+        run: |
+          tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
+          tcb env use "$CLOUDBASE_ENV_ID" --yes
+
+      - name: Re-fetch affected draws
+        run: |
+          tcb fn invoke lottery-ingest --json --params '{"slot":"all_first","runner":"github_repair","target_date":"2026-09-20","lottery_types":["ssq","fc3d","kl8","pl3","pl5","qxc"]}'
