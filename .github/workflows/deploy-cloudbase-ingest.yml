@@ -72,3 +72,22 @@ jobs:
           tcb fn detail lottery-ingest
           tcb fn detail lottery-api
           tcb fn detail lottery-api-http
+
+      - name: Smoke test public lottery API
+        env:
+          LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
+        run: |
+          curl --fail --show-error --silent \
+            --retry 5 --retry-delay 3 --retry-all-errors \
+            "$LOTTERY_API_URL/v2/health" \
+            | node -e '
+                let raw = "";
+                process.stdin.on("data", chunk => { raw += chunk; });
+                process.stdin.on("end", () => {
+                  const body = JSON.parse(raw);
+                  if (body.ok !== true || body.source !== "cloudbase_postgresql") {
+                    throw new Error(`unexpected health response: ${raw}`);
+                  }
+                  console.log(`public API healthy: ${body.generated_at}`);
+                });
+              '
