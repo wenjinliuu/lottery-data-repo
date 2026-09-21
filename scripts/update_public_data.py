@@ -286,6 +286,10 @@ def safe_text(value: Any) -> str:
     return "" if value is None else str(value)
 
 
+def first_defined(*values: Any) -> Any:
+    return next((value for value in values if value not in (None, "")), None)
+
+
 def normalize_prize_details(lottery_type: str, value: Any) -> list[dict[str, Any]]:
     if not isinstance(value, list):
         return []
@@ -300,10 +304,10 @@ def normalize_prize_details(lottery_type: str, value: Any) -> list[dict[str, Any
                 "prize_level": safe_text(item.get("prizename") or item.get("level") or item.get("name") or index),
                 "prize_name": prize_name,
                 "require": require,
-                "winning_count": safe_int(item.get("num") or item.get("winning_count")),
-                "prize_amount": safe_text(item.get("singlebonus") or item.get("bonus") or item.get("prize")),
-                "additional_count": safe_int(item.get("addnum") or item.get("additional_count")),
-                "additional_amount": safe_text(item.get("addbonus") or item.get("additional_amount")),
+                "winning_count": safe_int(first_defined(item.get("num"), item.get("winning_count"))),
+                "prize_amount": safe_text(first_defined(item.get("singlebonus"), item.get("bonus"), item.get("prize"))),
+                "additional_count": safe_int(first_defined(item.get("addnum"), item.get("additional_count"))),
+                "additional_amount": safe_text(first_defined(item.get("addbonus"), item.get("additional_amount"))),
                 "raw": item,
             }
         )

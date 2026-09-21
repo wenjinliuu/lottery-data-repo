@@ -25,3 +25,64 @@ test("manual lottery filter limits a shadow run to one due lottery", async () =>
   assert.equal(result.target_date, "2026-09-19");
   assert.deepEqual(result.results, []);
 });
+
+function ingestFixture({ complete }) {
+  const saved = [];
+  const repository = {
+    allDueLotteryTypes: async () => ["pl3"],
+    dueTargets: async () => [{ lottery_type: "pl3", issue: "26253", draw_date: "2026-09-20" }],
+    reserveApiCall: async () => ({ call_count: 1 }),
+    saveDraw: async (_target, draw, completeness) => {
+      saved.push({ draw, completeness });
+      return completeness;
+    },
+    recordFailure: async () => assert.fail("valid draw must not be recorded as a failure"),
+    close: async () => {},
+  };
+  const client = {
+    query: async () => ({
+      result: {
+        caipiaoid: 16,
+        issueno: "26253",
+        opendate: "2026-09-20 20:30:00",
+        number: "1 2 3",
+        saleamount: complete ? "12345678" : 0,
+        prize: complete ? [{ prizename: "直选", num: 0, singlebonus: 1040 }] : false,
+      },
+    }),
+  };
+  return { repository, client, saved };
+}
+
+test("numbers-only response is saved but remains pending for later slots", async () => {
+  const fixture = ingestFixture({ complete: false });
+  const result = await runIngest({
+    slot: "all_first",
+    targetDate: "2026-09-20",
+    repository: fixture.repository,
+    client: fixture.client,
+  });
+  assert.equal(result.target_date, "2026-09-20");
+  assert.equal(result.results[0].status, "pending");
+  assert.equal(result.results[0].completeness_reason, "prize_not_published");
+  assert.equal(fixture.saved.length, 1);
+});
+
+test("published prize and sales response completes the fetch target", async () => {
+  const fixture = ingestFixture({ complete: true });
+  const result = await runIngest({
+    slot: "all_first",
+    targetDate: "2026-09-20",
+    repository: fixture.repository,
+    client: fixture.client,
+  });
+  assert.equal(result.results[0].status, "updated");
+  assert.equal(result.results[0].completeness_reason, "complete");
+});
+
+test("manual target date rejects ambiguous formats", async () => {
+  await assert.rejects(
+    runIngest({ slot: "all_first", targetDate: "2026/09/20", repository: {}, client: {} }),
+    /Invalid target date/,
+  );
+});

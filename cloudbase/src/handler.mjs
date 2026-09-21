@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { JisuClient } from "./jisu-client.mjs";
-import { assertExpectedDraw, normalizeQueryPayload } from "./normalize.mjs";
+import { assertExpectedDraw, assessDrawCompleteness, normalizeQueryPayload } from "./normalize.mjs";
 import { LotteryRepository } from "./repository.mjs";
 import {
   allowedLotteriesForSlot,
@@ -20,13 +20,17 @@ const lotteryConfig = JSON.parse(readFileSync(configUrl, "utf8"));
 export async function runIngest({
   slot,
   now = new Date(),
+  targetDate: targetDateOverride,
   runner = "cloudbase",
   lotteryTypes,
   repository = new LotteryRepository(),
   client = new JisuClient(process.env.JISU_APPKEY),
 } = {}) {
   if (!slot) throw new Error("Missing schedule slot");
-  const targetDate = targetDateForSlot(slot, now);
+  if (targetDateOverride && !/^\d{4}-\d{2}-\d{2}$/.test(targetDateOverride)) {
+    throw new Error("Invalid target date; expected YYYY-MM-DD");
+  }
+  const targetDate = targetDateOverride ?? targetDateForSlot(slot, now);
   const usageDate = targetDate;
   const allDue = await repository.allDueLotteryTypes(targetDate);
   const scheduled = allowedLotteriesForSlot(slot, allDue);
@@ -53,8 +57,14 @@ export async function runIngest({
         const payload = await client.query(config.caipiaoid);
         const draw = normalizeQueryPayload(target.lottery_type, config, payload);
         assertExpectedDraw(draw, target);
-        await repository.saveDraw(target, draw);
-        results.push({ lottery_type: target.lottery_type, issue: draw.issue, status: "updated" });
+        const completeness = assessDrawCompleteness(draw);
+        const saved = await repository.saveDraw(target, draw, completeness);
+        results.push({
+          lottery_type: target.lottery_type,
+          issue: draw.issue,
+          status: saved.complete ? "updated" : "pending",
+          completeness_reason: saved.reason,
+        });
       } catch (error) {
         const returnedIssue = /stale_issue:([^;]+)/.exec(String(error))?.[1] ?? "";
         await repository.recordFailure(targetDate, target.lottery_type, returnedIssue, error);
@@ -82,6 +92,7 @@ export function resolveIngestEvent(event = {}) {
     slot,
     runner: event.runner ?? "cloudbase",
     lotteryTypes: event.lottery_types ?? event.lotteryTypes,
+    targetDate: event.target_date ?? event.targetDate,
   };
 }
 

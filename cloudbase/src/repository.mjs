@@ -1,4 +1,5 @@
 import cloudbase from "@cloudbase/node-sdk";
+import { assessDrawCompleteness, drawCompletenessScore } from "./normalize.mjs";
 
 function ensureSuccess(result, operation) {
   if (result?.error) {
@@ -152,8 +153,25 @@ export class LotteryRepository {
     );
   }
 
-  async saveDraw(target, draw) {
-    ensureSuccess(
+  async saveDraw(target, draw, completeness = assessDrawCompleteness(draw)) {
+    const [existing] = ensureSuccess(
+      await this.db
+        .from("lottery_draws")
+        .select("compatibility_payload")
+        .eq("lottery_type", draw.lottery_type)
+        .eq("issue", draw.issue)
+        .limit(1),
+      "read existing lottery draw",
+    );
+    const existingDraw = existing?.compatibility_payload;
+    const shouldWrite = !existingDraw
+      || drawCompletenessScore(draw) >= drawCompletenessScore(existingDraw);
+    const effectiveDraw = shouldWrite ? draw : existingDraw;
+    const effectiveCompleteness = shouldWrite
+      ? completeness
+      : assessDrawCompleteness(existingDraw);
+
+    if (shouldWrite) ensureSuccess(
       await this.db.from("lottery_draws").upsert(
         {
           lottery_type: draw.lottery_type,
@@ -189,18 +207,21 @@ export class LotteryRepository {
       await this.db
         .from("lottery_fetch_targets")
         .update({
-          status: "updated",
+          status: effectiveCompleteness.complete ? "updated" : "pending",
           attempts: (current?.attempts ?? 0) + 1,
-          latest_returned_issue: draw.issue,
-          last_error: null,
+          latest_returned_issue: effectiveDraw.issue,
+          last_error: effectiveCompleteness.complete
+            ? null
+            : `incomplete:${effectiveCompleteness.reason}`,
           first_attempt_at: current?.first_attempt_at || now,
           last_attempt_at: now,
-          completed_at: now,
+          completed_at: effectiveCompleteness.complete ? now : null,
           updated_at: now,
         })
         .eq("target_date", target.draw_date)
         .eq("lottery_type", target.lottery_type),
       "complete fetch target",
     );
+    return effectiveCompleteness;
   }
 }

@@ -14,6 +14,20 @@ function safeInteger(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function firstDefined(...values) {
+  return values.find((value) => value !== null && value !== undefined && value !== "");
+}
+
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== "";
+}
+
+function positiveNumber(value) {
+  if (!hasValue(value)) return false;
+  const parsed = Number(text(value).replaceAll(",", "").replaceAll("，", ""));
+  return Number.isFinite(parsed) && parsed > 0;
+}
+
 export function parseNumbers(lotteryType, queryResult) {
   const main = integers(queryResult.number);
   const refer = integers(queryResult.refernumber);
@@ -38,13 +52,47 @@ function normalizePrizeDetails(value) {
       prize_level: text(item.prizename || item.level || item.name || index + 1),
       prize_name: text(item.prizename || item.name || ""),
       require: text(item.require),
-      winning_count: safeInteger(item.num || item.winning_count),
-      prize_amount: text(item.singlebonus || item.bonus || item.prize),
-      additional_count: safeInteger(item.addnum || item.additional_count),
-      additional_amount: text(item.addbonus || item.additional_amount),
+      winning_count: safeInteger(firstDefined(item.num, item.winning_count)),
+      prize_amount: text(firstDefined(item.singlebonus, item.bonus, item.prize)),
+      additional_count: safeInteger(firstDefined(item.addnum, item.additional_count)),
+      additional_amount: text(firstDefined(item.addbonus, item.additional_amount)),
       raw: item,
     };
   });
+}
+
+export function assessDrawCompleteness(draw) {
+  const prizes = Array.isArray(draw?.prize_details) ? draw.prize_details : [];
+  if (!prizes.length) {
+    return { complete: false, reason: "prize_not_published" };
+  }
+  if (!prizes.every((item) => item.winning_count !== null && item.winning_count !== undefined)) {
+    return { complete: false, reason: "winning_counts_missing" };
+  }
+  if (!prizes.some((item) => hasValue(item.prize_amount))) {
+    return { complete: false, reason: "prize_amounts_missing" };
+  }
+  if (!positiveNumber(draw.sales_amount)) {
+    return { complete: false, reason: "sales_amount_pending" };
+  }
+  if (draw.lottery_type === "kl8" && !prizes.some((item) => Number(item.winning_count) > 0)) {
+    return { complete: false, reason: "kl8_winning_counts_pending" };
+  }
+  return { complete: true, reason: "complete" };
+}
+
+export function drawCompletenessScore(draw) {
+  const prizes = Array.isArray(draw?.prize_details) ? draw.prize_details : [];
+  const countFields = prizes.filter((item) => item.winning_count !== null && item.winning_count !== undefined).length;
+  const amountFields = prizes.filter((item) => hasValue(item.prize_amount)).length;
+  return (
+    prizes.length * 10
+    + countFields * 3
+    + amountFields * 2
+    + (positiveNumber(draw?.sales_amount) ? 1000 : 0)
+    + (hasValue(draw?.prize_pool) ? 100 : 0)
+    + (assessDrawCompleteness(draw).complete ? 10000 : 0)
+  );
 }
 
 function stable(value) {
