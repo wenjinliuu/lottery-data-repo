@@ -53,6 +53,10 @@ Slim v2 is intended for lazy loading:
 - `public_data/v2/by-year/{lottery_type}/{year}.json`: one lottery and one year.
 - `public_data/v2/calendar/{year}.json`: normalized annual draw calendar.
 
+There is intentionally no `public_data/v2/health.json`. The health endpoint reports whether the
+CloudBase read path itself is healthy; a GitHub mirror cannot answer that question and must not be
+used as a health fallback.
+
 V2 files are minified and contain normalized App fields only.
 
 ## Live migration state
