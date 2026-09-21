@@ -45,6 +45,25 @@ These routes preserve the current iOS decoders while the App migrates to lazy V2
    `/v2/by-year/{lottery_type}/{year}`; request earlier years only when needed.
 4. Cache `/v2/calendar/{year}` locally. Near New Year, also request the following year.
 5. If a CloudBase request fails, retry the matching GitHub `public_data/v2` path, then use the
-   most recent local disk cache.
+   most recent local disk cache. This fallback applies to bootstrap, recent draws, by-year data,
+   and annual calendars. It does not apply to `/v2/health`: health reports CloudBase itself, so
+   there is intentionally no `public_data/v2/health.json`.
+
+## V2 response contract details
+
+- Recent-draw responses use `schema: "duigehao.lottery.recent"`.
+- By-year responses use `schema: "duigehao.lottery.year"`.
+- `year` and `earliest_year` are JSON integers. `earliest_year` is the earliest year currently
+  available for that lottery, even when the requested year's `draws` array is empty. Clients
+  should use it instead of treating one empty intermediate year as the end of all history.
+- A draw's `time` is optional and is omitted when the source draw row has no exact time. For the
+  normal advertised draw time, use `bootstrap.schedule.{lottery_type}.draw_time`.
+- Calendar `entries` are a flat array. Each entry has `date` plus time-only `draw_time` and
+  `sale_close_time` fields; combine the date and time in the `Asia/Shanghai` timezone before
+  comparing instants. Calendar entries intentionally do not include `weekday`; derive it from
+  `date` when needed.
+- `/v2/health` returns `schema: "duigehao.lottery.health"`, `version: 2`, Boolean `ok`,
+  `generated_at`, `source: "cloudbase_postgresql"`, and a per-lottery `latest` summary.
+  It has no GitHub mirror and should not block App startup.
 
 The App must not embed `CLOUDBASE_API_KEY` or `JISU_APPKEY`.

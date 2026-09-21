@@ -222,6 +222,9 @@ async function main() {
         lotteryType,
       ),
     ]);
+    const earliestYear = rows.length
+      ? Number(dateText(rows.at(-1).draw_date).slice(0, 4))
+      : null;
     const calendarAsc = [...calendar].sort((a, b) => (
       dateText(a.draw_date).localeCompare(dateText(b.draw_date))
       || String(a.issue).localeCompare(String(b.issue))
@@ -291,7 +294,8 @@ async function main() {
         schema: "duigehao.lottery.year",
         version: 2,
         lottery_type: lotteryType,
-        year,
+        year: Number(year),
+        earliest_year: earliestYear,
         generated_at: updatedAt,
         draws: yearDraws.map((item) => item.v2),
       }, false);
@@ -396,7 +400,7 @@ async function main() {
     await writeJson(path.join(outputDir, "v2", "calendar", `${year}.json`), {
       schema: "duigehao.lottery.calendar",
       version: 2,
-      year,
+      year: Number(year),
       generated_at: updatedAt,
       entries: rows,
     }, false);

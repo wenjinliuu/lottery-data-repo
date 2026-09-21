@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { handleHttp } from "../src/api-handler.mjs";
+import { LotteryApiService, handleHttp } from "../src/api-handler.mjs";
 
 function service() {
   return {
@@ -44,4 +44,62 @@ test("supports HEAD and v1 compatibility paths", async () => {
     path: "/lottery/v1/calendar/2026.json",
   }, service());
   assert.deepEqual(JSON.parse(year.body), { year: 2026 });
+});
+
+
+test("V2 by-year exposes numeric year and the real earliest year", async () => {
+  class ContractService extends LotteryApiService {
+    constructor() {
+      super({}, () => new Date("2026-09-21T00:00:00Z"));
+    }
+
+    async drawRows() {
+      return [];
+    }
+
+    async earliestYear() {
+      return 2026;
+    }
+  }
+
+  const payload = await new ContractService().byYear("ssq", 2026);
+  assert.equal(payload.schema, "duigehao.lottery.year");
+  assert.equal(payload.year, 2026);
+  assert.equal(typeof payload.year, "number");
+  assert.equal(payload.earliest_year, 2026);
+});
+
+test("V2 calendar exposes a numeric year", async () => {
+  class ContractService extends LotteryApiService {
+    constructor() {
+      super({}, () => new Date("2026-09-21T00:00:00Z"));
+    }
+
+    async calendarRows() {
+      return [];
+    }
+  }
+
+  const payload = await new ContractService().calendar(2026);
+  assert.equal(payload.schema, "duigehao.lottery.calendar");
+  assert.equal(payload.year, 2026);
+  assert.equal(typeof payload.year, "number");
+});
+
+test("V2 health contract has one canonical schema", async () => {
+  class ContractService extends LotteryApiService {
+    constructor() {
+      super({}, () => new Date("2026-09-21T00:00:00Z"));
+    }
+
+    async drawRows(type) {
+      return [{ issue: `${type}-1`, draw_date: "2026-09-20" }];
+    }
+  }
+
+  const payload = await new ContractService().health();
+  assert.equal(payload.schema, "duigehao.lottery.health");
+  assert.equal(payload.version, 2);
+  assert.equal(payload.ok, true);
+  assert.equal(payload.source, "cloudbase_postgresql");
 });

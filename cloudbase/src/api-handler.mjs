@@ -85,6 +85,21 @@ export class LotteryApiService {
     );
   }
 
+  async earliestYear(lotteryType) {
+    const rows = ensureSuccess(
+      await this.db
+        .from("lottery_draws")
+        .select("draw_date")
+        .eq("lottery_type", lotteryType)
+        .order("draw_date", { ascending: true })
+        .limit(1),
+      `read earliest year/${lotteryType}`,
+    );
+    if (!rows[0]) return null;
+    const year = Number(String(rows[0].draw_date).slice(0, 4));
+    return Number.isInteger(year) ? year : null;
+  }
+
   async latestAndNext(lotteryType) {
     const clock = beijingClock(this.now());
     const lotteryConfig = config.lotteries[lotteryType];
@@ -149,12 +164,16 @@ export class LotteryApiService {
   }
 
   async byYear(lotteryType, year) {
-    const rows = await this.drawRows(lotteryType, 500, year);
+    const [rows, earliestYear] = await Promise.all([
+      this.drawRows(lotteryType, 500, year),
+      this.earliestYear(lotteryType),
+    ]);
     return {
       schema: "duigehao.lottery.year",
       version: 2,
       lottery_type: lotteryType,
-      year: String(year),
+      year: Number(year),
+      earliest_year: earliestYear,
       generated_at: beijingClock(this.now()).iso,
       draws: rows.map(materializeV2Draw),
     };
@@ -165,7 +184,7 @@ export class LotteryApiService {
     return {
       schema: "duigehao.lottery.calendar",
       version: 2,
-      year,
+      year: Number(year),
       generated_at: beijingClock(this.now()).iso,
       entries: rows.map(materializeCalendarEntry),
     };
