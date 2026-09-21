@@ -1,4 +1,4 @@
-name: Update lottery public data
+name: Update lottery V2 mirror
 
 on:
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
           JISU_APPKEY: ${{ secrets.JISU_APPKEY }}
         run: npm run fallback:github
 
-      - name: Export CloudBase public mirror
+      - name: Export CloudBase V2 mirror
         working-directory: cloudbase
         env:
           CLOUDBASE_ENV_ID: wenjin-cloudbase-d1empq882391ac1
@@ -55,7 +55,7 @@ jobs:
       - name: Build draw calendar
         run: python scripts/build_draw_calendar.py
 
-      - name: Validate public data
+      - name: Validate V2 public data
         run: |
           python -m unittest discover -s tests
           python scripts/validate_public_data.py
@@ -65,7 +65,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public_data
-          git diff --cached --quiet || git commit -m "Update lottery public data"
+          git diff --cached --quiet || git commit -m "Update lottery V2 mirror"
 
       - name: Push changes
         run: git push

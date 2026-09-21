@@ -127,8 +127,8 @@ export function normalizeQueryPayload(lotteryType, lotteryConfig, payload, fetch
     throw new Error(`${lotteryType}: query API missing issue or draw date`);
   }
   const draw = {
-    schema: "random_draw_agent_draw",
-    version: 1,
+    schema: "duigehao.lottery.ingest",
+    version: 2,
     lottery_type: lotteryType,
     lottery_name: lotteryConfig.name,
     caipiaoid: safeInteger(result.caipiaoid) ?? lotteryConfig.caipiaoid,

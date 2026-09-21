@@ -9,11 +9,6 @@ function service() {
     recent: async (type, limit) => ({ type, limit }),
     byYear: async (type, year) => ({ type, year }),
     calendar: async (year) => ({ year }),
-    v1Latest: async () => ({ schema: "latest" }),
-    v1Calendar: async () => ({ schema: "calendar" }),
-    v1YearCalendar: async (year) => ({ year }),
-    v1Recent: async (type) => ({ type }),
-    v1ByYear: async (type, year) => ({ type, year }),
   };
 }
 

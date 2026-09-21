@@ -79,44 +79,6 @@ export function nextMetadata(latestRow, calendarRows, lotteryConfig, referenceLo
   };
 }
 
-export function materializeV1Draw(row, lotteryType, lotteryConfig, next = null) {
-  const stored = row.compatibility_payload && typeof row.compatibility_payload === "object"
-    ? structuredClone(row.compatibility_payload)
-    : {};
-  const output = {
-    ...stored,
-    schema: stored.schema ?? "random_draw_agent_draw",
-    version: stored.version ?? 1,
-    lottery_type: lotteryType,
-    lottery_name: stored.lottery_name ?? lotteryConfig.name,
-    caipiaoid: stored.caipiaoid ?? lotteryConfig.caipiaoid,
-    issue: String(row.issue),
-    draw_date: dateText(row.draw_date),
-    draw_time: row.draw_time ?? stored.draw_time ?? "",
-    numbers: row.numbers ?? stored.numbers ?? {},
-    prize_pool: row.prize_pool ?? stored.prize_pool ?? "",
-    sales_amount: row.sales_amount ?? stored.sales_amount ?? "",
-    prize_details: row.prize_details ?? stored.prize_details ?? [],
-    fetched_at: row.source_fetched_at ?? stored.fetched_at ?? null,
-  };
-  if (next) {
-    Object.assign(output, {
-      next_issue: next.issue,
-      next_draw_date: next.date,
-      next_open_time: next.open_time,
-      next_buy_end_time: next.buy_end_time,
-      next_status: next.status,
-      next_source: next.source,
-      next_confirmed: next.confirmed,
-      next_basis_issue: next.basis_issue,
-      next_resolution_reason: next.status === "inferred"
-        ? "cloudbase_calendar_next_saleable_issue"
-        : "no_future_calendar_issue",
-    });
-  }
-  return output;
-}
-
 export function materializeCalendarEntry(row) {
   return compactObject({
     lottery_type: row.lottery_type,

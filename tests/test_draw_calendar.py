@@ -47,15 +47,21 @@ class DrawCalendarTests(unittest.TestCase):
                 closed.add(day.isoformat())
                 day += dt.timedelta(days=1)
 
-        for key, block in self.payload["lotteries"].items():
-            dates = {item["draw_date"] for item in block["issues"]}
+        for key in {item["lottery_type"] for item in self.payload["entries"]}:
+            dates = {
+                item["date"] for item in self.payload["entries"]
+                if item["lottery_type"] == key
+            }
             overlap = dates & closed
             self.assertEqual(overlap, set(), f"{key} 在休市日仍排了开奖：{sorted(overlap)[:5]}")
 
     def test_sequence_is_continuous(self):
         """期号必须连续递增、不跳号 —— 休市是顺延不是跳过。"""
-        for key, block in self.payload["lotteries"].items():
-            issues = [item["issue"] for item in block["issues"]]
+        for key in {item["lottery_type"] for item in self.payload["entries"]}:
+            issues = [
+                item["issue"] for item in self.payload["entries"]
+                if item["lottery_type"] == key
+            ]
             tail = [int(value[-3:]) for value in issues]
             self.assertEqual(tail, list(range(1, len(issues) + 1)),
                              f"{key} 的期号不连续")
@@ -66,16 +72,17 @@ class DrawCalendarTests(unittest.TestCase):
         closed_days = sum((end - start).days + 1 for start, end, _ in spans)
         days_in_year = (dt.date(self.year, 12, 31) - dt.date(self.year, 1, 1)).days + 1
         for key in ("fc3d", "pl3", "pl5", "kl8"):
-            self.assertEqual(self.payload["lotteries"][key]["count"],
+            count = sum(1 for item in self.payload["entries"] if item["lottery_type"] == key)
+            self.assertEqual(count,
                              days_in_year - closed_days,
                              f"{key} 的期数和「全年天数 - 休市天数」对不上")
 
     def test_written_file_is_current(self):
         """仓库里已经写出的日历文件必须和当前规则生成的一致。"""
-        path = ROOT / f"public_data/calendar/{self.year}.json"
+        path = ROOT / f"public_data/v2/calendar/{self.year}.json"
         self.assertTrue(path.exists(), "缺少已生成的日历文件")
         saved = json.loads(path.read_text(encoding="utf-8"))
-        self.assertEqual(saved["lotteries"], self.payload["lotteries"],
+        self.assertEqual(saved["entries"], self.payload["entries"],
                          "日历文件已过期，请重新跑 scripts/build_draw_calendar.py")
 
 

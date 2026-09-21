@@ -1,18 +1,16 @@
 {
-  "schema": "random_draw_agent_lottery_config",
-  "version": 1,
+  "schema": "duigehao.lottery.config",
+  "version": 2,
   "timezone": "Asia/Shanghai",
   "api": {
     "name": "jisuapi",
     "query_url": "https://api.jisuapi.com/caipiao/query",
-    "class_url": "https://api.jisuapi.com/caipiao/class",
     "appkey_env": "JISU_APPKEY",
     "timeout_seconds": 15
   },
   "export": {
-    "output_dir": "public_data",
-    "keep_recent_per_lottery": 50,
-    "v2_recent_per_lottery": 30,
+    "output_dir": "public_data/v2",
+    "recent_per_lottery": 30,
     "write_by_year": true
   },
   "lotteries": {

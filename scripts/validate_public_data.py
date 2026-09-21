@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_DATA = ROOT / "public_data"
+PUBLIC_DATA = ROOT / "public_data" / "v2"
 LOTTERIES = ["ssq", "fc3d", "qlc", "dlt", "qxc", "pl3", "pl5", "kl8"]
 EXPECTED_WEEKDAYS = {
     "ssq": [0, 2, 4],
@@ -50,61 +50,59 @@ def load(path: Path) -> dict:
 
 
 def main() -> None:
-    latest = load(PUBLIC_DATA / "latest.json")
-    calendar = load(PUBLIC_DATA / "calendar.json")
-    health = load(PUBLIC_DATA / "health.json")
-    assert latest["schema"] == "random_draw_agent_latest"
-    assert calendar["schema"] == "random_draw_agent_calendar"
-    assert health["schema"] == "random_draw_agent_public_data_health"
-    assert isinstance(latest.get("draws"), dict)
+    index = load(PUBLIC_DATA / "index.json")
+    bootstrap = load(PUBLIC_DATA / "bootstrap.json")
+    current_year = datetime.now().year
+    calendar = load(PUBLIC_DATA / "calendar" / f"{current_year}.json")
+    assert index["schema"] == "duigehao.lottery.index"
+    assert index["version"] == 2
+    assert bootstrap["schema"] == "duigehao.lottery.bootstrap"
+    assert bootstrap["version"] == 2
+    assert calendar["schema"] == "duigehao.lottery.calendar"
+    assert calendar["version"] == 2
+    assert isinstance(bootstrap.get("latest"), dict)
+    assert isinstance(bootstrap.get("schedule"), dict)
     for lottery_type, weekdays in EXPECTED_WEEKDAYS.items():
-        assert calendar["lotteries"][lottery_type]["draw_weekdays"] == weekdays
-    for lottery_type, entry in calendar["lotteries"].items():
-        status = entry.get("next_status")
-        if status is not None:
-            assert status in {"confirmed", "inferred", "unavailable"}
-            assert entry.get("next_source") in {"class_api", "schedule_inference", "none"}
-            assert isinstance(entry.get("next_confirmed"), bool)
+        assert bootstrap["schedule"][lottery_type]["weekdays"] == weekdays
+    for lottery_type, entry in bootstrap["schedule"].items():
+        next_draw = entry.get("next", {})
+        status = next_draw.get("status")
+        if status:
+            assert status in {"inferred", "unavailable"}
+            assert next_draw.get("source") in {"schedule_inference", "none"}
+            assert isinstance(next_draw.get("confirmed"), bool)
             if status in {"confirmed", "inferred"}:
-                assert entry.get("next_issue")
-                assert entry.get("next_open_time")
-                datetime.fromisoformat(str(entry["next_open_time"]).replace(" ", "T"))
-            if status == "confirmed":
-                assert entry.get("next_confirmed") is True
+                assert next_draw.get("issue")
+                assert next_draw.get("open_time")
+                datetime.fromisoformat(str(next_draw["open_time"]).replace(" ", "T"))
             if status == "inferred":
-                assert entry.get("next_confirmed") is False
-    for draw in latest["draws"].values():
-        status = draw.get("next_status")
-        if status is not None:
-            assert status in {"confirmed", "inferred", "unavailable"}
-            assert draw.get("next_source") in {"class_api", "schedule_inference", "none"}
-            assert isinstance(draw.get("next_confirmed"), bool)
-            if status in {"confirmed", "inferred"}:
-                assert draw.get("next_issue")
-                assert draw.get("next_open_time")
-                assert str(draw.get("next_issue")) != str(draw.get("issue"))
-        for prize in draw.get("prize_details", []):
-            raw_require = (prize.get("raw") or {}).get("require")
-            assert prize.get("require", "") == ("" if raw_require is None else str(raw_require))
+                assert next_draw.get("confirmed") is False
     for lottery_type in LOTTERIES:
         path = PUBLIC_DATA / "draws" / f"{lottery_type}.json"
         if path.exists():
             payload = load(path)
             assert payload["lottery_type"] == lottery_type
+            assert payload["schema"] == "duigehao.lottery.recent"
+            assert payload["version"] == 2
+            assert payload["limit"] == 30
             assert isinstance(payload.get("draws"), list)
             for draw in payload["draws"]:
-                assert draw["lottery_type"] == lottery_type
                 assert draw.get("issue")
+                assert draw.get("date")
                 assert "numbers" in draw
                 validate_numbers(lottery_type, draw["numbers"])
-                assert "raw_public_json" in draw
-                for prize in draw.get("prize_details", []):
-                    raw_require = (prize.get("raw") or {}).get("require")
-                    assert prize.get("require", "") == ("" if raw_require is None else str(raw_require))
+                assert "raw_public_json" not in draw
+                assert "compatibility_payload" not in draw
             issues = [str(draw["issue"]) for draw in payload["draws"]]
             assert len(issues) == len(set(issues))
-            assert str(latest["draws"][lottery_type]["issue"]) == issues[0]
-    print("public data schema ok")
+            assert str(bootstrap["latest"][lottery_type]["issue"]) == issues[0]
+            year_path = PUBLIC_DATA / "by-year" / lottery_type / f"{current_year}.json"
+            year_payload = load(year_path)
+            assert year_payload["schema"] == "duigehao.lottery.year"
+            assert isinstance(year_payload["year"], int)
+            assert isinstance(year_payload["earliest_year"], int)
+    assert all("lottery_type" in item and "date" in item for item in calendar["entries"])
+    print("V2 public data schema ok")
 
 
 if __name__ == "__main__":

@@ -1,207 +1,106 @@
-[README.md](https://github.com/user-attachments/files/27269242/README.md)
-# lottery-data-repo
+# 对个号开奖数据 V2
 
-公共彩票开奖数据仓库。这个仓库只保存公开开奖数据，供 lotto-Agent 或其他客户端读取。
+这是“对个号”使用的公共彩票开奖数据仓库。生产数据由腾讯云开发 CloudBase PostgreSQL 保存，本仓库只提供延迟的 GitHub V2 静态镜像和部署源码。
 
-本仓库不保存任何用户私有数据，包括：
+仓库不保存用户选号、投入、核对结果、账号或 API Key。
 
-- 用户选号记录
-- 投入成本
-- 兑奖结果
-- OpenClaw 用户 ID
-- API key
+## 当前架构
 
-## 数据目录
+- CloudBase lottery-ingest：按定时器调用极速数据并写入 PostgreSQL。
+- CloudBase lottery-api-http：提供只读 /v2/* API。
+- GitHub Actions：北京时间 08:14 对前一天未完成彩种做最后兜底，然后把 CloudBase 数据导出到 public_data/v2。
+- iOS App：CloudBase V2 为主源，GitHub V2 为在线兜底，本地缓存为离线兜底。
+- 网页版：只读取 GitHub public_data/v2，不直接连接 CloudBase。
 
-```text
-public_data/
-├── index.json
-├── latest.json
-├── calendar.json
-├── health.json
-├── calendar/
-│   ├── closures.json
-│   └── 2026.json
-├── draws/
-│   ├── ssq.json
-│   ├── dlt.json
-│   └── ...
-└── by-year/
-    ├── dlt/2026.json
-    └── ...
-```
+CloudBase 每次抓取后不会立即提交 GitHub。七个 CloudBase 定时点实时更新数据库；GitHub 镜像通常每天 08:14 更新一次，也可以手动运行工作流更新。
 
-文件说明：
+## V2 公共镜像
 
-- `latest.json`：每个彩种最新一期，客户端默认优先读取。
-- `draws/{lottery_type}.json`：单个彩种最近 50 期。
-- `by-year/{lottery_type}/{year}.json`：按年份归档的长期历史。
-- `calendar.json`：开奖日历，以及 API 返回的下一期期号、开奖时间、截止购买时间（只覆盖下一期）。
-- `calendar/{year}.json`：**整年**的「期号 ↔ 开奖日期」绑定表，由 `scripts/build_draw_calendar.py` 推演生成。客户端补录旧票或跨期选号时用这个。
-- `calendar/closures.json`：休市日。国庆固定 10-01 至 10-04；春节 10 天每年由财政部在上一年 12 月公布后**手工更新这一个文件**，然后重跑生成脚本即可。
-- `health.json`：最近一次自动更新状态。
-- `index.json`：公共数据索引和 schema 信息。
+基础地址：
 
-## 支持彩种
+    https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/v2
 
-- 双色球 `ssq`
-- 福彩3D `fc3d`
-- 七乐彩 `qlc`
-- 大乐透 `dlt`
-- 体彩七星彩 `qxc`
-- 排列三 `pl3`
-- 排列五 `pl5`
-- 快乐8 `kl8`
+目录：
 
-## 自动更新
+    public_data/v2/
+    ├── index.json
+    ├── bootstrap.json
+    ├── draws/{lottery_type}.json
+    ├── by-year/{lottery_type}/{year}.json
+    └── calendar/{year}.json
 
-本仓库使用 GitHub Actions 自动抓取开奖数据并写回仓库。
+- bootstrap.json：八个彩种最新一期以及开奖安排、下一期推算。
+- draws/{type}.json：单彩种最近 30 期。
+- by-year/{type}/{year}.json：单彩种单年度数据。
+- calendar/{year}.json：年度期号与开奖日期。
+- index.json：V2 文件索引。
 
-定时任务为北京时间：
+public_data/v2/health.json 不存在。健康检查只检查 CloudBase 自身，因此只能调用 CloudBase /v2/health，不能使用 GitHub 镜像代答。
 
-```text
-19:46
-20:06
-21:26
-02:36
-```
+支持彩种：ssq、dlt、kl8、fc3d、pl3、qlc、qxc、pl5。
 
-GitHub cron 使用 UTC，因此 workflow 中对应为：
+## CloudBase API
 
-```text
-11:46 UTC
-12:06 UTC
-13:26 UTC
-18:36 UTC
-```
+基础地址：
 
-自动更新 workflow：
+    https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
 
-```text
-.github/workflows/update-lottery-data.yml
-```
+只读接口：
 
-## 配置 GitHub Secret
+    GET /v2
+    GET /v2/bootstrap
+    GET /v2/draws/{lottery_type}
+    GET /v2/by-year/{lottery_type}/{year}
+    GET /v2/calendar/{year}
+    GET /v2/health
 
-在仓库中配置：
+V1 接口和 V1 静态文件已经删除。
 
-```text
-Settings -> Secrets and variables -> Actions -> New repository secret
-```
+## 抓取与镜像时间
 
-新增：
+| 执行位置 | 北京时间 | 作用 |
+| --- | --- | --- |
+| CloudBase | 21:34 | 福彩早期抓取 |
+| CloudBase | 21:44 | 当日全部应开奖彩种 |
+| CloudBase | 21:54 | 只补未完成彩种 |
+| CloudBase | 22:14 | 只补未完成彩种 |
+| CloudBase | 22:34 | 只补未完成彩种 |
+| CloudBase | 00:34 | 补前一天未完成彩种 |
+| CloudBase | 02:44 | 最后一次云端恢复 |
+| GitHub Actions | 08:14 | 最终兜底并导出 GitHub V2 镜像 |
 
-```text
-Name: JISU_APPKEY
-Value: 你的极速数据 appkey
-```
+同一目标开奖日自动调用共享 60 次硬上限；已完整的彩种会跳过。号码已返回但奖级仍不完整时不会提前结束补抓。
 
-不要把 appkey 写进仓库文件。
+## 工作流
 
-## 手动运行
+部署工作流 .github/workflows/deploy-cloudbase-ingest.yml 会安装依赖、运行测试、部署三个函数并调用 /v2/health 验证。
 
-在 GitHub 页面：
+08:14 工作流 .github/workflows/update-lottery-data.yml 会：
 
-```text
-Actions -> Update lottery public data -> Run workflow
-```
+1. 对前一天未完成彩种执行最后兜底。
+2. 从 CloudBase PostgreSQL 导出 public_data/v2。
+3. 生成并校验年度日历。
+4. 提交 V2 镜像到 main。
 
-也可以本地运行：
+所需 GitHub Repository Secrets：CLOUDBASE_API_KEY、JISU_APPKEY。
 
-```bash
-export JISU_APPKEY="your_appkey"
-python scripts/update_public_data.py
-python scripts/build_draw_calendar.py            # 生成当年的整年期次表
-python scripts/validate_public_data.py
-python -m unittest discover -s tests
-```
+## 年度日历
 
-### 整年开奖日历
+休市配置位于 config/closures.json。春节日期公布后补充下一年配置，然后运行：
 
-`calendar/{year}.json` 把一整年每个彩种的期号和开奖日期一次性推演出来。
-推演规则已用 2026 年 750 期真实开奖记录**全量比对，零不符**：
+    python scripts/build_draw_calendar.py --year 2027
+    python -m unittest discover -s tests
+    python scripts/validate_public_data.py
 
-1. 各彩种按 `config/lotteries.json` 里的 `draw_weekdays` 开奖（0 = 周日）。
-2. 期号每年从 001 重新开始。
-3. 休市日不开奖、不发期号，期号**顺延**而不是跳号。
-   （反证：福彩3D 2026-04-28 的真实期号是 `2026108`，而那天是年内第 118 天，
-   差的正好是春节休市的 10 天。）
-4. 期号格式两系：福彩 `ssq / fc3d / qlc / kl8` 是 7 位 `YYYYNNN`；
-   体彩 `dlt / qxc / pl3 / pl5` 是 5 位 `YYNNN`。
+日历生成器直接输出 V2 扁平 entries 结构。
 
-每年只需要做一件事：**春节休市日公布后改 `calendar/closures.json`，重跑脚本。**
-`tests/test_draw_calendar.py` 会在 CI 里把推演结果和真实数据再比对一遍，
-规则一旦对不上就直接失败。
+## 本地验证
 
-#### 跨年操作（每年 12 月做一次）
+    cd cloudbase
+    npm ci
+    npm test
+    cd ..
+    python -m unittest discover -s tests
+    python scripts/validate_public_data.py
 
-```bash
-# 1. 在 closures.json 的 years 下加一年，只有春节需要查，国庆固定 10-01 ~ 10-04
-#    "2027": [
-#      { "id": "spring_festival", "name": "春节", "start": "2027-…", "end": "2027-…", … },
-#      { "id": "national_day",    "name": "国庆", "start": "2027-10-01", "end": "2027-10-04", … }
-#    ]
-
-# 2. 生成
-python scripts/build_draw_calendar.py --year 2027
-
-# 3. 校验（次年有真实开奖数据之后再跑一次，会自动逐期比对）
-python -m unittest discover -s tests
-```
-
-漏填这一年的休市日时脚本会**直接报错退出**，不会悄悄生成一份期号全年错位的日历。
-
-## 公共读取地址
-
-如果仓库地址是：
-
-```text
-https://github.com/wenjinliuu/lottery-data-repo
-```
-
-公共数据 base URL 为：
-
-```text
-https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data
-```
-
-常用文件：
-
-```text
-https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/latest.json
-https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/calendar.json
-https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/health.json
-https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data/draws/dlt.json
-```
-
-lotto-Agent 可配置：
-
-```bash
-export LOTTERY_PUBLIC_DATA_BASE_URL="https://raw.githubusercontent.com/wenjinliuu/lottery-data-repo/main/public_data"
-```
-
-## 数据来源
-
-更新脚本调用极速数据接口：
-
-```text
-https://api.jisuapi.com/caipiao/query
-https://api.jisuapi.com/caipiao/class
-```
-
-每期开奖会保留：
-
-- 标准化字段
-- 结构化开奖号码
-- 奖池、销售额
-- 奖项明细、中奖注数、单注奖金、追加奖金
-- 下一期期号、下期开奖时间、截止购买时间
-- 清洗后的 `raw_public_json`
-
-真实 API key 会在写入前替换为 `***`。
-
-详细字段见：
-
-```text
-docs/DATA_SCHEMA.md
-```
+字段契约见 docs/DATA_SCHEMA.md，API 说明见 docs/LOTTERY_API.md。
