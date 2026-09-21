@@ -42,6 +42,7 @@ jobs:
           npm test
           node -e "import('./src/handler.mjs').then(() => console.log('handler import ok'))"
           node -e "import('./src/api-handler.mjs').then(() => console.log('api handler import ok'))"
+          node -e "import('./src/http-server.mjs').then(() => console.log('http server import ok'))"
 
       - name: Install CloudBase CLI
         run: npm install --global @cloudbase/cli@3.8.3
@@ -63,7 +64,11 @@ jobs:
       - name: Deploy read-only API function
         run: tcb fn deploy lottery-api --force --yes
 
+      - name: Deploy read-only HTTP API function
+        run: tcb fn deploy lottery-api-http --force --yes
+
       - name: Verify deployed functions
         run: |
           tcb fn detail lottery-ingest
           tcb fn detail lottery-api
+          tcb fn detail lottery-api-http
