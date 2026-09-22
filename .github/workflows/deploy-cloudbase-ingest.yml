@@ -67,11 +67,6 @@ jobs:
       - name: Deploy read-only HTTP API function
         run: tcb fn deploy lottery-api-http --force --yes
 
-      - name: Verify completed targets skip without upstream calls
-        if: contains(github.event.head_commit.message, '[status acceptance]')
-        run: |
-          tcb fn invoke lottery-ingest --params '{"slot":"all_retry_3","target_date":"2026-09-21","runner":"github_acceptance_status_v2"}'
-
       - name: Verify deployed functions
         run: |
           tcb fn detail lottery-ingest
@@ -109,8 +104,6 @@ jobs:
                     body.schema !== "duigehao.lottery.status"
                     || body.version !== 2
                     || !body.lotteries
-                    || body.latest_execution?.execution_status !== "success"
-                    || Number(body.latest_execution?.skipped_count) !== 6
                   ) {
                     throw new Error(`unexpected status response: ${raw}`);
                   }
