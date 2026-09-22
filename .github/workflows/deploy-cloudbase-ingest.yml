@@ -91,3 +91,22 @@ jobs:
                   console.log(`public API healthy: ${body.generated_at}`);
                 });
               '
+
+          curl --fail --show-error --silent \\
+            --retry 5 --retry-delay 3 --retry-all-errors \\
+            "$LOTTERY_API_URL/v2/status" \\
+            | node -e '
+                let raw = "";
+                process.stdin.on("data", chunk => { raw += chunk; });
+                process.stdin.on("end", () => {
+                  const body = JSON.parse(raw);
+                  if (
+                    body.schema !== "duigehao.lottery.status"
+                    || body.version !== 2
+                    || !body.lotteries
+                  ) {
+                    throw new Error(`unexpected status response: ${raw}`);
+                  }
+                  console.log(`public status API healthy: ${body.generated_at}`);
+                });
+              '

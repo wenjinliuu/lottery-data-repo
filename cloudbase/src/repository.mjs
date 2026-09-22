@@ -1,5 +1,5 @@
 import cloudbase from "@cloudbase/node-sdk";
-import { assessDrawCompleteness, drawCompletenessScore } from "./normalize.mjs";
+import { assessDrawCompleteness, drawCompletenessScore, drawDataStatus } from "./normalize.mjs";
 
 function ensureSuccess(result, operation) {
   if (result?.error) {
@@ -47,27 +47,82 @@ export class LotteryRepository {
             target_date: targetDate,
             lottery_type: row.lottery_type,
             expected_issue: String(row.issue),
+            data_status: "waiting",
+            status: "pending",
           })),
           { onConflict: "target_date,lottery_type", ignoreDuplicates: true },
         ),
         "create fetch targets",
       );
     }
-    const pending = ensureSuccess(
+    const targets = ensureSuccess(
       await this.db
         .from("lottery_fetch_targets")
-        .select("target_date,lottery_type,expected_issue,status")
+        .select("target_date,lottery_type,expected_issue,data_status,status")
         .eq("target_date", targetDate)
         .in("lottery_type", allowedLotteries)
-        .neq("status", "updated")
         .order("lottery_type"),
-      "query pending targets",
+      "query fetch targets",
     );
-    return pending.map((row) => ({
+    return targets.map((row) => ({
       draw_date: String(row.target_date).slice(0, 10),
       lottery_type: row.lottery_type,
       issue: String(row.expected_issue),
+      data_status: row.data_status
+        ?? (row.status === "updated" ? "completed" : "waiting"),
     }));
+  }
+
+  async startRun({ runner, slot, targetDate, requestedCount }) {
+    const rows = ensureSuccess(
+      await this.db
+        .from("lottery_ingest_runs")
+        .insert({
+          runner,
+          slot,
+          target_date: targetDate,
+          status: "running",
+          requested_count: requestedCount,
+          details: {},
+        })
+        .select("id"),
+      "start ingest run",
+    );
+    if (!rows[0]?.id) throw new Error("start ingest run: missing run id");
+    return rows[0].id;
+  }
+
+  async finishRun(runId, { status, updatedCount, skippedCount, details }) {
+    ensureSuccess(
+      await this.db
+        .from("lottery_ingest_runs")
+        .update({
+          status,
+          updated_count: updatedCount,
+          skipped_count: skippedCount,
+          details,
+          finished_at: nowTimestamp(),
+        })
+        .eq("id", runId),
+      "finish ingest run",
+    );
+  }
+
+  async recordSkipped(targetDate, lotteryType) {
+    const now = nowTimestamp();
+    ensureSuccess(
+      await this.db
+        .from("lottery_fetch_targets")
+        .update({
+          last_execution_status: "success",
+          last_action: "skipped",
+          last_execution_at: now,
+          updated_at: now,
+        })
+        .eq("target_date", targetDate)
+        .eq("lottery_type", lotteryType),
+      "record skipped target",
+    );
   }
 
   async allDueLotteryTypes(targetDate) {
@@ -124,7 +179,7 @@ export class LotteryRepository {
     throw new Error("reserve API usage: concurrent update retry limit reached");
   }
 
-  async recordFailure(targetDate, lotteryType, returnedIssue, error) {
+  async recordFailure(targetDate, lotteryType, returnedIssue, error, { countAttempt = true } = {}) {
     const [target] = ensureSuccess(
       await this.db
         .from("lottery_fetch_targets")
@@ -140,11 +195,14 @@ export class LotteryRepository {
       await this.db
         .from("lottery_fetch_targets")
         .update({
-          attempts: target.attempts + 1,
+          attempts: target.attempts + (countAttempt ? 1 : 0),
           latest_returned_issue: returnedIssue || null,
           last_error: String(error).slice(0, 1000),
+          last_execution_status: "failed",
+          last_action: countAttempt ? "fetched" : "skipped",
+          last_execution_at: now,
           first_attempt_at: target.first_attempt_at || now,
-          last_attempt_at: now,
+          ...(countAttempt ? { last_attempt_at: now } : {}),
           updated_at: now,
         })
         .eq("target_date", targetDate)
@@ -157,7 +215,7 @@ export class LotteryRepository {
     const [existing] = ensureSuccess(
       await this.db
         .from("lottery_draws")
-        .select("compatibility_payload")
+        .select("compatibility_payload,data_status")
         .eq("lottery_type", draw.lottery_type)
         .eq("issue", draw.issue)
         .limit(1),
@@ -170,6 +228,7 @@ export class LotteryRepository {
     const effectiveCompleteness = shouldWrite
       ? completeness
       : assessDrawCompleteness(existingDraw);
+    const dataStatus = drawDataStatus(effectiveDraw);
 
     if (shouldWrite) ensureSuccess(
       await this.db.from("lottery_draws").upsert(
@@ -186,6 +245,7 @@ export class LotteryRepository {
           compatibility_payload: draw,
           source_payload: draw.raw_public_json ?? null,
           source_fetched_at: draw.fetched_at,
+          data_status: dataStatus,
           updated_at: nowTimestamp(),
         },
         { onConflict: "lottery_type,issue" },
@@ -208,6 +268,7 @@ export class LotteryRepository {
         .from("lottery_fetch_targets")
         .update({
           status: effectiveCompleteness.complete ? "updated" : "pending",
+          data_status: dataStatus,
           attempts: (current?.attempts ?? 0) + 1,
           latest_returned_issue: effectiveDraw.issue,
           last_error: effectiveCompleteness.complete
@@ -215,6 +276,9 @@ export class LotteryRepository {
             : `incomplete:${effectiveCompleteness.reason}`,
           first_attempt_at: current?.first_attempt_at || now,
           last_attempt_at: now,
+          last_execution_status: "success",
+          last_action: "fetched",
+          last_execution_at: now,
           completed_at: effectiveCompleteness.complete ? now : null,
           updated_at: now,
         })
@@ -222,6 +286,6 @@ export class LotteryRepository {
         .eq("lottery_type", target.lottery_type),
       "complete fetch target",
     );
-    return effectiveCompleteness;
+    return { ...effectiveCompleteness, data_status: dataStatus, wrote: shouldWrite };
   }
 }

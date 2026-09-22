@@ -18,7 +18,7 @@ const config = JSON.parse(readFileSync(configUrl, "utf8"));
 
 const DRAW_COLUMNS = [
   "issue", "draw_date", "draw_time", "numbers", "prize_pool", "sales_amount",
-  "prize_details", "source_fetched_at",
+  "prize_details", "source_fetched_at", "data_status",
 ].join(",");
 const CALENDAR_COLUMNS = "lottery_type,issue,draw_date,draw_time,sale_close_time";
 
@@ -207,6 +207,62 @@ export class LotteryApiService {
     };
   }
 
+  async status() {
+    const [runs, targets] = await Promise.all([
+      ensureSuccess(
+        await this.db
+          .from("lottery_ingest_runs")
+          .select("runner,slot,target_date,status,requested_count,updated_count,skipped_count,started_at,finished_at")
+          .order("started_at", { ascending: false })
+          .limit(1),
+        "read latest ingest run",
+      ),
+      ensureSuccess(
+        await this.db
+          .from("lottery_fetch_targets")
+          .select("target_date,lottery_type,expected_issue,data_status,last_execution_status,last_action,last_execution_at,completed_at")
+          .order("target_date", { ascending: false })
+          .order("lottery_type")
+          .limit(120),
+        "read latest fetch status",
+      ),
+    ]);
+    const latestByLottery = {};
+    for (const row of targets) {
+      if (latestByLottery[row.lottery_type]) continue;
+      latestByLottery[row.lottery_type] = compactStatus(row);
+    }
+    const run = runs[0];
+    return {
+      schema: "duigehao.lottery.status",
+      version: 2,
+      generated_at: beijingClock(this.now()).iso,
+      latest_execution: run ? {
+        executed_at: run.finished_at ?? run.started_at,
+        execution_status: run.status,
+        runner: run.runner,
+        slot: run.slot,
+        target_date: String(run.target_date).slice(0, 10),
+        requested_count: Number(run.requested_count),
+        updated_count: Number(run.updated_count),
+        skipped_count: Number(run.skipped_count),
+      } : null,
+      lotteries: latestByLottery,
+    };
+  }
+
+}
+
+function compactStatus(row) {
+  return {
+    target_date: String(row.target_date).slice(0, 10),
+    issue: String(row.expected_issue),
+    executed_at: row.last_execution_at ?? null,
+    execution_status: row.last_execution_status ?? null,
+    action: row.last_action ?? null,
+    data_status: row.data_status ?? "waiting",
+    completed_at: row.completed_at ?? null,
+  };
 }
 
 function methodOf(event) {
@@ -282,6 +338,7 @@ export async function handleHttp(event = {}, service = new LotteryApiService()) 
           recent: "/v2/draws/{lottery_type}",
           by_year: "/v2/by-year/{lottery_type}/{year}",
           calendar: "/v2/calendar/{year}",
+          status: "/v2/status",
           health: "/v2/health",
         },
         lotteries: LOTTERY_TYPES,
@@ -293,6 +350,9 @@ export async function handleHttp(event = {}, service = new LotteryApiService()) 
     }
     if (path === "/v2/health") {
       return response(200, await service.health(), { head, cache: 30 });
+    }
+    if (path === "/v2/status") {
+      return response(200, await service.status(), { head, cache: 15 });
     }
     let match = /^\/v2\/draws\/([a-z0-9]+)$/.exec(path);
     if (match) {

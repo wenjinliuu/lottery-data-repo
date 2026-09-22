@@ -38,18 +38,50 @@ export async function runIngest({
   const allowed = requested
     ? scheduled.filter((lotteryType) => requested.has(lotteryType))
     : scheduled;
-  const pending = await repository.dueTargets(targetDate, allowed);
+  const targets = await repository.dueTargets(targetDate, allowed);
   const results = [];
+  let runId = null;
 
   try {
-    for (const target of pending) {
+    runId = await repository.startRun({
+      runner,
+      slot,
+      targetDate,
+      requestedCount: targets.length,
+    });
+    for (const target of targets) {
+      if (target.data_status === "completed") {
+        await repository.recordSkipped(targetDate, target.lottery_type);
+        results.push({
+          lottery_type: target.lottery_type,
+          issue: target.issue,
+          execution_status: "success",
+          action: "skipped",
+          data_status: "completed",
+        });
+        continue;
+      }
       const reservation = await repository.reserveApiCall(
         usageDate,
         "jisuapi",
         automaticDailyLimit(),
       );
       if (!reservation) {
-        results.push({ lottery_type: target.lottery_type, status: "daily_limit_reached" });
+        await repository.recordFailure(
+          targetDate,
+          target.lottery_type,
+          "",
+          "daily_limit_reached",
+          { countAttempt: false },
+        );
+        results.push({
+          lottery_type: target.lottery_type,
+          issue: target.issue,
+          execution_status: "failed",
+          action: "skipped",
+          data_status: target.data_status,
+          error: "daily_limit_reached",
+        });
         break;
       }
       const config = lotteryConfig.lotteries[target.lottery_type];
@@ -62,22 +94,55 @@ export async function runIngest({
         results.push({
           lottery_type: target.lottery_type,
           issue: draw.issue,
-          status: saved.complete ? "updated" : "pending",
+          execution_status: "success",
+          action: "fetched",
+          data_status: saved.data_status,
           completeness_reason: saved.reason,
         });
       } catch (error) {
         const returnedIssue = /stale_issue:([^;]+)/.exec(String(error))?.[1] ?? "";
         await repository.recordFailure(targetDate, target.lottery_type, returnedIssue, error);
-        results.push({ lottery_type: target.lottery_type, status: "pending", error: String(error) });
+        results.push({
+          lottery_type: target.lottery_type,
+          issue: target.issue,
+          execution_status: "failed",
+          action: "fetched",
+          data_status: target.data_status,
+          error: String(error),
+        });
       }
     }
+    const executionStatus = results.some((item) => item.execution_status === "failed")
+      ? "failed"
+      : "success";
+    const skippedCount = results.filter((item) => item.action === "skipped").length;
+    const updatedCount = results.filter((item) => item.action === "fetched"
+      && item.execution_status === "success").length;
+    await repository.finishRun(runId, {
+      status: executionStatus,
+      updatedCount,
+      skippedCount,
+      details: { results },
+    });
     return {
-      ok: true,
+      ok: executionStatus === "success",
       runner,
       slot,
       target_date: targetDate,
+      execution_status: executionStatus,
       results,
     };
+  } catch (error) {
+    if (runId !== null) {
+      await repository.finishRun(runId, {
+        status: "failed",
+        updatedCount: results.filter((item) => item.action === "fetched"
+          && item.execution_status === "success").length,
+        skippedCount: results.filter((item) => item.action === "skipped").length,
+        details: { results, error: String(error).slice(0, 1000) },
+      });
+    }
+    throw error;
   } finally {
     await repository.close();
   }

@@ -10,6 +10,8 @@ test("manual lottery filter limits a shadow run to one due lottery", async () =>
       seen.push(...allowed);
       return [];
     },
+    startRun: async () => 1,
+    finishRun: async () => {},
     close: async () => {},
   };
 
@@ -23,18 +25,30 @@ test("manual lottery filter limits a shadow run to one due lottery", async () =>
 
   assert.deepEqual(seen, ["dlt"]);
   assert.equal(result.target_date, "2026-09-19");
+  assert.equal(result.execution_status, "success");
   assert.deepEqual(result.results, []);
 });
 
 function ingestFixture({ complete }) {
   const saved = [];
+  const runs = [];
   const repository = {
     allDueLotteryTypes: async () => ["pl3"],
-    dueTargets: async () => [{ lottery_type: "pl3", issue: "26253", draw_date: "2026-09-20" }],
+    dueTargets: async () => [{
+      lottery_type: "pl3",
+      issue: "26253",
+      draw_date: "2026-09-20",
+      data_status: "waiting",
+    }],
+    startRun: async () => 1,
+    finishRun: async (_id, run) => runs.push(run),
     reserveApiCall: async () => ({ call_count: 1 }),
     saveDraw: async (_target, draw, completeness) => {
       saved.push({ draw, completeness });
-      return completeness;
+      return {
+        ...completeness,
+        data_status: completeness.complete ? "completed" : "numbers_ready",
+      };
     },
     recordFailure: async () => assert.fail("valid draw must not be recorded as a failure"),
     close: async () => {},
@@ -51,10 +65,10 @@ function ingestFixture({ complete }) {
       },
     }),
   };
-  return { repository, client, saved };
+  return { repository, client, saved, runs };
 }
 
-test("numbers-only response is saved but remains pending for later slots", async () => {
+test("numbers-only response is saved and remains available for later slots", async () => {
   const fixture = ingestFixture({ complete: false });
   const result = await runIngest({
     slot: "all_first",
@@ -63,9 +77,11 @@ test("numbers-only response is saved but remains pending for later slots", async
     client: fixture.client,
   });
   assert.equal(result.target_date, "2026-09-20");
-  assert.equal(result.results[0].status, "pending");
+  assert.equal(result.results[0].execution_status, "success");
+  assert.equal(result.results[0].data_status, "numbers_ready");
   assert.equal(result.results[0].completeness_reason, "prize_not_published");
   assert.equal(fixture.saved.length, 1);
+  assert.equal(fixture.runs[0].status, "success");
 });
 
 test("published prize and sales response completes the fetch target", async () => {
@@ -76,7 +92,8 @@ test("published prize and sales response completes the fetch target", async () =
     repository: fixture.repository,
     client: fixture.client,
   });
-  assert.equal(result.results[0].status, "updated");
+  assert.equal(result.results[0].execution_status, "success");
+  assert.equal(result.results[0].data_status, "completed");
   assert.equal(result.results[0].completeness_reason, "complete");
 });
 

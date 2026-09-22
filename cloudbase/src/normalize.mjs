@@ -81,6 +81,12 @@ export function assessDrawCompleteness(draw) {
   return { complete: true, reason: "complete" };
 }
 
+export function drawDataStatus(draw) {
+  const values = Object.values(draw?.numbers ?? {}).flat().filter((value) => value != null);
+  if (!values.length) return "waiting";
+  return assessDrawCompleteness(draw).complete ? "completed" : "numbers_ready";
+}
+
 export function drawCompletenessScore(draw) {
   const prizes = Array.isArray(draw?.prize_details) ? draw.prize_details : [];
   const countFields = prizes.filter((item) => item.winning_count !== null && item.winning_count !== undefined).length;

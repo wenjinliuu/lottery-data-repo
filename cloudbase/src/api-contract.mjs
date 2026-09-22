@@ -25,7 +25,7 @@ export function materializeV2Draw(row) {
   const prizes = (Array.isArray(row.prize_details) ? row.prize_details : []).map((item) => compactObject({
     name: item.prize_name || item.prize_level,
     match: item.require,
-    winners: item.winning_count,
+    winners: item.winning_count ?? item.raw?.num,
     amount: item.prize_amount,
     extra_winners: item.additional_count,
     extra_amount: item.additional_amount,
@@ -39,6 +39,7 @@ export function materializeV2Draw(row) {
     sales: String(row.sales_amount ?? ""),
     prizes,
     fetched_at: row.source_fetched_at ?? null,
+    data_status: row.data_status ?? "completed",
   });
 }
 
