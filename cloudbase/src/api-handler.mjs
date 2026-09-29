@@ -21,6 +21,8 @@ const DRAW_COLUMNS = [
   "prize_details", "source_fetched_at", "data_status",
 ].join(",");
 const CALENDAR_COLUMNS = "lottery_type,issue,draw_date,draw_time,sale_close_time";
+const CALENDAR_PAGE_SIZE = 1000;
+const CALENDAR_MAX_PAGES = 20;
 
 function ensureSuccess(result, operation) {
   if (result?.error) {
@@ -72,16 +74,31 @@ export class LotteryApiService {
 
   async calendarRows(year, lotteryType = null) {
     const [start, end] = yearBounds(year);
-    let query = this.db
-      .from("lottery_calendar")
-      .select(CALENDAR_COLUMNS)
-      .gte("draw_date", start)
-      .lte("draw_date", end);
-    if (lotteryType) query = query.eq("lottery_type", lotteryType);
-    return ensureSuccess(
-      await query.order("draw_date", { ascending: true }).order("lottery_type").limit(3000),
-      `read calendar/${year}`,
-    );
+    const page = (from, to) => {
+      let query = this.db
+        .from("lottery_calendar")
+        .select(CALENDAR_COLUMNS)
+        .gte("draw_date", start)
+        .lte("draw_date", end);
+      if (lotteryType) query = query.eq("lottery_type", lotteryType);
+      return query.order("draw_date", { ascending: true }).order("lottery_type").range(from, to);
+    };
+    // 单个彩种一年最多 366 期，一次就够。
+    if (lotteryType) return ensureSuccess(await page(0, CALENDAR_PAGE_SIZE - 1), `read calendar/${year}`);
+
+    // 整年两千多期，而 CloudBase 的 PostgreSQL 接口单次最多回 1000 行，多出来的会被
+    // 默默截掉（.limit 再大也没用）。按唯一的 (draw_date, lottery_type) 排序分页读：
+    // 每次按实际拿到的行数往后翻，直到空页 —— 平台上限哪天变小也不会漏。
+    const rows = [];
+    for (let pageIndex = 0; pageIndex < CALENDAR_MAX_PAGES; pageIndex += 1) {
+      const batch = ensureSuccess(
+        await page(rows.length, rows.length + CALENDAR_PAGE_SIZE - 1),
+        `read calendar/${year} from ${rows.length}`,
+      );
+      if (batch.length === 0) return rows;
+      rows.push(...batch);
+    }
+    throw new Error(`read calendar/${year}: more than ${CALENDAR_MAX_PAGES} pages`);
   }
 
   async earliestYear(lotteryType) {
