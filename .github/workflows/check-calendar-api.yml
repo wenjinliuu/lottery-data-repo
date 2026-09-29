@@ -1,0 +1,68 @@
+name: Check public calendar API
+
+# 只读核对线上 /v2/calendar/{year}：条数、首尾日期、(日期, 彩种) 不重复。
+# 不部署、不写库，只发一个 GET。
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Calendar year"
+        default: "2026"
+      expected_count:
+        description: "Expected entry count (empty to skip)"
+        default: "2006"
+  push:
+    paths:
+      - ".github/workflows/check-calendar-api.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
+      YEAR: ${{ inputs.year || '2026' }}
+      EXPECTED_COUNT: ${{ github.event_name == 'push' && '2006' || inputs.expected_count }}
+    steps:
+      - name: Fetch calendar
+        run: |
+          curl --fail --show-error --silent \
+            --retry 5 --retry-delay 3 --retry-all-errors \
+            "$LOTTERY_API_URL/v2/calendar/$YEAR" -o calendar.json
+          echo "response bytes: $(wc -c < calendar.json)"
+
+      - name: Verify calendar
+        run: |
+          node -e '
+            const fs = require("fs");
+            const { YEAR, EXPECTED_COUNT, GITHUB_STEP_SUMMARY } = process.env;
+            const entries = JSON.parse(fs.readFileSync("calendar.json", "utf8")).entries ?? [];
+            const keys = new Set(entries.map((entry) => `${entry.date}|${entry.lottery_type}`));
+            const first = entries[0]?.date;
+            const last = entries.at(-1)?.date;
+            const perType = {};
+            for (const entry of entries) {
+              const type = entry.lottery_type;
+              perType[type] = (perType[type] ?? 0) + 1;
+            }
+            const summary = [
+              `### /v2/calendar/${YEAR}`,
+              "",
+              `- entries: ${entries.length}` + (EXPECTED_COUNT ? ` (expected ${EXPECTED_COUNT})` : ""),
+              `- first: ${first}`,
+              `- last: ${last} (expected ${YEAR}-12-31)`,
+              `- unique (date, lottery): ${keys.size}`,
+              `- per lottery: ${JSON.stringify(perType)}`,
+            ].join("\n");
+            console.log(summary);
+            fs.appendFileSync(GITHUB_STEP_SUMMARY, summary + "\n");
+
+            const problems = [];
+            if (EXPECTED_COUNT && entries.length !== Number(EXPECTED_COUNT)) problems.push(`count ${entries.length} != ${EXPECTED_COUNT}`);
+            if (last !== `${YEAR}-12-31`) problems.push(`last date ${last} != ${YEAR}-12-31`);
+            if (keys.size !== entries.length) problems.push(`${entries.length - keys.size} duplicate (date, lottery) entries`);
+            if (problems.length) throw new Error(problems.join("; "));
+            console.log("calendar OK");
+          '
