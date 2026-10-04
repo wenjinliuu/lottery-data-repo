@@ -59,7 +59,8 @@ jobs:
           '
   deploy:
     needs: checks
-    if: ${{ github.ref == 'refs/heads/main' && needs.checks.outputs.deploy_ready == 'true' && github.event_name == 'workflow_dispatch' }}
+    if: >-
+      ${{ github.ref == 'refs/heads/main' && needs.checks.outputs.deploy_ready == 'true' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'deploy: lottery access protection'))) }}
     runs-on: ubuntu-latest
     env:
       TCB_DISABLE_REPORT: "1"
