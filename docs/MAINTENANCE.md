@@ -22,6 +22,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - CloudBase 功能先读官方 cloudbase-guidelines；部署只走 git → GitHub Actions。MCP 只用于查数据、日志和排查。
 - 验证命令：`npm --prefix cloudbase ci`、`npm --prefix cloudbase test`、`python -m unittest discover -s tests`、`python scripts/validate_public_data.py`。
 - **Deploy CloudBase lottery functions**：部署函数 → 更新并回读限流 → 验证缺失/错误密钥 401 与正确密钥 200 → 执行本次权限迁移 → 再验收。工作流绿色不代表已部署，deploy job 可能因缺 Secret 跳过。
+- push/PR 只检查，云端部署必须手动在 main 运行工作流，避免 Secret 或文档更新时意外提前开启保护。格式失败时日志只显示长度和非法字符判断，不显示密钥。
 - 首次启用/轮换密钥先构建并安装带新密钥的 App，再启用云端对应密钥。详细步骤见 [API_ACCESS_CONTROL.md](API_ACCESS_CONTROL.md)。
 - 改休市配置后重新生成受影响年份日历、跑测试和结构验证、同步兼容别名；没有权威新年度安排时不假称已确认。
 
