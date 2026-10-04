@@ -17,6 +17,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 ## 密钥、修改与发布
 
 - `LOTTERY_READ_API_KEY` 在本仓库和 `lottery-ios` 分别存为 Actions Repository Secret，值相同；32–128 位英文字母、数字、`_`、`-`，建议 64 位随机十六进制。它不是云管理凭据 `CLOUDBASE_API_KEY` 或上游 `JISU_APPKEY`。
+- App 构建、服务端校验及验收脚本统一去除 Secret 首尾空白，兼容复制带换行；内部空白/其他非法字符仍拒绝。不得对请求头随意宽松转换。
 - 禁止将真实密钥写入源码、工作流参数、测试 fixture、日志、Issue、文档。固定 App 读取密钥可能被从安装包提取，只提供基础限制。
 - 改字段前读 [DATA_SCHEMA.md](DATA_SCHEMA.md)，同时核对 iOS 的 DTO/Mapper：云端与 GitHub 使用同一 V2 JSON 契约。
 - CloudBase 功能先读官方 cloudbase-guidelines；部署只走 git → GitHub Actions。MCP 只用于查数据、日志和排查。

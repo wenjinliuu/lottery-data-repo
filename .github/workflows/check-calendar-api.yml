@@ -29,8 +29,9 @@ jobs:
     steps:
       - name: Fetch calendar
         run: |
+          read_key="$(node -e 'process.stdout.write((process.env.LOTTERY_READ_API_KEY || "").trim())')"
           curl --fail --show-error --silent \
-            --header "X-Lottery-Api-Key: $LOTTERY_READ_API_KEY" \
+            --header "X-Lottery-Api-Key: $read_key" \
             --retry 5 --retry-delay 3 --retry-all-errors \
             "$LOTTERY_API_URL/v2/calendar/$YEAR" -o calendar.json
           echo "response bytes: $(wc -c < calendar.json)"
