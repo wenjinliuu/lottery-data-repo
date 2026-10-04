@@ -22,7 +22,10 @@ for (const headers of [{}, { "X-Lottery-Api-Key": "incorrect-read-key" }]) {
   const { response, body } = await request("/v2/bootstrap", headers);
   assert.equal(response.status, 401);
   assert.equal(body.error, "unauthorized");
-  assert.equal(response.headers.get("cache-control"), "no-store");
+  // The gateway may append stricter cache directives to 401 responses.
+  assert.ok(response.headers.get("cache-control")?.split(",")
+    .some((directive) => directive.trim().toLowerCase() === "no-store"),
+    "Unauthorized responses must retain the no-store directive");
 }
 const headers = { "X-Lottery-Api-Key": key };
 for (const path of ["/v2/health", "/v2/status", "/v2/bootstrap"]) {
