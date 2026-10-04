@@ -3,11 +3,15 @@ name: Deploy CloudBase lottery functions
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, api-key-access-control]
     paths:
       - "cloudbase/**"
       - "cloudbaserc.json"
       - ".github/workflows/deploy-cloudbase-ingest.yml"
+      - "config/lottery-gateway-access.json"
+      - "scripts/sync_legacy_mirror.py"
+      - "tests/**"
+  pull_request:
 
 permissions:
   contents: read
@@ -17,13 +21,51 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  checks:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_ready: ${{ steps.access.outputs.deploy_ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+          cache: npm
+          cache-dependency-path: cloudbase/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Test function package and data contracts
+        run: |
+          npm --prefix cloudbase ci
+          npm --prefix cloudbase test
+          python -m unittest discover -s tests
+          python scripts/validate_public_data.py
+      - name: Check access-key configuration without revealing it
+        id: access
+        env:
+          LOTTERY_READ_API_KEY: ${{ secrets.LOTTERY_READ_API_KEY }}
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const key = process.env.LOTTERY_READ_API_KEY || "";
+            if (key && !/^[A-Za-z0-9_-]{32,128}$/.test(key)) {
+              throw new Error("LOTTERY_READ_API_KEY must be 32-128 URL-safe random characters");
+            }
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy_ready=${Boolean(key)}\n`);
+            if (!key) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+              "Access protection is not deployed: set LOTTERY_READ_API_KEY in this repository and lottery-ios, then manually run this workflow. Existing cloud functions were not changed.\n");
+          '
   deploy:
+    needs: checks
+    if: ${{ github.ref == 'refs/heads/main' && needs.checks.outputs.deploy_ready == 'true' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     env:
       TCB_DISABLE_REPORT: "1"
       CLOUDBASE_ENV_ID: wenjin-cloudbase-d1empq882391ac1
       CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
       JISU_APPKEY: ${{ secrets.JISU_APPKEY }}
+      LOTTERY_READ_API_KEY: ${{ secrets.LOTTERY_READ_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,6 +94,9 @@ jobs:
           tcb --version
           tcb login --help
           tcb fn deploy --help
+          tcb routes edit --help
+          tcb routes list --help
+          tcb db pg migration up --help
 
       - name: Authenticate to the target environment
         run: |
@@ -67,46 +112,27 @@ jobs:
       - name: Deploy read-only HTTP API function
         run: tcb fn deploy lottery-api-http --force --yes
 
-      - name: Verify deployed functions
+      - name: Configure relaxed lottery-only gateway limits
         run: |
-          tcb fn detail lottery-ingest
-          tcb fn detail lottery-api
-          tcb fn detail lottery-api-http
+          tcb routes edit -e "$CLOUDBASE_ENV_ID" --yes --data "$(cat config/lottery-gateway-access.json)"
+          tcb routes list -e "$CLOUDBASE_ENV_ID" --json > "$RUNNER_TEMP/lottery-routes.json"
+          node cloudbase/scripts/check-gateway-access.mjs "$RUNNER_TEMP/lottery-routes.json"
 
-      - name: Smoke test public lottery API
+      - name: Verify key-protected API before restricting direct database reads
         env:
           LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
-        run: |
-          curl --fail --show-error --silent \
-            --retry 5 --retry-delay 3 --retry-all-errors \
-            "$LOTTERY_API_URL/v2/health" \
-            | node -e '
-                let raw = "";
-                process.stdin.on("data", chunk => { raw += chunk; });
-                process.stdin.on("end", () => {
-                  const body = JSON.parse(raw);
-                  if (body.ok !== true || body.source !== "cloudbase_postgresql") {
-                    throw new Error(`unexpected health response: ${raw}`);
-                  }
-                  console.log(`public API healthy: ${body.generated_at}`);
-                });
-              '
+        run: node cloudbase/scripts/check-api-access.mjs
 
-          curl --fail --show-error --silent \
-            --retry 5 --retry-delay 3 --retry-all-errors \
-            "$LOTTERY_API_URL/v2/status" \
-            | node -e '
-                let raw = "";
-                process.stdin.on("data", chunk => { raw += chunk; });
-                process.stdin.on("end", () => {
-                  const body = JSON.parse(raw);
-                  if (
-                    body.schema !== "duigehao.lottery.status"
-                    || body.version !== 2
-                    || !body.lotteries
-                  ) {
-                    throw new Error(`unexpected status response: ${raw}`);
-                  }
-                  console.log(`public status API healthy: ${body.generated_at}`);
-                });
-              '
+      - name: Restrict public direct database reads through a versioned migration
+        run: |
+          migration_dir="$RUNNER_TEMP/lottery-private-read-migration"
+          mkdir -p "$migration_dir/cloudbase/migrations"
+          cp cloudbase/migrations/20261004080500_lottery_private_reads.sql "$migration_dir/cloudbase/migrations/"
+          cd "$migration_dir"
+          tcb db pg migration up -e "$CLOUDBASE_ENV_ID" --dry-run
+          tcb db pg migration up -e "$CLOUDBASE_ENV_ID" --yes
+
+      - name: Verify API after permission migration
+        env:
+          LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
+        run: node cloudbase/scripts/check-api-access.mjs

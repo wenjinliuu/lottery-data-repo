@@ -12,9 +12,12 @@
     GET|HEAD /v2/by-year/{lottery_type}/{year}
     GET|HEAD /v2/calendar/{year}
     GET|HEAD /v2/health
+    GET|HEAD /v2/status
     OPTIONS /v2/*
 
 支持彩种：ssq、dlt、kl8、fc3d、pl3、qlc、qxc、pl5。
+
+访问保护：所有 GET/HEAD 必须带 `X-Lottery-Api-Key`；GitHub 镜像无需密钥。配置方式和启用顺序见 [API_ACCESS_CONTROL.md](API_ACCESS_CONTROL.md)。
 
 规则：
 

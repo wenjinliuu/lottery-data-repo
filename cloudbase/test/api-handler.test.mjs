@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { LotteryApiService, handleHttp } from "../src/api-handler.mjs";
+import { LotteryApiService, handleHttp as rawHandleHttp } from "../src/api-handler.mjs";
+
+import { authenticatedEvent, testAccess } from "./access-fixture.mjs";
+
+const handleHttp = (event, service) => rawHandleHttp(authenticatedEvent(event), service, testAccess);
 
 function service() {
   return {

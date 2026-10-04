@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createCloudBaseDatabase } from "./repository.mjs";
+import { apiAccess, API_KEY_HEADER } from "./api-access.mjs";
 import {
   LOTTERY_TYPES,
   RECENT_LIMIT,
@@ -325,16 +326,18 @@ function response(statusCode, payload, { head = false, cache = 60 } = {}) {
     isBase64Encoded: false,
     headers: {
       "content-type": "application/json; charset=utf-8",
-      "cache-control": `public, max-age=${cache}, stale-while-revalidate=${Math.max(cache, 300)}`,
+      "cache-control": cache > 0 ? `private, max-age=${cache}` : "no-store",
+      "vary": API_KEY_HEADER,
       "access-control-allow-origin": "*",
       "access-control-allow-methods": "GET, HEAD, OPTIONS",
+      "access-control-allow-headers": API_KEY_HEADER,
       "x-content-type-options": "nosniff",
     },
     body: head ? "" : JSON.stringify(payload),
   };
 }
 
-export async function handleHttp(event = {}, service = new LotteryApiService()) {
+export async function handleHttp(event = {}, service = null, checkAccess = apiAccess) {
   const method = methodOf(event);
   const head = method === "HEAD";
   if (method === "OPTIONS") return response(204, {}, { head: true, cache: 86400 });
@@ -342,9 +345,15 @@ export async function handleHttp(event = {}, service = new LotteryApiService()) 
     return response(405, { error: "method_not_allowed" }, { cache: 0 });
   }
 
+  const accessError = checkAccess(event);
+  if (accessError) {
+    return response(accessError.statusCode, { error: accessError.error }, { head, cache: 0 });
+  }
+
   const path = requestPath(event);
   const query = queryOf(event);
   try {
+    service ??= new LotteryApiService();
     if (path === "/" || path === "/v2" || path === "/v2/index") {
       return response(200, {
         schema: "duigehao.lottery.index",

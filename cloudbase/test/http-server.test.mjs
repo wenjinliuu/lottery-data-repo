@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createLotteryHttpServer } from "../src/http-server.mjs";
 
+import { TEST_API_KEY, testAccess } from "./access-fixture.mjs";
+
 function service() {
   return {
     bootstrap: async () => ({ schema: "bootstrap" }),
@@ -13,7 +15,7 @@ function service() {
 }
 
 async function withServer(run) {
-  const server = createLotteryHttpServer(service());
+  const server = createLotteryHttpServer(service(), testAccess);
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   try {
     const { port } = server.address();
@@ -25,7 +27,7 @@ async function withServer(run) {
 
 test("serves the API contract over a real HTTP socket", async () => {
   await withServer(async (base) => {
-    const response = await fetch(`${base}/lottery/v2/draws/ssq?limit=100`);
+    const response = await fetch(`${base}/lottery/v2/draws/ssq?limit=100`, { headers: { "X-Lottery-Api-Key": TEST_API_KEY } });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get("access-control-allow-origin"), "*");
     assert.deepEqual(await response.json(), { type: "ssq", limit: 30 });
@@ -37,5 +39,13 @@ test("returns 405 for writes without reading the request body", async () => {
     const response = await fetch(`${base}/lottery/v2/bootstrap`, { method: "POST" });
     assert.equal(response.status, 405);
     assert.deepEqual(await response.json(), { error: "method_not_allowed" });
+  });
+});
+
+ test("rejects unauthenticated requests over the real HTTP entry point", async () => {
+  await withServer(async (base) => {
+    const response = await fetch(`${base}/lottery/v2/bootstrap`);
+    assert.equal(response.status, 401);
+    assert.equal(response.headers.get("cache-control"), "no-store");
   });
 });

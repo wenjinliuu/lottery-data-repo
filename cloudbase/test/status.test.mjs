@@ -1,7 +1,9 @@
+import { authenticatedEvent, testAccess } from "./access-fixture.mjs";
+const handleHttp = (event, service) => rawHandleHttp(authenticatedEvent(event), service, testAccess);
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { handleHttp } from "../src/api-handler.mjs";
+import { handleHttp as rawHandleHttp } from "../src/api-handler.mjs";
 import { runIngest } from "../src/handler.mjs";
 import {
   assessDrawCompleteness,

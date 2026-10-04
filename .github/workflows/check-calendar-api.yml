@@ -25,10 +25,12 @@ jobs:
       LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
       YEAR: ${{ inputs.year || '2026' }}
       EXPECTED_COUNT: ${{ github.event_name == 'push' && '2006' || inputs.expected_count }}
+      LOTTERY_READ_API_KEY: ${{ secrets.LOTTERY_READ_API_KEY }}
     steps:
       - name: Fetch calendar
         run: |
           curl --fail --show-error --silent \
+            --header "X-Lottery-Api-Key: $LOTTERY_READ_API_KEY" \
             --retry 5 --retry-delay 3 --retry-all-errors \
             "$LOTTERY_API_URL/v2/calendar/$YEAR" -o calendar.json
           echo "response bytes: $(wc -c < calendar.json)"
