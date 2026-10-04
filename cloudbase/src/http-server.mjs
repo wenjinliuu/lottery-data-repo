@@ -8,6 +8,7 @@ function requestEvent(req) {
     path: url.pathname,
     rawPath: url.pathname,
     queryStringParameters: Object.fromEntries(url.searchParams.entries()),
+    headers: req.headers,
   };
 }
 
@@ -20,10 +21,10 @@ function writeResult(req, res, result) {
   res.end(result.body);
 }
 
-export function createLotteryHttpServer(service) {
+export function createLotteryHttpServer(service, checkAccess) {
   return http.createServer(async (req, res) => {
     try {
-      writeResult(req, res, await handleHttp(requestEvent(req), service));
+      writeResult(req, res, await handleHttp(requestEvent(req), service, checkAccess));
     } catch (error) {
       console.error("lottery-api-http request failed", String(error));
       res.writeHead(500, {

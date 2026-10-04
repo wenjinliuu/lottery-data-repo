@@ -39,13 +39,13 @@ public_data/v2/health.json 不存在。健康检查只检查 CloudBase 自身，
 
 支持彩种：ssq、dlt、kl8、fc3d、pl3、qlc、qxc、pl5。
 
-## CloudBase API
+## CloudBase App API
 
 基础地址：
 
     https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
 
-只读接口：
+App 专用只读接口（启用访问保护后需要 `X-Lottery-Api-Key` 请求头）：
 
     GET /v2
     GET /v2/bootstrap
