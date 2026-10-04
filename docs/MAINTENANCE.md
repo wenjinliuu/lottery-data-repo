@@ -22,6 +22,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - 改字段前读 [DATA_SCHEMA.md](DATA_SCHEMA.md)，同时核对 iOS 的 DTO/Mapper：云端与 GitHub 使用同一 V2 JSON 契约。
 - CloudBase 功能先读官方 cloudbase-guidelines；部署只走 git → GitHub Actions。MCP 只用于查数据、日志和排查。
 - 验证命令：`npm --prefix cloudbase ci`、`npm --prefix cloudbase test`、`python -m unittest discover -s tests`、`python scripts/validate_public_data.py`。
+- 腾讯云网关会追加或替换缓存头为 `no-store, no-cache, must-revalidate, max-age=0`。验收按指令含义判断：拒绝响应必须有 `no-store`；成功响应必须有 `private` 或更严格的 `no-store`。不要求整串响应头与函数代码完全一致，也不能接受公开共享缓存。
 - **Deploy CloudBase lottery functions**：部署函数 → 更新并回读限流 → 验证缺失/错误密钥 401 与正确密钥 200 → 执行本次权限迁移 → 再验收。工作流绿色不代表已部署，deploy job 可能因缺 Secret 跳过。
 - 普通 push/PR 只检查。云端部署需在 main 手动运行工作流；如果手动入口不可用，可合入标题以 `deploy: lottery access protection` 开头的明确发布提交。仅这个前缀的 main push 会启用部署，不对普通文档/配置更新自动部署。合入这种发布提交之前必须确认带密钥的 TestFlight 已上传。格式失败日志不显示密钥。
 - 首次启用/轮换密钥先构建并安装带新密钥的 App，再启用云端对应密钥。详细步骤见 [API_ACCESS_CONTROL.md](API_ACCESS_CONTROL.md)。

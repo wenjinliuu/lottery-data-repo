@@ -31,7 +31,11 @@ const headers = { "X-Lottery-Api-Key": key };
 for (const path of ["/v2/health", "/v2/status", "/v2/bootstrap"]) {
   const { response, body } = await request(path, headers);
   assert.equal(response.status, 200, path);
-  assert.match(response.headers.get("cache-control"), /^private,/);
+  // Tencent may replace private caching with the stronger no-store policy.
+  const cacheDirectives = response.headers.get("cache-control")?.split(",")
+    .map((directive) => directive.trim().toLowerCase()) ?? [];
+  assert.ok(cacheDirectives.includes("private") || cacheDirectives.includes("no-store"),
+    "Authenticated reads must forbid shared caching");
   if (path === "/v2/health") assert.equal(body.ok, true);
   if (path === "/v2/status") assert.equal(body.schema, "duigehao.lottery.status");
   if (path === "/v2/bootstrap") assert.equal(Object.keys(body.latest).length, 8);
