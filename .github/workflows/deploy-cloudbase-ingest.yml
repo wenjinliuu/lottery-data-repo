@@ -48,9 +48,10 @@ jobs:
         run: |
           node --input-type=module -e '
             import fs from "node:fs";
-            const key = process.env.LOTTERY_READ_API_KEY || "";
+            const rawKey = process.env.LOTTERY_READ_API_KEY || "";
+            const key = rawKey.trim();
             if (key && !/^[A-Za-z0-9_-]{32,128}$/.test(key)) {
-              throw new Error("LOTTERY_READ_API_KEY must be 32-128 URL-safe random characters");
+              throw new Error(`LOTTERY_READ_API_KEY must be 32-128 URL-safe random characters; length=${rawKey.length}, trimmed_length=${key.length}, unsupported_characters=${/[^A-Za-z0-9_-]/.test(key)}`);
             }
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy_ready=${Boolean(key)}\n`);
             if (!key) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
@@ -58,7 +59,7 @@ jobs:
           '
   deploy:
     needs: checks
-    if: ${{ github.ref == 'refs/heads/main' && needs.checks.outputs.deploy_ready == 'true' && github.event_name != 'pull_request' }}
+    if: ${{ github.ref == 'refs/heads/main' && needs.checks.outputs.deploy_ready == 'true' && github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     env:
       TCB_DISABLE_REPORT: "1"
@@ -69,6 +70,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Normalize copied read-key whitespace for deployment
+        run: |
+          node -e '
+            const fs = require("fs");
+            const key = process.env.LOTTERY_READ_API_KEY.trim();
+            console.log(`::add-mask::${key}`);
+            fs.appendFileSync(process.env.GITHUB_ENV, `LOTTERY_READ_API_KEY=${key}\n`);
+          '
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

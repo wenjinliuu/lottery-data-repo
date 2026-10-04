@@ -9,8 +9,9 @@ function digest(value) {
 // This is an application read key, never a CloudBase management credential.
 // Fail closed if deployment omitted it. Do not accept keys in URLs or log them.
 export function createApiAccess({ apiKey = process.env.LOTTERY_READ_API_KEY } = {}) {
-  const configured = typeof apiKey === "string" && apiKey.length >= 32;
-  const expected = configured ? digest(apiKey) : null;
+  const normalizedKey = typeof apiKey === "string" ? apiKey.trim() : "";
+  const configured = /^[A-Za-z0-9_-]{32,128}$/.test(normalizedKey);
+  const expected = configured ? digest(normalizedKey) : null;
   return (event) => {
     if (!expected) return { statusCode: 503, error: "api_access_not_configured" };
     const matches = Object.entries(event.headers ?? {})

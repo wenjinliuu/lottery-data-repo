@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 const base = process.env.LOTTERY_API_URL;
-const key = process.env.LOTTERY_READ_API_KEY;
+const key = process.env.LOTTERY_READ_API_KEY?.trim();
 assert.ok(base && key, "Configure the lottery URL and App read key before the smoke test");
 
 async function request(path, headers = {}) {

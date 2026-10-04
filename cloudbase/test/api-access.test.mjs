@@ -44,6 +44,12 @@ test("rejects duplicate and oversized key values", () => {
   ]) assert.equal(testAccess({ headers }).statusCode, 401);
 });
 
+test("normalizes copied Secret whitespace but rejects internal invalid characters", () => {
+  const access = createApiAccess({ apiKey: ` \n${TEST_API_KEY}\n` });
+  assert.equal(access({ headers: { [API_KEY_HEADER]: TEST_API_KEY } }), null);
+  assert.equal(createApiAccess({ apiKey: `${TEST_API_KEY}\nInjected` })({ headers: {} }).statusCode, 503);
+});
+
 test("preflight needs no key, HEAD does, and authorized responses cannot enter shared caches", async () => {
   const preflight = await handleHttp({ httpMethod: "OPTIONS", path: "/v2/bootstrap" }, null, testAccess);
   assert.equal(preflight.statusCode, 204);
