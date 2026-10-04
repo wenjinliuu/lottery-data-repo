@@ -108,6 +108,7 @@ jobs:
           tcb routes edit --help
           tcb routes list --help
           tcb db pg migration up --help
+          tcb db pg migration fetch --help
 
       - name: Authenticate to the target environment
         run: |
@@ -140,6 +141,9 @@ jobs:
           mkdir -p "$migration_dir/cloudbase/migrations"
           cp cloudbase/migrations/20261004080500_lottery_private_reads.sql "$migration_dir/cloudbase/migrations/"
           cd "$migration_dir"
+          # API-key login is project scoped; authenticate the isolated directory too.
+          tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
+          tcb db pg migration fetch -e "$CLOUDBASE_ENV_ID"
           tcb db pg migration up -e "$CLOUDBASE_ENV_ID" --dry-run
           tcb db pg migration up -e "$CLOUDBASE_ENV_ID" --yes
 

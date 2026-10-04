@@ -25,6 +25,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - 腾讯云网关会追加或替换缓存头为 `no-store, no-cache, must-revalidate, max-age=0`。验收按指令含义判断：拒绝响应必须有 `no-store`；成功响应必须有 `private` 或更严格的 `no-store`。不要求整串响应头与函数代码完全一致，也不能接受公开共享缓存。
 - **Deploy CloudBase lottery functions**：部署函数 → 更新并回读限流 → 验证缺失/错误密钥 401 与正确密钥 200 → 执行本次权限迁移 → 再验收。工作流绿色不代表已部署，deploy job 可能因缺 Secret 跳过。
 - 普通 push/PR 只检查。云端部署需在 main 手动运行工作流；如果手动入口不可用，可合入标题以 `deploy: lottery access protection` 开头的明确发布提交。仅这个前缀的 main push 会启用部署，不对普通文档/配置更新自动部署。合入这种发布提交之前必须确认带密钥的 TestFlight 已上传。格式失败日志不显示密钥。
+- 权限迁移在隔离目录运行；该目录重新登录 API Key，先 fetch 远端已应用迁移，再 preview/up。不能把本仓库未应用的历史 SQL 一起推上去，也不能把迁移登录失败当成权限已完成。
 - 首次启用/轮换密钥先构建并安装带新密钥的 App，再启用云端对应密钥。详细步骤见 [API_ACCESS_CONTROL.md](API_ACCESS_CONTROL.md)。
 - 改休市配置后重新生成受影响年份日历、跑测试和结构验证、同步兼容别名；没有权威新年度安排时不假称已确认。
 
