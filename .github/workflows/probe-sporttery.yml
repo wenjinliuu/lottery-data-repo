@@ -1,7 +1,7 @@
 name: Probe sporttery API from CloudBase (one-off)
 
 # 一次性探测：在 CloudBase 云函数里请求体彩接口 3 次，验证国内云出口能否访问。
-# 只在 probe/sporttery 分支触发；不改动 lottery-* 函数；跑完删除探测函数。
+# 只在 probe/sporttery 分支触发；不改动 lottery-* 函数；调用和删除通过 MCP 完成。
 on:
   push:
     branches: [probe/sporttery]
@@ -45,22 +45,6 @@ jobs:
         working-directory: probe/sporttery
         run: |
           tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
-          tcb fn invoke --help | head -30 || true
           tcb fn deploy jc-probe --force --yes
 
-      - name: Invoke probe
-        working-directory: probe/sporttery
-        run: |
-          sleep 10
-          tcb fn invoke jc-probe -e "$CLOUDBASE_ENV_ID" --params '{}' | tee "$RUNNER_TEMP/probe.txt"
-          {
-            echo '## Sporttery probe result'
-            echo '```'
-            cat "$RUNNER_TEMP/probe.txt"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Delete probe function
-        if: always()
-        working-directory: probe/sporttery
-        run: tcb fn delete jc-probe -e "$CLOUDBASE_ENV_ID" --yes || tcb fn delete jc-probe --yes || true
+      # 调用与删除由 CloudBase MCP 完成（API Key 登录的 CLI 无权调用事件函数：Cam authentication failed）
