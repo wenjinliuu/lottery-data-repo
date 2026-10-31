@@ -1,0 +1,66 @@
+name: Probe sporttery API from CloudBase (one-off)
+
+# 一次性探测：在 CloudBase 云函数里请求体彩接口 3 次，验证国内云出口能否访问。
+# 只在 probe/sporttery 分支触发；不改动 lottery-* 函数；跑完删除探测函数。
+on:
+  push:
+    branches: [probe/sporttery]
+    paths:
+      - "probe/sporttery/**"
+      - ".github/workflows/probe-sporttery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: probe-sporttery
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      TCB_DISABLE_REPORT: "1"
+      CLOUDBASE_ENV_ID: wenjin-cloudbase-d1empq882391ac1
+      CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+
+      - name: Baseline from GitHub runner (one request, expected to be blocked)
+        run: |
+          curl -s -o /dev/null -w "github-runner calc status: %{http_code}\n" --max-time 20 \
+            -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0 Safari/537.36" \
+            -e https://www.sporttery.cn/ \
+            "https://webapi.sporttery.cn/gateway/jc/football/getMatchCalculatorV1.qry?poolCode=hhad,had&channel=c" || true
+
+      - name: Install CloudBase CLI
+        run: npm install --global @cloudbase/cli@3.8.3
+
+      - name: Deploy probe function (isolated config)
+        working-directory: probe/sporttery
+        run: |
+          tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
+          tcb fn invoke --help | head -30 || true
+          tcb fn deploy jc-probe --force --yes
+
+      - name: Invoke probe
+        working-directory: probe/sporttery
+        run: |
+          sleep 10
+          tcb fn invoke jc-probe -e "$CLOUDBASE_ENV_ID" --params '{}' | tee "$RUNNER_TEMP/probe.txt"
+          {
+            echo '## Sporttery probe result'
+            echo '```'
+            cat "$RUNNER_TEMP/probe.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete probe function
+        if: always()
+        working-directory: probe/sporttery
+        run: tcb fn delete jc-probe -e "$CLOUDBASE_ENV_ID" --yes || tcb fn delete jc-probe --yes || true
