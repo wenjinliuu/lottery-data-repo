@@ -47,4 +47,18 @@ jobs:
           tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
           tcb fn deploy jc-probe --force --yes
 
-      # 调用与删除由 CloudBase MCP 完成（API Key 登录的 CLI 无权调用事件函数：Cam authentication failed）
+      - name: Invoke probe (HTTP function, API key)
+        working-directory: probe/sporttery
+        run: |
+          sleep 15
+          for i in 1 2 3; do
+            if tcb fn invoke jc-probe -e "$CLOUDBASE_ENV_ID" -X GET --api-key "$CLOUDBASE_API_KEY" > "$RUNNER_TEMP/probe.txt" 2>&1; then break; fi
+            cat "$RUNNER_TEMP/probe.txt"; sleep 20
+          done
+          cat "$RUNNER_TEMP/probe.txt"
+          { echo '## Sporttery probe result'; echo '```'; cat "$RUNNER_TEMP/probe.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete probe function
+        if: always()
+        working-directory: probe/sporttery
+        run: tcb fn delete jc-probe -e "$CLOUDBASE_ENV_ID" --yes || true

@@ -6,12 +6,13 @@
     {
       "name": "jc-probe",
       "dir": "jc-probe",
-      "handler": "index.main",
-      "runtime": "Nodejs18.15",
+      "handler": "http-index.main",
+      "runtime": "Nodejs20.19",
       "timeout": 60,
       "memorySize": 128,
       "installDependency": false,
-      "triggers": []
+      "triggers": [],
+      "type": "HTTP"
     }
   ]
 }

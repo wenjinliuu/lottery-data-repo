@@ -13,7 +13,7 @@ function get(url, referer) {
     req.on('error', (e) => resolve({ status: 'error', err: String(e), ms: Date.now() - t0 }));
   });
 }
-exports.main = async (event) => {
+async function probe() {
   const out = {};
   // 出口 IP
   const ip = await get('https://api.ipify.org?format=json', 'https://www.sporttery.cn/');
@@ -33,3 +33,12 @@ exports.main = async (event) => {
   try { const j = JSON.parse(c.body); const v = j.value || {}; out.history.keys = Object.keys(v); out.history.had = (v.hadList || []).slice(0, 3).concat((v.hadList || []).slice(-1)); out.history.hadCount = (v.hadList || []).length; out.history.hhad = (v.hhadList || []).slice(0, 2); out.history.hhadCount = (v.hhadList || []).length; } catch (e) { out.history.parseErr = String(e); }
   return out;
 };
+
+const http = require('http');
+const port = Number(process.env.PORT || 9000);
+http.createServer(async (req, res) => {
+  let out;
+  try { out = await probe(); } catch (e) { out = { fatal: String(e) }; }
+  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(out));
+}).listen(port, '0.0.0.0', () => console.log('jc-probe listening on ' + port));
