@@ -8,6 +8,8 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 | --- | --- | --- |
 | 抓取和补抓 | `cloudbase/src/handler.mjs`、`repository.mjs`、`config/lotteries.json` | 已完整彩种跳过；自动调用共享预算；号码和奖级都完整才结束补抓 |
 | 自用 API | `cloudbase/src/api-handler.mjs`、`api-access.mjs` | GET/HEAD 先验证读取密钥，再访问数据库；不返回或记录密钥 |
+| 个人票据 | `cloudbase/src/user-api.mjs`、`user-tickets.mjs`、`user-access.mjs` | `/v2/me/*` 只认个人密钥 `X-Lottery-User-Key`，读取密钥换不来；响应一律 `no-store`；票据照片不上云 |
+| 云端核对与推送 | `cloudbase/src/settle.mjs`、`prize-rules.mjs`、`apns.mjs` | 抓取落库后核对当期票据；每期最多推两次（开奖、奖金落定）；失败只记进 `results[].settlement`，不得让抓取失败；规则与 `lottery-ios` 的 `PrizeRules.swift` 逐条一致 |
 | 网关限流 | `config/lottery-gateway-access.json` | 仅 `/lottery`：每 IP 10 QPS，总计 100 QPS；不影响同环境其他项目 |
 | 数据库权限 | `cloudbase/migrations` | 匿名/普通认证角色不直接读取开奖表；保留服务角色；新增版本迁移，不重放历史迁移 |
 | GitHub 同步 | `.github/workflows/update-lottery-data.yml` | 北京时间 08:14 补前一天未完成数据、导出、生成日历、提交镜像；排队会延迟 |
@@ -28,6 +30,14 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - 权限迁移在隔离目录运行；该目录重新登录 API Key，先 fetch 远端已应用迁移，再 preview/up。不能把本仓库未应用的历史 SQL 一起推上去，也不能把迁移登录失败当成权限已完成。
 - 首次启用/轮换密钥先构建并安装带新密钥的 App，再启用云端对应密钥。详细步骤见 [API_ACCESS_CONTROL.md](API_ACCESS_CONTROL.md)。
 - 改休市配置后重新生成受影响年份日历、跑测试和结构验证、同步兼容别名；没有权威新年度安排时不假称已确认。
+
+## 个人票据与推送
+
+- Secrets：`LOTTERY_USER_API_KEY`（格式同读取密钥，但只存手机钥匙串，不进安装包、不进 `lottery-ios` 的 Secrets）、`APNS_KEY_P8`（.p8 文件的 base64，一行）、`APNS_KEY_ID`、`APNS_TEAM_ID`、`APNS_TOPIC`（App 的 Bundle ID）。任何一项没配：同步接口 503 或不推送，开奖抓取不受影响。
+- 表：`user_tickets`（`record` 与 App 备份文件的单条记录同构；云端核对结果存在 `settle_*` 列，不改 `record`）、`user_push_devices`、`user_draw_notifications`。回退 SQL 在迁移文件末尾。
+- 同步以 App 的修改时间为准，新的覆盖旧的；删除是软删除。号码或期次变了，`settle_*` 清空重算。
+- 改奖级规则必须同时改 `lottery-ios` 的 `PrizeRules.swift` 和两边的测试。
+- 没收到推送：先看 `lottery_ingest_runs.details.results[].settlement`（`push: not_configured / no_devices`、`push_errors`），再看 `user_push_devices.disabled / last_error`，最后看 `user_draw_notifications` 是否这一期已经推过。
 
 ## 排查顺序
 

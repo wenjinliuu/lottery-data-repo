@@ -9,6 +9,7 @@ import {
   materializeV2Draw,
   nextMetadata,
 } from "./api-contract.mjs";
+import { handleUser, isUserPath } from "./user-api.mjs";
 
 const configUrl = [
   new URL("../config/lotteries.json", import.meta.url),
@@ -337,9 +338,17 @@ function response(statusCode, payload, { head = false, cache = 60 } = {}) {
   };
 }
 
-export async function handleHttp(event = {}, service = null, checkAccess = apiAccess) {
+export async function handleHttp(event = {}, service = null, checkAccess = apiAccess, user = {}) {
   const method = methodOf(event);
   const head = method === "HEAD";
+  // 个人票据接口单独一套密钥和方法，开奖查询那一半保持只读不变。
+  if (isUserPath(requestPath(event))) {
+    return handleUser(
+      { event, method, path: requestPath(event), query: queryOf(event) },
+      user.store ?? null,
+      user.checkAccess,
+    );
+  }
   if (method === "OPTIONS") return response(204, {}, { head: true, cache: 86400 });
   if (method !== "GET" && !head) {
     return response(405, { error: "method_not_allowed" }, { cache: 0 });

@@ -14,7 +14,11 @@
       "envVariables": {
         "CLOUDBASE_ENV_ID": "wenjin-cloudbase-d1empq882391ac1",
         "CLOUDBASE_API_KEY": "{{env.CLOUDBASE_API_KEY}}",
-        "JISU_APPKEY": "{{env.JISU_APPKEY}}"
+        "JISU_APPKEY": "{{env.JISU_APPKEY}}",
+        "APNS_KEY_P8": "{{env.APNS_KEY_P8}}",
+        "APNS_KEY_ID": "{{env.APNS_KEY_ID}}",
+        "APNS_TEAM_ID": "{{env.APNS_TEAM_ID}}",
+        "APNS_TOPIC": "{{env.APNS_TOPIC}}"
       },
       "triggers": [],
       "ignore": [
@@ -37,7 +41,8 @@
       "envVariables": {
         "CLOUDBASE_ENV_ID": "wenjin-cloudbase-d1empq882391ac1",
         "CLOUDBASE_API_KEY": "{{env.CLOUDBASE_API_KEY}}",
-        "LOTTERY_READ_API_KEY": "{{env.LOTTERY_READ_API_KEY}}"
+        "LOTTERY_READ_API_KEY": "{{env.LOTTERY_READ_API_KEY}}",
+        "LOTTERY_USER_API_KEY": "{{env.LOTTERY_USER_API_KEY}}"
       },
       "triggers": [],
       "ignore": [
@@ -61,7 +66,8 @@
       "envVariables": {
         "CLOUDBASE_ENV_ID": "wenjin-cloudbase-d1empq882391ac1",
         "CLOUDBASE_API_KEY": "{{env.CLOUDBASE_API_KEY}}",
-        "LOTTERY_READ_API_KEY": "{{env.LOTTERY_READ_API_KEY}}"
+        "LOTTERY_READ_API_KEY": "{{env.LOTTERY_READ_API_KEY}}",
+        "LOTTERY_USER_API_KEY": "{{env.LOTTERY_USER_API_KEY}}"
       },
       "triggers": [],
       "ignore": [
