@@ -153,7 +153,9 @@ export class DrawPushStore {
 
 /**
  * 开奖号码落库后调用：给订了这个彩种的设备各推一条，每期只推一次。
- * 通知带 mutable-content，手机上的通知扩展会用本机的票把正文改写成中奖情况。
+ * 通知同时带 content-available：App 在后台被唤醒，用本机的票核对完，
+ * 再用同一个标识符（collapse id）发一条本地通知把它换成中奖情况。
+ * App 没被唤醒（比如被手动划掉了）时，用户看到的就是开奖号码本身。
  * 任何失败都不该影响抓取本身，调用方要自己兜住异常。
  */
 export async function pushDraw({
@@ -177,6 +179,8 @@ export async function pushDraw({
     body: numbersText(lotteryType, draw.numbers),
     threadId: `draw-${lotteryType}`,
     mutableContent: true,
+    contentAvailable: true,
+    collapseId: `draw-${lotteryType}-${issue}`,
     data: drawPayload(lotteryType, draw),
   });
   for (const result of results.filter((item) => item.gone)) {

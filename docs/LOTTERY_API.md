@@ -39,7 +39,7 @@
 
 同一个令牌重复登记就是覆盖；`lotteries` 传空数组即退订。错误：400（`invalid_token`、`invalid_lotteries`、`invalid_json`、`body_too_large`）、401、503。
 
-开奖号码落库后，订了该彩种的设备各收到一条通知（每期一次）：标题「双色球 2026130 期开奖」，正文是开奖号码，带 `mutable-content`。自定义字段 `lottery_type` 和 `draw`（`issue`、`date`、`numbers`、`prizes[{name, amount, extra_amount}]`，与 `/v2/draws` 的单条开奖同构；奖级放不下时省略）。云端不知道用户有什么票，中奖情况由 App 的通知扩展在本机算出来后改写正文。
+开奖号码落库后，订了该彩种的设备各收到一条通知（每期一次）：标题「双色球 2026130 期开奖」，正文是开奖号码，带 `content-available` 和 `mutable-content`，`apns-collapse-id` 为 `draw-{lottery_type}-{issue}`。自定义字段 `lottery_type` 和 `draw`（`issue`、`date`、`numbers`、`prizes[{name, amount, extra_amount}]`，与 `/v2/draws` 的单条开奖同构；奖级放不下时省略）。云端不知道用户有什么票，中奖情况由 App 被唤醒后在本机算出来，再用同一个标识符发本地通知替换掉这一条。
 
 ## GitHub 静态镜像
 

@@ -63,7 +63,7 @@ export function createApnsClient({
     /**
      * @returns {Promise<Array<{token, ok, status, reason, gone}>>} gone 表示令牌已失效，应停用。
      */
-    async send(devices, { title, body, data = {}, threadId, mutableContent = false }) {
+    async send(devices, { title, body, data = {}, threadId, mutableContent = false, contentAvailable = false, collapseId }) {
       const payload = JSON.stringify({
         aps: {
           alert: { title, body },
@@ -71,6 +71,8 @@ export function createApnsClient({
           ...(threadId ? { "thread-id": threadId } : {}),
           // 让手机上的通知扩展有机会在显示前改写正文。
           ...(mutableContent ? { "mutable-content": 1 } : {}),
+          // 顺便在后台唤醒 App：它用本机的票核对完，会把这条通知换成中奖情况。
+          ...(contentAvailable ? { "content-available": 1 } : {}),
         },
         ...data,
       });
@@ -92,6 +94,8 @@ export function createApnsClient({
                 "apns-topic": (device.bundle_id || topic).trim(),
                 "apns-push-type": "alert",
                 "apns-priority": "10",
+                // 同一个 id 的通知互相替换；它也是手机上这条通知的标识符。
+                ...(collapseId ? { "apns-collapse-id": collapseId } : {}),
                 "content-type": "application/json",
               }, payload, timeoutMs);
               let reason = "";

@@ -35,7 +35,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - Secrets：`APNS_KEY_P8`（推送密钥 .p8 文件的 base64，一行）、`APNS_KEY_ID`、`APNS_TEAM_ID`（与 `lottery-ios` 的 `APPLE_TEAM_ID` 同值，仓库密钥不能跨仓库读，所以这里要再存一份）。Bundle ID 不是秘密，直接写在 `cloudbaserc.json` 的 `APNS_TOPIC` 里。上传 TestFlight 用的 App Store Connect 密钥不能当推送密钥用。任何一项没配就不推送，开奖抓取不受影响。
 - 表：`push_devices`（令牌、环境、订阅的彩种）、`draw_push_log`（每期一行，防重复）。回退 SQL 在迁移文件末尾。
 - `POST /v2/devices` 是唯一的写接口，和读取共用 `X-Lottery-Api-Key`。
-- 通知里的 `draw` 与 `/v2/draws` 的单条开奖同构；改字段要同时改 `lottery-ios` 的通知扩展。整条通知上限 4096 字节，奖级表放不下时整个不带。
+- 通知里的 `draw` 与 `/v2/draws` 的单条开奖同构；改字段要同时改 `lottery-ios` 的 `DrawPushPayload`。整条通知上限 4096 字节，奖级表放不下时整个不带。
 - 没收到推送：先看 `lottery_ingest_runs.details.results[].notification`（`not_configured / no_devices / no_numbers / already_sent`、`push_errors`），再看 `push_devices.disabled / last_error / lotteries`。
 
 ## 排查顺序

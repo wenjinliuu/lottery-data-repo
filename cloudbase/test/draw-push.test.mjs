@@ -96,6 +96,8 @@ test("开奖推送：只推给订了这个彩种的设备，每期一次，失�
   assert.equal(message.title, "双色球 2026130 期开奖");
   assert.equal(message.body, "05 06 10 25 27 30 + 11");
   assert.equal(message.mutableContent, true);
+  assert.equal(message.contentAvailable, true);
+  assert.equal(message.collapseId, "draw-ssq-2026130");
   assert.equal(message.data.draw.issue, "2026130");
   assert.equal(db.tables.push_devices.find((d) => d.token === TOKEN_B).disabled, true);
   assert.equal(db.tables.draw_push_log[0].delivered, 1);
