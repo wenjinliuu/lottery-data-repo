@@ -56,11 +56,11 @@ test("按环境分主机发送，410 标成失效", async () => {
   const results = await client.send([
     { token: "good", environment: "production", bundle_id: "" },
     { token: "dead", environment: "sandbox", bundle_id: "other.bundle" },
-  ], { title: "t", body: "b", data: { issue: "1" }, threadId: "draw-ssq" });
+  ], { title: "t", body: "b", data: { issue: "1" }, threadId: "draw-ssq", mutableContent: true });
   assert.deepEqual(results.map((r) => [r.token, r.ok, r.gone]), [["good", true, false], ["dead", false, true]]);
   assert.deepEqual(requests.map((r) => [r.host, r.headers["apns-topic"]]), [
     ["https://api.push.apple.com", "app.bundle"],
     ["https://api.sandbox.push.apple.com", "other.bundle"],
   ]);
-  assert.deepEqual(requests[0].body, { aps: { alert: { title: "t", body: "b" }, sound: "default", "thread-id": "draw-ssq" }, issue: "1" });
+  assert.deepEqual(requests[0].body, { aps: { alert: { title: "t", body: "b" }, sound: "default", "thread-id": "draw-ssq", "mutable-content": 1 }, issue: "1" });
 });

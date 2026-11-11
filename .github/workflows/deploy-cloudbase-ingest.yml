@@ -68,9 +68,8 @@ jobs:
       CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
       JISU_APPKEY: ${{ secrets.JISU_APPKEY }}
       LOTTERY_READ_API_KEY: ${{ secrets.LOTTERY_READ_API_KEY }}
-      # 个人票据同步与开奖推送。没配时接口返回 503、核对照常但不推送，不影响开奖数据。
+      # 开奖推送。没配时不推送，不影响开奖数据。
       # APNS_KEY_P8 存 .p8 文件的 base64（一行），不要存带换行的原文。
-      LOTTERY_USER_API_KEY: ${{ secrets.LOTTERY_USER_API_KEY }}
       APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
       APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
       APNS_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
@@ -141,12 +140,12 @@ jobs:
           LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
         run: node cloudbase/scripts/check-api-access.mjs
 
-      - name: Apply versioned migrations (private reads, personal tickets)
+      - name: Apply versioned migrations (private reads, draw push)
         run: |
           migration_dir="$RUNNER_TEMP/lottery-private-read-migration"
           mkdir -p "$migration_dir/cloudbase/migrations"
           cp cloudbase/migrations/20261004080500_lottery_private_reads.sql "$migration_dir/cloudbase/migrations/"
-          cp cloudbase/migrations/20261110150000_user_tickets.sql "$migration_dir/cloudbase/migrations/"
+          cp cloudbase/migrations/20261112090000_draw_push.sql "$migration_dir/cloudbase/migrations/"
           cd "$migration_dir"
           # API-key login is project scoped; authenticate the isolated directory too.
           tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes

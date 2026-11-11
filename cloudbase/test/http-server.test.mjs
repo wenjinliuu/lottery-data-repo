@@ -50,35 +50,25 @@ test("returns 405 for writes without reading the request body", async () => {
   });
 });
 
-test("accepts a JSON body on the personal ticket route and rejects oversized ones", async () => {
-  const { UserTicketStore } = await import("../src/user-tickets.mjs");
-  const { createUserAccess } = await import("../src/user-access.mjs");
+test("registers a push device over a real socket and rejects oversized bodies", async () => {
+  const { DrawPushStore } = await import("../src/draw-push.mjs");
   const { createFakeDb } = await import("./fake-db.mjs");
-  const userKey = "unit-test-only-user-key-not-for-production";
-  const server = createLotteryHttpServer(service(), testAccess, {
-    store: new UserTicketStore(createFakeDb()),
-    checkAccess: createUserAccess({ userKey }),
-  });
+  const db = createFakeDb();
+  const server = createLotteryHttpServer(service(), testAccess, new DrawPushStore(db));
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   try {
     const base = `http://127.0.0.1:${server.address().port}`;
-    const headers = { "X-Lottery-User-Key": userKey, "content-type": "application/json" };
-    const ticket = {
-      id: "a",
-      updated_at: "2026-11-10T10:00:00Z",
-      record: { gameKey: "ssq", targetExpect: "2026130", numbers: { red: [1, 2, 3, 4, 5, 6], blue: [7] } },
-    };
-    const posted = await fetch(`${base}/lottery/v2/me/tickets`, { method: "POST", headers, body: JSON.stringify({ tickets: [ticket] }) });
-    assert.equal(posted.status, 200);
-    assert.equal((await posted.json()).accepted, 1);
-    const pulled = await fetch(`${base}/lottery/v2/me/tickets?since=0`, { headers });
-    assert.deepEqual((await pulled.json()).tickets.map((item) => item.id), ["a"]);
-    // 读取密钥换不来个人数据
-    const wrongKey = await fetch(`${base}/lottery/v2/me/tickets`, { headers: { "X-Lottery-Api-Key": TEST_API_KEY } });
-    assert.equal(wrongKey.status, 401);
-    const huge = await fetch(`${base}/lottery/v2/me/tickets`, { method: "POST", headers, body: "x".repeat(1024 * 1024 + 10) })
+    const headers = { "X-Lottery-Api-Key": TEST_API_KEY, "content-type": "application/json" };
+    const body = JSON.stringify({ token: "ab".repeat(32), environment: "production", bundle_id: "app", lotteries: ["ssq"] });
+    const ok = await fetch(`${base}/lottery/v2/devices`, { method: "POST", headers, body });
+    assert.equal(ok.status, 200);
+    assert.equal(db.tables.push_devices.length, 1);
+    const noKey = await fetch(`${base}/lottery/v2/devices`, { method: "POST", body });
+    assert.equal(noKey.status, 401);
+    const huge = await fetch(`${base}/lottery/v2/devices`, { method: "POST", headers, body: "x".repeat(20 * 1024) })
       .then((response) => response.status, () => "connection closed");
     assert.ok(huge === 500 || huge === "connection closed");
+    assert.equal(db.tables.push_devices.length, 1);
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }

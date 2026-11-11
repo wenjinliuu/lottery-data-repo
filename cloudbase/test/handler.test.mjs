@@ -104,7 +104,7 @@ test("manual target date rejects ambiguous formats", async () => {
   );
 });
 
-test("draw settlement runs after a save and its failure never fails the ingest", async () => {
+test("draw push runs after a save and its failure never fails the ingest", async () => {
   const calls = [];
   const ok = ingestFixture({ complete: true });
   const result = await runIngest({
@@ -112,10 +112,10 @@ test("draw settlement runs after a save and its failure never fails the ingest",
     targetDate: "2026-09-20",
     repository: ok.repository,
     client: ok.client,
-    settle: async (target) => { calls.push(target); return { tickets: 2, won: 1, notified: "result" }; },
+    notify: async (target) => { calls.push(target); return { push: "sent", delivered: 1 }; },
   });
   assert.deepEqual(calls, [{ lotteryType: "pl3", issue: "26253" }]);
-  assert.deepEqual(result.results[0].settlement, { tickets: 2, won: 1, notified: "result" });
+  assert.deepEqual(result.results[0].notification, { push: "sent", delivered: 1 });
 
   const broken = ingestFixture({ complete: true });
   const failed = await runIngest({
@@ -123,15 +123,15 @@ test("draw settlement runs after a save and its failure never fails the ingest",
     targetDate: "2026-09-20",
     repository: broken.repository,
     client: broken.client,
-    settle: async () => { throw new Error("push service down"); },
+    notify: async () => { throw new Error("push service down"); },
   });
   assert.equal(failed.execution_status, "success");
   assert.equal(failed.results[0].data_status, "completed");
-  assert.match(failed.results[0].settlement.error, /push service down/);
+  assert.match(failed.results[0].notification.error, /push service down/);
   assert.equal(broken.runs[0].status, "success");
 });
 
-test("fake repositories never reach the real settlement path by default", async () => {
+test("fake repositories never reach the real push path by default", async () => {
   const fixture = ingestFixture({ complete: true });
   const result = await runIngest({
     slot: "all_first",
@@ -139,5 +139,5 @@ test("fake repositories never reach the real settlement path by default", async 
     repository: fixture.repository,
     client: fixture.client,
   });
-  assert.equal("settlement" in result.results[0], false);
+  assert.equal("notification" in result.results[0], false);
 });

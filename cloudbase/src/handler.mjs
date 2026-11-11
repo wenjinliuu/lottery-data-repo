@@ -8,7 +8,7 @@ import {
   automaticDailyLimit,
   targetDateForSlot,
 } from "./schedule.mjs";
-import { settleAndNotify } from "./settle.mjs";
+import { pushDraw } from "./draw-push.mjs";
 
 const configUrl = [
   new URL("../config/lotteries.json", import.meta.url),
@@ -26,8 +26,8 @@ export async function runIngest({
   lotteryTypes,
   repository = new LotteryRepository(),
   client = new JisuClient(process.env.JISU_APPKEY),
-  // 开奖落库后核对个人票据并推送。测试里换了假仓库时默认不跑，免得去连真库。
-  settle = repository instanceof LotteryRepository ? settleAndNotify : null,
+  // 开奖号码落库后推送。测试里换了假仓库时默认不跑，免得去连真库。
+  notify = repository instanceof LotteryRepository ? pushDraw : null,
 } = {}) {
   if (!slot) throw new Error("Missing schedule slot");
   if (targetDateOverride && !/^\d{4}-\d{2}-\d{2}$/.test(targetDateOverride)) {
@@ -94,13 +94,13 @@ export async function runIngest({
         assertExpectedDraw(draw, target);
         const completeness = assessDrawCompleteness(draw);
         const saved = await repository.saveDraw(target, draw, completeness);
-        // 核对和推送是附带的事：失败只记一笔，绝不能把这次抓取判成失败。
-        let settlement;
-        if (settle) {
+        // 推送是附带的事：失败只记一笔，绝不能把这次抓取判成失败。
+        let notification;
+        if (notify) {
           try {
-            settlement = await settle({ lotteryType: target.lottery_type, issue: draw.issue });
+            notification = await notify({ lotteryType: target.lottery_type, issue: draw.issue });
           } catch (error) {
-            settlement = { error: String(error).slice(0, 300) };
+            notification = { error: String(error).slice(0, 300) };
           }
         }
         results.push({
@@ -110,7 +110,7 @@ export async function runIngest({
           action: "fetched",
           data_status: saved.data_status,
           completeness_reason: saved.reason,
-          ...(settlement ? { settlement } : {}),
+          ...(notification ? { notification } : {}),
         });
       } catch (error) {
         const returnedIssue = /stale_issue:([^;]+)/.exec(String(error))?.[1] ?? "";

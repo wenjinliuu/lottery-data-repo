@@ -3,7 +3,7 @@
 export function createFakeDb(seed = {}) {
   const tables = Object.fromEntries(Object.entries(seed).map(([name, rows]) => [name, rows.map((row) => ({ ...row }))]));
   let seq = 0;
-  const bump = (table, row) => { if (table === "user_tickets") row.sync_seq = ++seq; };
+  const bump = (table, row) => { void table; void row; void seq; };
   const keysOf = (onConflict) => String(onConflict).split(",");
 
   function builder(table) {

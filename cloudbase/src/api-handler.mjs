@@ -9,7 +9,7 @@ import {
   materializeV2Draw,
   nextMetadata,
 } from "./api-contract.mjs";
-import { handleUser, isUserPath } from "./user-api.mjs";
+import { DrawPushStore, ValidationError } from "./draw-push.mjs";
 
 const configUrl = [
   new URL("../config/lotteries.json", import.meta.url),
@@ -338,16 +338,42 @@ function response(statusCode, payload, { head = false, cache = 60 } = {}) {
   };
 }
 
-export async function handleHttp(event = {}, service = null, checkAccess = apiAccess, user = {}) {
+const MAX_BODY_BYTES = 16 * 1024;
+
+function jsonBody(event) {
+  let raw = event.body ?? "";
+  if (raw && typeof raw === "object" && !Buffer.isBuffer(raw)) return raw;
+  if (event.isBase64Encoded) raw = Buffer.from(String(raw), "base64").toString("utf8");
+  raw = String(raw);
+  if (Buffer.byteLength(raw) > MAX_BODY_BYTES) throw new ValidationError("body_too_large");
+  try {
+    const parsed = JSON.parse(raw || "null");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not an object");
+    return parsed;
+  } catch {
+    throw new ValidationError("invalid_json");
+  }
+}
+
+// 唯一的写接口：登记推送设备和它订阅的彩种。和读取共用同一把密钥。
+async function registerDevice(event, pushStore) {
+  try {
+    const result = await (pushStore ?? new DrawPushStore()).registerDevice(jsonBody(event));
+    return response(200, result, { cache: 0 });
+  } catch (error) {
+    if (error instanceof ValidationError) return response(400, { error: error.message }, { cache: 0 });
+    console.error("lottery-api devices", String(error));
+    return response(500, { error: "internal_error" }, { cache: 0 });
+  }
+}
+
+export async function handleHttp(event = {}, service = null, checkAccess = apiAccess, pushStore = null) {
   const method = methodOf(event);
   const head = method === "HEAD";
-  // 个人票据接口单独一套密钥和方法，开奖查询那一半保持只读不变。
-  if (isUserPath(requestPath(event))) {
-    return handleUser(
-      { event, method, path: requestPath(event), query: queryOf(event) },
-      user.store ?? null,
-      user.checkAccess,
-    );
+  if (method === "POST" && requestPath(event) === "/v2/devices") {
+    const denied = checkAccess(event);
+    if (denied) return response(denied.statusCode, { error: denied.error }, { cache: 0 });
+    return registerDevice(event, pushStore);
   }
   if (method === "OPTIONS") return response(204, {}, { head: true, cache: 86400 });
   if (method !== "GET" && !head) {
