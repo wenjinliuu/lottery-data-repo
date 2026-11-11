@@ -74,7 +74,6 @@ jobs:
       APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
       APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
       APNS_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
-      APNS_TOPIC: ${{ secrets.APNS_TOPIC }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

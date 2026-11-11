@@ -18,7 +18,7 @@
         "APNS_KEY_P8": "{{env.APNS_KEY_P8}}",
         "APNS_KEY_ID": "{{env.APNS_KEY_ID}}",
         "APNS_TEAM_ID": "{{env.APNS_TEAM_ID}}",
-        "APNS_TOPIC": "{{env.APNS_TOPIC}}"
+        "APNS_TOPIC": "com.wenjinliu.lotterywallet"
       },
       "triggers": [],
       "ignore": [

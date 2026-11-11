@@ -33,7 +33,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 
 ## 个人票据与推送
 
-- Secrets：`LOTTERY_USER_API_KEY`（格式同读取密钥，但只存手机钥匙串，不进安装包、不进 `lottery-ios` 的 Secrets）、`APNS_KEY_P8`（.p8 文件的 base64，一行）、`APNS_KEY_ID`、`APNS_TEAM_ID`、`APNS_TOPIC`（App 的 Bundle ID）。任何一项没配：同步接口 503 或不推送，开奖抓取不受影响。
+- Secrets：`LOTTERY_USER_API_KEY`（格式同读取密钥，但只存手机钥匙串，不进安装包、不进 `lottery-ios` 的 Secrets）、`APNS_KEY_P8`（.p8 文件的 base64，一行）、`APNS_KEY_ID`、`APNS_TEAM_ID`（与 `lottery-ios` 的 `APPLE_TEAM_ID` 同值，仓库密钥不能跨仓库读，所以这里要再存一份）。推送的 Bundle ID 不是秘密，直接写在 `cloudbaserc.json` 的 `APNS_TOPIC` 里；上传 TestFlight 用的 App Store Connect 密钥不能当推送密钥用。任何一项没配：同步接口 503 或不推送，开奖抓取不受影响。
 - 表：`user_tickets`（`record` 与 App 备份文件的单条记录同构；云端核对结果存在 `settle_*` 列，不改 `record`）、`user_push_devices`、`user_draw_notifications`。回退 SQL 在迁移文件末尾。
 - 同步以 App 的修改时间为准，新的覆盖旧的；删除是软删除。号码或期次变了，`settle_*` 清空重算。
 - 改奖级规则必须同时改 `lottery-ios` 的 `PrizeRules.swift` 和两边的测试。
