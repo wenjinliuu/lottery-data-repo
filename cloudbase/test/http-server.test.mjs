@@ -49,3 +49,27 @@ test("returns 405 for writes without reading the request body", async () => {
     assert.equal(response.headers.get("cache-control"), "no-store");
   });
 });
+
+test("registers a push device over a real socket and rejects oversized bodies", async () => {
+  const { DrawPushStore } = await import("../src/draw-push.mjs");
+  const { createFakeDb } = await import("./fake-db.mjs");
+  const db = createFakeDb();
+  const server = createLotteryHttpServer(service(), testAccess, new DrawPushStore(db));
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  try {
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const headers = { "X-Lottery-Api-Key": TEST_API_KEY, "content-type": "application/json" };
+    const body = JSON.stringify({ token: "ab".repeat(32), environment: "production", bundle_id: "app", lotteries: ["ssq"] });
+    const ok = await fetch(`${base}/lottery/v2/devices`, { method: "POST", headers, body });
+    assert.equal(ok.status, 200);
+    assert.equal(db.tables.push_devices.length, 1);
+    const noKey = await fetch(`${base}/lottery/v2/devices`, { method: "POST", body });
+    assert.equal(noKey.status, 401);
+    const huge = await fetch(`${base}/lottery/v2/devices`, { method: "POST", headers, body: "x".repeat(20 * 1024) })
+      .then((response) => response.status, () => "connection closed");
+    assert.ok(huge === 500 || huge === "connection closed");
+    assert.equal(db.tables.push_devices.length, 1);
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+});

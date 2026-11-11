@@ -23,10 +23,23 @@
 
 - 最近开奖最多返回 30 期。
 - 年份范围为 2000 至 2100。
-- 只允许 GET、HEAD、OPTIONS；其它方法返回 405。
+- 只允许 GET、HEAD、OPTIONS，其它方法返回 405；唯一的例外是 `POST /v2/devices`，见下一节。
 - 未知彩种和非法年份返回 404。
 - /v1/* 已删除并返回 404。
 - 所有响应允许跨域读取。
+
+## 推送设备登记
+
+    POST /v2/devices
+
+带 `X-Lottery-Api-Key`，请求体最多 16KB，响应 `no-store`：
+
+    {"token": "<APNs 设备令牌，十六进制>", "environment": "production|sandbox",
+     "bundle_id": "com.wenjinliu.lotterywallet", "lotteries": ["ssq", "dlt"]}
+
+同一个令牌重复登记就是覆盖；`lotteries` 传空数组即退订。错误：400（`invalid_token`、`invalid_lotteries`、`invalid_json`、`body_too_large`）、401、503。
+
+开奖号码落库后，订了该彩种的设备各收到一条通知（每期一次）：标题「双色球 2026130 期开奖」，正文是开奖号码，带 `content-available` 和 `mutable-content`，`apns-collapse-id` 为 `draw-{lottery_type}-{issue}`。自定义字段 `lottery_type` 和 `draw`（`issue`、`date`、`numbers`、`prizes[{name, amount, extra_amount}]`，与 `/v2/draws` 的单条开奖同构；奖级放不下时省略）。云端不知道用户有什么票，中奖情况由 App 被唤醒后在本机算出来，再用同一个标识符发本地通知替换掉这一条。
 
 ## GitHub 静态镜像
 

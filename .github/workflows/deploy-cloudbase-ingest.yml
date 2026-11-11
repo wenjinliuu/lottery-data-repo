@@ -68,6 +68,11 @@ jobs:
       CLOUDBASE_API_KEY: ${{ secrets.CLOUDBASE_API_KEY }}
       JISU_APPKEY: ${{ secrets.JISU_APPKEY }}
       LOTTERY_READ_API_KEY: ${{ secrets.LOTTERY_READ_API_KEY }}
+      # 开奖推送。没配时不推送，不影响开奖数据。
+      # APNS_KEY_P8 存 .p8 文件的 base64（一行），不要存带换行的原文。
+      APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+      APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+      APNS_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -135,11 +140,12 @@ jobs:
           LOTTERY_API_URL: https://wenjin-cloudbase-d1empq882391ac1-1311287495.ap-shanghai.app.tcloudbase.com/lottery
         run: node cloudbase/scripts/check-api-access.mjs
 
-      - name: Restrict public direct database reads through a versioned migration
+      - name: Apply versioned migrations (private reads, draw push)
         run: |
           migration_dir="$RUNNER_TEMP/lottery-private-read-migration"
           mkdir -p "$migration_dir/cloudbase/migrations"
           cp cloudbase/migrations/20261004080500_lottery_private_reads.sql "$migration_dir/cloudbase/migrations/"
+          cp cloudbase/migrations/20261112090000_draw_push.sql "$migration_dir/cloudbase/migrations/"
           cd "$migration_dir"
           # API-key login is project scoped; authenticate the isolated directory too.
           tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes

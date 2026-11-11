@@ -8,6 +8,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 | --- | --- | --- |
 | 抓取和补抓 | `cloudbase/src/handler.mjs`、`repository.mjs`、`config/lotteries.json` | 已完整彩种跳过；自动调用共享预算；号码和奖级都完整才结束补抓 |
 | 自用 API | `cloudbase/src/api-handler.mjs`、`api-access.mjs` | GET/HEAD 先验证读取密钥，再访问数据库；不返回或记录密钥 |
+| 开奖推送 | `cloudbase/src/draw-push.mjs`、`apns.mjs` | 号码落库后给订了该彩种的设备推一条，每期一次；通知带开奖号码和奖级金额，中没中由手机本机核对；**云端不存任何票据**；失败只记进 `results[].notification`，不得让抓取失败 |
 | 网关限流 | `config/lottery-gateway-access.json` | 仅 `/lottery`：每 IP 10 QPS，总计 100 QPS；不影响同环境其他项目 |
 | 数据库权限 | `cloudbase/migrations` | 匿名/普通认证角色不直接读取开奖表；保留服务角色；新增版本迁移，不重放历史迁移 |
 | GitHub 同步 | `.github/workflows/update-lottery-data.yml` | 北京时间 08:14 补前一天未完成数据、导出、生成日历、提交镜像；排队会延迟 |
@@ -28,6 +29,14 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - 权限迁移在隔离目录运行；该目录重新登录 API Key，先 fetch 远端已应用迁移，再 preview/up。不能把本仓库未应用的历史 SQL 一起推上去，也不能把迁移登录失败当成权限已完成。
 - 首次启用/轮换密钥先构建并安装带新密钥的 App，再启用云端对应密钥。详细步骤见 [API_ACCESS_CONTROL.md](API_ACCESS_CONTROL.md)。
 - 改休市配置后重新生成受影响年份日历、跑测试和结构验证、同步兼容别名；没有权威新年度安排时不假称已确认。
+
+## 开奖推送
+
+- Secrets：`APNS_KEY_P8`（推送密钥 .p8 文件的 base64，一行）、`APNS_KEY_ID`、`APNS_TEAM_ID`（与 `lottery-ios` 的 `APPLE_TEAM_ID` 同值，仓库密钥不能跨仓库读，所以这里要再存一份）。Bundle ID 不是秘密，直接写在 `cloudbaserc.json` 的 `APNS_TOPIC` 里。上传 TestFlight 用的 App Store Connect 密钥不能当推送密钥用。任何一项没配就不推送，开奖抓取不受影响。
+- 表：`push_devices`（令牌、环境、订阅的彩种）、`draw_push_log`（每期一行，防重复）。回退 SQL 在迁移文件末尾。
+- `POST /v2/devices` 是唯一的写接口，和读取共用 `X-Lottery-Api-Key`。
+- 通知里的 `draw` 与 `/v2/draws` 的单条开奖同构；改字段要同时改 `lottery-ios` 的 `DrawPushPayload`。整条通知上限 4096 字节，奖级表放不下时整个不带。
+- 没收到推送：先看 `lottery_ingest_runs.details.results[].notification`（`not_configured / no_devices / no_numbers / already_sent`、`push_errors`），再看 `push_devices.disabled / last_error / lotteries`。
 
 ## 排查顺序
 
