@@ -166,6 +166,7 @@ export async function pushDraw({
     body: numbersText(lotteryType, draw.numbers),
     threadId: `draw-${lotteryType}`,
     contentAvailable: true,
+    mutableContent: true,
     collapseId: `draw-${lotteryType}-${issue}`,
     data: drawPayload(lotteryType, draw),
   });

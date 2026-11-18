@@ -113,6 +113,7 @@ test("APNs failures are retried without resending to accepted or expired devices
     send: async (devices, message) => {
       sent.push(devices.map((d) => d.token));
       assert.equal(message.contentAvailable, true);
+      assert.equal(message.mutableContent, true);
       assert.equal(message.collapseId, "draw-ssq-2026130");
       return devices.map(({ token }) => ({
         token, ok: token === TOKEN_A || sent.length > 1,

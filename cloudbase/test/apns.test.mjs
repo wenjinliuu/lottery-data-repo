@@ -56,7 +56,7 @@ test("production and sandbox use their own signing key, and 410 marks the device
   const results = await client.send([
     { token: "good", environment: "production", bundle_id: "" },
     { token: "dead", environment: "sandbox", bundle_id: "other.bundle" },
-  ], { title: "t", body: "b", data: { issue: "1" }, threadId: "draw-ssq", contentAvailable: true, collapseId: "draw-ssq-1" });
+  ], { title: "t", body: "b", data: { issue: "1" }, threadId: "draw-ssq", contentAvailable: true, mutableContent: true, collapseId: "draw-ssq-1" });
   assert.deepEqual(results.map((r) => [r.token, r.ok, r.gone]), [["good", true, false], ["dead", false, true]]);
   assert.deepEqual(requests.map((r) => [r.host, r.headers["apns-topic"]]), [
     ["https://api.push.apple.com", "app.bundle"],
@@ -65,7 +65,8 @@ test("production and sandbox use their own signing key, and 410 marks the device
   const keyID = (request) => JSON.parse(Buffer.from(request.headers.authorization
     .replace("bearer ", "").split(".")[0], "base64url")).kid;
   assert.deepEqual(requests.map(keyID), ["PROD", "K"]);
-  assert.deepEqual(requests[0].body, { aps: { alert: { title: "t", body: "b" }, sound: "default", "thread-id": "draw-ssq", "content-available": 1 }, issue: "1" });
+  assert.deepEqual(requests[0].body, { aps: { alert: { title: "t", body: "b" }, sound: "default", "thread-id": "draw-ssq", "content-available": 1, "mutable-content": 1 }, issue: "1" });
+  assert.equal(requests[0].headers["apns-push-type"], "alert");
   assert.equal(requests[0].headers["apns-collapse-id"], "draw-ssq-1");
 });
 

@@ -92,7 +92,7 @@ export function createApnsClient({
     /**
      * @returns {Promise<Array<{token, ok, status, reason, gone}>>} gone 表示令牌已失效，应停用。
      */
-    async send(devices, { title, body, data = {}, threadId, contentAvailable = false, collapseId }) {
+    async send(devices, { title, body, data = {}, threadId, contentAvailable = false, mutableContent = false, collapseId }) {
       const payload = JSON.stringify({
         aps: {
           alert: { title, body },
@@ -100,6 +100,7 @@ export function createApnsClient({
           ...(threadId ? { "thread-id": threadId } : {}),
           // 有机会在后台核对；不依赖唤醒来显示原始通知。
           ...(contentAvailable ? { "content-available": 1 } : {}),
+          ...(mutableContent ? { "mutable-content": 1 } : {}),
         },
         ...data,
       });
