@@ -95,8 +95,17 @@ jobs:
           cache: npm
           cache-dependency-path: cloudbase/package-lock.json
 
-      - name: Test function package
+      - name: Test function package without live credentials
         working-directory: cloudbase
+        env:
+          APNS_KEY_P8: ''
+          APNS_KEY_ID: ''
+          APNS_TEAM_ID: ''
+          APNS_PRODUCTION_KEY_P8: ''
+          APNS_PRODUCTION_KEY_ID: ''
+          CLOUDBASE_API_KEY: ''
+          JISU_APPKEY: ''
+          LOTTERY_READ_API_KEY: ''
         run: |
           npm ci
           npm test
