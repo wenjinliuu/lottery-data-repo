@@ -24,10 +24,11 @@ test("令牌是 ES256 JWT，验得过签名", () => {
 });
 
 test("缺任何一项配置就不创建客户端", () => {
-  assert.equal(createApnsClient({ keyP8: pem, keyId: "K", teamId: "T", topic: "" }), null);
-  assert.equal(createApnsClient({ keyP8: "", keyId: "K", teamId: "T", topic: "x" }), null);
+  const withoutProduction = { productionKeyP8: "", productionKeyId: "" };
+  assert.equal(createApnsClient({ ...withoutProduction, keyP8: pem, keyId: "K", teamId: "T", topic: "" }), null);
+  assert.equal(createApnsClient({ ...withoutProduction, keyP8: "", keyId: "K", teamId: "T", topic: "x" }), null);
   // 部署模板没替换、或密钥贴坏了：当成没配，不抛异常
-  assert.equal(createApnsClient({ keyP8: "{{env.APNS_KEY_P8}}", keyId: "K", teamId: "T", topic: "x" }), null);
+  assert.equal(createApnsClient({ ...withoutProduction, keyP8: "{{env.APNS_KEY_P8}}", keyId: "K", teamId: "T", topic: "x" }), null);
 });
 
 test("production and sandbox use their own signing key, and 410 marks the device inactive", async () => {
