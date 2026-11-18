@@ -32,7 +32,8 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 
 ## 开奖推送
 
-- Secrets：`APNS_KEY_P8`（推送密钥 .p8 文件的 base64，一行）、`APNS_KEY_ID`、`APNS_TEAM_ID`（与 `lottery-ios` 的 `APPLE_TEAM_ID` 同值，仓库密钥不能跨仓库读，所以这里要再存一份）。Bundle ID 不是秘密，直接写在 `cloudbaserc.json` 的 `APNS_TOPIC` 里。上传 TestFlight 用的 App Store Connect 密钥不能当推送密钥用。任何一项没配就不推送，开奖抓取不受影响。
+- TestFlight 走 APNs Production。将可用于 Production 的 APNs 密钥填入 Actions Secrets `APNS_PRODUCTION_KEY_ID` 和 `APNS_PRODUCTION_KEY_P8`（.p8 的单行 Base64）。现有 `APNS_KEY_ID` 和 `APNS_KEY_P8` 供 Sandbox 使用。旧版可同时用于两个环境的密钥仍兼容。Apple 返回 `BadEnvironmentKeyInToken` 时核对密钥的 APNs 环境。
+- 两种环境共用 `APNS_TEAM_ID`，与 `lottery-ios` 的 `APPLE_TEAM_ID` 同值。Bundle ID 在 `cloudbaserc.json` 的 `APNS_TOPIC`。上传 TestFlight 用的 App Store Connect 密钥不能当推送密钥用。
 - `push_devices` 保存令牌、环境和通知开关。旧 `lotteries` 字段只存固定的所有彩种或空列表。请求传 `enabled`，旧版带彩种列表的请求仍能开启或关闭通知。
 - `draw_push_deliveries` 按期、按设备记录尝试和 APNs 接受状态。抓取和 GitHub 补抓即使跳过已完整数据，仍会补推未被 APNs 接受的通知。只补当天和前一天；短暂失败最多尝试五次。旧日志中已有成功的期次不补发。
 - `POST /v2/devices` 是唯一的写接口，和读取共用 `X-Lottery-Api-Key`。

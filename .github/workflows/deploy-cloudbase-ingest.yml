@@ -72,6 +72,8 @@ jobs:
       # APNS_KEY_P8 存 .p8 文件的 base64（一行），不要存带换行的原文。
       APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
       APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+      APNS_PRODUCTION_KEY_ID: ${{ secrets.APNS_PRODUCTION_KEY_ID }}
+      APNS_PRODUCTION_KEY_P8: ${{ secrets.APNS_PRODUCTION_KEY_P8 }}
       APNS_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
     steps:
       - name: Checkout

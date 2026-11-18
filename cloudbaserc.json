@@ -17,6 +17,8 @@
         "JISU_APPKEY": "{{env.JISU_APPKEY}}",
         "APNS_KEY_P8": "{{env.APNS_KEY_P8}}",
         "APNS_KEY_ID": "{{env.APNS_KEY_ID}}",
+        "APNS_PRODUCTION_KEY_P8": "{{env.APNS_PRODUCTION_KEY_P8}}",
+        "APNS_PRODUCTION_KEY_ID": "{{env.APNS_PRODUCTION_KEY_ID}}",
         "APNS_TEAM_ID": "{{env.APNS_TEAM_ID}}",
         "APNS_TOPIC": "com.wenjinliu.lotterywallet"
       },

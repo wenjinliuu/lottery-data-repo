@@ -59,20 +59,35 @@ export function createApnsClient({
   keyP8 = process.env.APNS_KEY_P8,
   keyId = process.env.APNS_KEY_ID,
   teamId = process.env.APNS_TEAM_ID,
+  productionKeyP8 = process.env.APNS_PRODUCTION_KEY_P8,
+  productionKeyId = process.env.APNS_PRODUCTION_KEY_ID,
   topic = process.env.APNS_TOPIC,
   timeoutMs = 10000,
   connect = http2.connect,
 } = {}) {
-  if (!keyP8 || !keyId || !teamId || !topic) return null;
-  let key;
-  try {
-    key = readSigningKey(keyP8);
-  } catch (error) {
-    // 密钥配坏了也不能挡住核对：当成没配，只留一条日志（不打印密钥内容）。
-    console.error("apns signing key unreadable", error?.code ?? error?.name ?? "error");
-    return null;
-  }
-  if (!key) return null;
+  const configured = (value) => {
+    const text = String(value ?? "").trim();
+    return text.startsWith("{{env.") ? "" : text;
+  };
+  const signing = (rawKey, rawId, environment) => {
+    if (!configured(rawKey) || !configured(rawId)) return null;
+    try {
+      const key = readSigningKey(rawKey);
+      if (key?.asymmetricKeyType !== "ec" || key.asymmetricKeyDetails?.namedCurve !== "prime256v1") {
+        console.error("apns signing key must use P-256", environment);
+        return null;
+      }
+      return { key, keyId: configured(rawId) };
+    } catch (error) {
+      console.error("apns signing key unreadable", environment, error?.code ?? "error");
+      return null;
+    }
+  };
+  if (!configured(teamId) || !configured(topic)) return null;
+  const sharedKey = signing(keyP8, keyId, "shared");
+  const hasProductionConfig = Boolean(configured(productionKeyP8) || configured(productionKeyId));
+  const productionKey = hasProductionConfig ? signing(productionKeyP8, productionKeyId, "production") : sharedKey;
+  if (!sharedKey && !productionKey) return null;
   return {
     /**
      * @returns {Promise<Array<{token, ok, status, reason, gone}>>} gone 表示令牌已失效，应停用。
@@ -88,7 +103,6 @@ export function createApnsClient({
         },
         ...data,
       });
-      const token = providerToken({ key, keyId: keyId.trim(), teamId: teamId.trim() });
       const byHost = new Map();
       for (const device of devices) {
         const host = HOSTS[device.environment] ?? HOSTS.production;
@@ -97,6 +111,13 @@ export function createApnsClient({
       }
 
       const sendGroup = async ([host, group]) => {
+        const environment = host === HOSTS.sandbox ? "sandbox" : "production";
+        const credential = environment === "production" ? productionKey : sharedKey;
+        if (!credential) {
+          return group.map(({ token }) => ({ token, ok: false, status: 0,
+            reason: `${environment}_key_not_configured`, gone: false }));
+        }
+        const token = providerToken({ ...credential, teamId: configured(teamId) });
         const deadline = Date.now() + timeoutMs;
         const session = connect(host);
         session.on("error", () => {});
