@@ -104,6 +104,22 @@ jobs:
           node -e "import('./src/api-handler.mjs').then(() => console.log('api handler import ok'))"
           node -e "import('./src/http-server.mjs').then(() => console.log('http server import ok'))"
 
+      - name: Validate dedicated Production APNs signing configuration
+        run: |
+          node --input-type=module <<'NODE'
+          import { readSigningKey } from './cloudbase/src/apns.mjs';
+          try {
+            const id = process.env.APNS_PRODUCTION_KEY_ID?.trim();
+            const key = readSigningKey(process.env.APNS_PRODUCTION_KEY_P8);
+            if (!/^[A-Z0-9]{10}$/.test(id ?? '') || key?.asymmetricKeyDetails?.namedCurve !== 'prime256v1') {
+              throw new Error();
+            }
+          } catch {
+            console.error('Set a valid APNS_PRODUCTION_KEY_ID and APNS_PRODUCTION_KEY_P8 before deploying.');
+            process.exit(1);
+          }
+          NODE
+
       - name: Install CloudBase CLI
         run: npm install --global @cloudbase/cli@3.8.3
 
