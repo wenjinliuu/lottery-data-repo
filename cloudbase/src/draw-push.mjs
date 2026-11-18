@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createCloudBaseDatabase } from "./repository.mjs";
 import { LOTTERY_TYPES, materializeV2Draw } from "./api-contract.mjs";
 import { createApnsClient } from "./apns.mjs";
+import { hasCompleteDrawNumbers } from "./normalize.mjs";
 
 const configUrl = [
   new URL("../config/lotteries.json", import.meta.url),
@@ -76,11 +77,12 @@ export class DrawPushStore {
     this.db = database;
   }
 
-  /** 新版只发送开关。旧版列表仅用于判断是否订阅，不保留购买偏好。 */
-  async registerDevice({ token, environment, bundle_id: bundleId, enabled, lotteries }) {
+  /** 设备只登记通知开关和客户端能力。 */
+  async registerDevice({ token, environment, bundle_id: bundleId, enabled, lotteries, passive_draws: passiveDraws = false }) {
     const normalized = String(token ?? "").trim().toLowerCase();
     if (!/^[0-9a-f]{64,200}$/.test(normalized)) throw new ValidationError("invalid_token");
     if (enabled !== undefined && typeof enabled !== "boolean") throw new ValidationError("invalid_enabled");
+    if (typeof passiveDraws !== "boolean") throw new ValidationError("invalid_passive_draws");
     if (enabled === undefined &&
         (!Array.isArray(lotteries) || lotteries.some((item) => !LOTTERY_TYPES.includes(item)))) {
       throw new ValidationError("invalid_lotteries");
@@ -91,6 +93,7 @@ export class DrawPushStore {
         token: normalized,
         environment: environment === "sandbox" ? "sandbox" : "production",
         bundle_id: String(bundleId ?? "").slice(0, 200),
+        passive_draws: passiveDraws,
         lotteries: subscribed ? [...LOTTERY_TYPES].sort() : [],
         disabled: false,
         last_error: null,
@@ -123,7 +126,9 @@ export class DrawPushStore {
     const rows = ensureSuccess(await this.db.rpc("claim_draw_push_deliveries", {
       p_lottery_type: lotteryType, p_issue: issue, p_claim_id: claimId,
     }), "claim draw push deliveries");
-    return rows.map(({ device_token, environment }) => ({ token: device_token, environment }));
+    return rows.map(({ device_token, environment, passive_draws }) => ({
+      token: device_token, environment, passiveDraws: passive_draws === true,
+    }));
   }
 
   async recordDelivery(lotteryType, issue, claimId, result) {
@@ -153,8 +158,7 @@ export async function pushDraw({
 }) {
   if (!apns) return { push: "not_configured" };
   const draw = await store.drawRow(lotteryType, issue);
-  const hasNumbers = Object.values(draw?.numbers ?? {}).flat().some((value) => Number.isInteger(value));
-  if (!hasNumbers) return { push: "no_numbers" };
+  if (!hasCompleteDrawNumbers(lotteryType, draw?.numbers ?? {})) return { push: "no_numbers" };
 
   const claimId = randomUUID();
   const devices = await store.claim(lotteryType, issue, claimId);

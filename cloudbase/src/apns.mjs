@@ -100,10 +100,19 @@ export function createApnsClient({
           ...(threadId ? { "thread-id": threadId } : {}),
           // 有机会在后台核对；不依赖唤醒来显示原始通知。
           ...(contentAvailable ? { "content-available": 1 } : {}),
-          ...(mutableContent ? { "mutable-content": 1 } : {}),
         },
         ...data,
       });
+      const passivePayload = mutableContent ? JSON.stringify({
+        aps: {
+          alert: { title, body },
+          "interruption-level": "passive",
+          "thread-id": "draw-other",
+          "mutable-content": 1,
+          ...(contentAvailable ? { "content-available": 1 } : {}),
+        },
+        ...data,
+      }) : payload;
       const byHost = new Map();
       for (const device of devices) {
         const host = HOSTS[device.environment] ?? HOSTS.production;
@@ -140,7 +149,7 @@ export function createApnsClient({
                   "apns-expiration": String(Math.floor(Date.now() / 1000) + 4 * 60 * 60),
                   ...(collapseId ? { "apns-collapse-id": collapseId } : {}),
                   "content-type": "application/json",
-                }, payload, remaining);
+                }, device.passiveDraws ? passivePayload : payload, remaining);
                 let reason = "";
                 try {
                   const value = JSON.parse(response.body || "{}").reason;

@@ -38,7 +38,7 @@ README 面向外部使用者，只介绍 GitHub 镜像；项目自用云服务�
 - `draw_push_deliveries` 按期、按设备记录尝试和 APNs 接受状态。抓取和 GitHub 补抓即使跳过已完整数据，仍会补推未被 APNs 接受的通知。只补当天和前一天；短暂失败最多尝试五次。旧日志中已有成功的期次不补发。
 - `POST /v2/devices` 是唯一的写接口，和读取共用 `X-Lottery-Api-Key`。
 - 通知里的 `draw` 与 `/v2/draws` 的单条开奖同构；改字段要同时改 `lottery-ios` 的 `DrawPushPayload`。整条通知上限 4096 字节，奖级表放不下时整个不带。
-- 开奖消息仍发给所有启用通知的设备。`aps.mutable-content: 1` 允许 iOS 通知服务扩展在本机选择待开奖期次、核对和改写通知。服务端无需接收用户选择的彩种、期号或票据。旧版本继续显示原始开奖号码。
+- 开奖号码完整后，按期发给所有启用通知的设备。声明 `passive_draws` 的设备收到被动通知，`aps.mutable-content: 1` 允许 iOS 扩展在本机核对，有对应票据时升级为正常提醒。服务端只接收设备能力和开关，旧版本继续显示普通开奖通知。
 - 没收到推送：先看 `lottery_ingest_runs.details.results[].notification` 的 `not_configured`、`no_pending_devices`、`push_errors` 或 `record_failures`，再查设备是否已启用及其最近错误。APNs 接受表示苹果接收请求，真机显示仍需验收。
 
 ## 排查顺序

@@ -48,7 +48,12 @@ test("登记设备：要读取密钥，校验令牌和彩种，重复登记是�
   assert.equal(ok.statusCode, 200);
   assert.equal(ok.headers["cache-control"], "no-store");
   assert.deepEqual(db.tables.push_devices.map((d) => [d.token, d.environment, d.lotteries]), [[TOKEN_A, "sandbox", [...LOTTERY_TYPES].sort()]]);
+  assert.equal(db.tables.push_devices[0].passive_draws, false);
+  assert.equal((await register(db, { token: TOKEN_A, enabled: true, passive_draws: "true" })).statusCode, 400);
+  assert.equal((await register(db, { token: TOKEN_A, enabled: true, passive_draws: true })).statusCode, 200);
+  assert.equal(db.tables.push_devices[0].passive_draws, true);
   assert.equal((await register(db, { token: TOKEN_A, enabled: true })).statusCode, 200);
+  assert.equal(db.tables.push_devices[0].passive_draws, false);
   assert.deepEqual(db.tables.push_devices[0].lotteries, [...LOTTERY_TYPES].sort());
   assert.equal((await register(db, { token: TOKEN_A, enabled: "false" })).statusCode, 400);
   await register(db, { token: TOKEN_A, enabled: false });
@@ -141,4 +146,11 @@ test("missing configuration, missing numbers, and an empty claim are distinct", 
   assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns }), { push: "no_pending_devices" });
   assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2099001", store, apns }), { push: "no_numbers" });
   assert.deepEqual(apns.sent, []);
+});
+
+test("a partially collected issue never consumes its notification claim", async () => {
+  const db = createFakeDb({ lottery_draws: [{ ...ssqRow, numbers: { red: [1, 2, 3, 4, 5, 6] } }] });
+  db.rpc = async () => assert.fail("wait for the blue ball before claiming deliveries");
+  assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: ssqRow.issue, store: new DrawPushStore(db), apns: fakeApns() }),
+    { push: "no_numbers" });
 });
