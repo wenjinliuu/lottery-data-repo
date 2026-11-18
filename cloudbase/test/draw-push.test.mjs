@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { DrawPushStore, drawPayload, numbersText, pushDraw } from "../src/draw-push.mjs";
 import { handleHttp } from "../src/api-handler.mjs";
 import { createFakeDb } from "./fake-db.mjs";
+import { LOTTERY_TYPES } from "../src/api-contract.mjs";
 import { authenticatedEvent, testAccess } from "./access-fixture.mjs";
 
 const TOKEN_A = "aa".repeat(32);
@@ -46,8 +47,11 @@ test("登记设备：要读取密钥，校验令牌和彩种，重复登记是�
   const ok = await register(db, { token: TOKEN_A.toUpperCase(), environment: "sandbox", bundle_id: "app", lotteries: ["ssq", "dlt", "ssq"] });
   assert.equal(ok.statusCode, 200);
   assert.equal(ok.headers["cache-control"], "no-store");
-  assert.deepEqual(db.tables.push_devices.map((d) => [d.token, d.environment, d.lotteries]), [[TOKEN_A, "sandbox", ["dlt", "ssq"]]]);
-  await register(db, { token: TOKEN_A, lotteries: [] });
+  assert.deepEqual(db.tables.push_devices.map((d) => [d.token, d.environment, d.lotteries]), [[TOKEN_A, "sandbox", [...LOTTERY_TYPES].sort()]]);
+  assert.equal((await register(db, { token: TOKEN_A, enabled: true })).statusCode, 200);
+  assert.deepEqual(db.tables.push_devices[0].lotteries, [...LOTTERY_TYPES].sort());
+  assert.equal((await register(db, { token: TOKEN_A, enabled: "false" })).statusCode, 400);
+  await register(db, { token: TOKEN_A, enabled: false });
   assert.deepEqual(db.tables.push_devices.map((d) => [d.environment, d.lotteries]), [["production", []]]);
   // 其它写方法仍然不允许
   const put = await handleHttp(authenticatedEvent({ httpMethod: "PUT", path: "/v2/devices" }), null, testAccess);
@@ -81,41 +85,59 @@ test("随通知下发的开奖数据：只留核对要用的字段，放不下�
   assert.ok(Buffer.byteLength(JSON.stringify(trimmed)) < 3600);
 });
 
-test("开奖推送：只推给订了这个彩种的设备，每期一次，失效令牌停用", async () => {
-  const db = createFakeDb({ lottery_draws: [ssqRow] });
+test("APNs failures are retried without resending to accepted or expired devices", async () => {
+  const db = createFakeDb({ lottery_draws: [ssqRow], draw_push_deliveries: [] });
   const store = new DrawPushStore(db);
-  await store.registerDevice({ token: TOKEN_A, lotteries: ["ssq"] });
-  await store.registerDevice({ token: TOKEN_B, lotteries: ["ssq", "dlt"] });
-  await store.registerDevice({ token: "cc".repeat(32), lotteries: ["dlt"] });
-  const apns = fakeApns();
-
+  const tokenC = "cc".repeat(32);
+  await store.registerDevice({ token: TOKEN_A, enabled: true });
+  await store.registerDevice({ token: TOKEN_B, enabled: true });
+  await store.registerDevice({ token: tokenC, enabled: true });
+  // The real claim/lease query is in the migration. This fixture supplies the
+  // eligible result of that query and exercises the real update payload.
+  const claimed = [];
+  db.rpc = async (method, args) => {
+    assert.equal(method, "claim_draw_push_deliveries");
+    const list = claimed.length ? [tokenC] : [TOKEN_A, TOKEN_B, tokenC];
+    claimed.push(args.p_claim_id);
+    for (const token of list) {
+      const row = db.tables.draw_push_deliveries.find((item) => item.device_token === token);
+      if (row) row.claim_id = args.p_claim_id;
+      else db.tables.draw_push_deliveries.push({
+        lottery_type: "ssq", issue: "2026130", device_token: token, claim_id: args.p_claim_id,
+      });
+    }
+    return { data: list.map((token) => ({ device_token: token, environment: "production" })) };
+  };
+  const sent = [];
+  const apns = {
+    send: async (devices, message) => {
+      sent.push(devices.map((d) => d.token));
+      assert.equal(message.contentAvailable, true);
+      assert.equal(message.collapseId, "draw-ssq-2026130");
+      return devices.map(({ token }) => ({
+        token, ok: token === TOKEN_A || sent.length > 1,
+        status: token === TOKEN_B ? 410 : 503, gone: token === TOKEN_B,
+        reason: token === TOKEN_B ? "Unregistered" : "ServiceUnavailable",
+      }));
+    },
+  };
   const first = await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns });
-  assert.deepEqual(first, { push: "sent", devices: 2, delivered: 1, push_errors: ["Unregistered"] });
-  assert.deepEqual(apns.sent[0].tokens, [TOKEN_A, TOKEN_B]);
-  const { message } = apns.sent[0];
-  assert.equal(message.title, "双色球 2026130 期开奖");
-  assert.equal(message.body, "05 06 10 25 27 30 + 11");
-  assert.equal(message.mutableContent, true);
-  assert.equal(message.contentAvailable, true);
-  assert.equal(message.collapseId, "draw-ssq-2026130");
-  assert.equal(message.data.draw.issue, "2026130");
+  assert.deepEqual([first.push, first.accepted], ["partial_failure", 1]);
+  assert.equal(first.push_errors.ServiceUnavailable, 1);
   assert.equal(db.tables.push_devices.find((d) => d.token === TOKEN_B).disabled, true);
-  assert.equal(db.tables.draw_push_log[0].delivered, 1);
-
-  assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns }), { push: "already_sent" });
-  assert.equal(apns.sent.length, 1);
+  assert.equal(db.tables.draw_push_deliveries.find((d) => d.device_token === tokenC).accepted_at, null);
+  const retry = await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns });
+  assert.deepEqual([retry.push, retry.accepted], ["accepted", 1]);
+  assert.deepEqual(sent, [[TOKEN_A, TOKEN_B, tokenC], [tokenC]]);
 });
 
-test("不推的几种情况都不占这一期的名额", async () => {
-  const db = createFakeDb({ lottery_draws: [ssqRow, { ...ssqRow, issue: "2026131", numbers: {} }] });
+test("missing configuration, missing numbers, and an empty claim are distinct", async () => {
+  const db = createFakeDb({ lottery_draws: [ssqRow] });
+  db.rpc = async () => ({ data: [] });
   const store = new DrawPushStore(db);
   const apns = fakeApns();
   assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns: null }), { push: "not_configured" });
-  assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns }), { push: "no_devices" });
-  assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2026131", store, apns }), { push: "no_numbers" });
+  assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns }), { push: "no_pending_devices" });
   assert.deepEqual(await pushDraw({ lotteryType: "ssq", issue: "2099001", store, apns }), { push: "no_numbers" });
-  assert.equal(db.tables.draw_push_log?.length ?? 0, 0);
-  // 之后有设备订阅了，这一期还能推
-  await store.registerDevice({ token: TOKEN_A, lotteries: ["ssq"] });
-  assert.equal((await pushDraw({ lotteryType: "ssq", issue: "2026130", store, apns })).push, "sent");
+  assert.deepEqual(apns.sent, []);
 });

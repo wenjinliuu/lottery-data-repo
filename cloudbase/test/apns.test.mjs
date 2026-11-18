@@ -30,14 +30,13 @@ test("缺任何一项配置就不创建客户端", () => {
   assert.equal(createApnsClient({ keyP8: "{{env.APNS_KEY_P8}}", keyId: "K", teamId: "T", topic: "x" }), null);
 });
 
-test("按环境分主机发送，410 标成失效", async () => {
+test("production and sandbox use their own signing key, and 410 marks the device inactive", async () => {
   const requests = [];
   const connect = (host) => {
     const session = new EventEmitter();
     session.close = () => {};
     session.request = (headers) => {
       const stream = new EventEmitter();
-      stream.setTimeout = () => {};
       stream.setEncoding = () => {};
       stream.end = (body) => {
         requests.push({ host, headers, body: JSON.parse(body) });
@@ -52,16 +51,30 @@ test("按环境分主机发送，410 标成失效", async () => {
     };
     return session;
   };
-  const client = createApnsClient({ keyP8: pem, keyId: "K", teamId: "T", topic: "app.bundle", connect });
+  const client = createApnsClient({ keyP8: pem, keyId: "K", teamId: "T", topic: "app.bundle", productionKeyP8: pem, productionKeyId: "PROD", connect });
   const results = await client.send([
     { token: "good", environment: "production", bundle_id: "" },
     { token: "dead", environment: "sandbox", bundle_id: "other.bundle" },
-  ], { title: "t", body: "b", data: { issue: "1" }, threadId: "draw-ssq", mutableContent: true, contentAvailable: true, collapseId: "draw-ssq-1" });
+  ], { title: "t", body: "b", data: { issue: "1" }, threadId: "draw-ssq", contentAvailable: true, collapseId: "draw-ssq-1" });
   assert.deepEqual(results.map((r) => [r.token, r.ok, r.gone]), [["good", true, false], ["dead", false, true]]);
   assert.deepEqual(requests.map((r) => [r.host, r.headers["apns-topic"]]), [
     ["https://api.push.apple.com", "app.bundle"],
-    ["https://api.sandbox.push.apple.com", "other.bundle"],
+    ["https://api.sandbox.push.apple.com", "app.bundle"],
   ]);
-  assert.deepEqual(requests[0].body, { aps: { alert: { title: "t", body: "b" }, sound: "default", "thread-id": "draw-ssq", "mutable-content": 1, "content-available": 1 }, issue: "1" });
+  const keyID = (request) => JSON.parse(Buffer.from(request.headers.authorization
+    .replace("bearer ", "").split(".")[0], "base64url")).kid;
+  assert.deepEqual(requests.map(keyID), ["PROD", "K"]);
+  assert.deepEqual(requests[0].body, { aps: { alert: { title: "t", body: "b" }, sound: "default", "thread-id": "draw-ssq", "content-available": 1 }, issue: "1" });
   assert.equal(requests[0].headers["apns-collapse-id"], "draw-ssq-1");
+});
+
+test("a partial production configuration does not silently fall back to the sandbox key", async () => {
+  const client = createApnsClient({
+    keyP8: pem, keyId: "SANDBOX", productionKeyId: "PROD", productionKeyP8: "",
+    teamId: "TEAM", topic: "app.bundle", connect: () => assert.fail("no production credentials"),
+  });
+  const [result] = await client.send([{ token: "synthetic", environment: "production" }], {
+    title: "draw", body: "1 2 3",
+  });
+  assert.equal(result.reason, "production_key_not_configured");
 });

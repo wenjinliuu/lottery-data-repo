@@ -355,14 +355,14 @@ function jsonBody(event) {
   }
 }
 
-// 唯一的写接口：登记推送设备和它订阅的彩种。和读取共用同一把密钥。
+// 唯一的写接口：登记推送设备和通知开关。和读取共用同一把密钥。
 async function registerDevice(event, pushStore) {
   try {
     const result = await (pushStore ?? new DrawPushStore()).registerDevice(jsonBody(event));
     return response(200, result, { cache: 0 });
   } catch (error) {
     if (error instanceof ValidationError) return response(400, { error: error.message }, { cache: 0 });
-    console.error("lottery-api devices", String(error));
+    console.error("lottery-api device registration failed", error?.name ?? "Error");
     return response(500, { error: "internal_error" }, { cache: 0 });
   }
 }

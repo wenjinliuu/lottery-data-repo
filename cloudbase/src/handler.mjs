@@ -5,6 +5,7 @@ import { assertExpectedDraw, assessDrawCompleteness, normalizeQueryPayload } fro
 import { LotteryRepository } from "./repository.mjs";
 import {
   allowedLotteriesForSlot,
+  beijingDateParts,
   automaticDailyLimit,
   targetDateForSlot,
 } from "./schedule.mjs";
@@ -43,6 +44,20 @@ export async function runIngest({
     : scheduled;
   const targets = await repository.dueTargets(targetDate, allowed);
   const results = [];
+  // Diagnostics must remain visible without turning a successful draw fetch into a failure.
+  const notifyDraw = async (lotteryType, issue) => {
+    if (!notify) return {};
+    const localDate = beijingDateParts(now);
+    const yesterday = new Date(Date.UTC(localDate.year, localDate.month - 1, localDate.day - 1));
+    if (notify === pushDraw && targetDate < yesterday.toISOString().slice(0, 10)) {
+      return { notification: { push: "out_of_window" } };
+    }
+    try {
+      return { notification: await notify({ lotteryType, issue }) };
+    } catch (error) {
+      return { notification: { error: String(error).slice(0, 300) } };
+    }
+  };
   let runId = null;
 
   try {
@@ -61,6 +76,7 @@ export async function runIngest({
           execution_status: "success",
           action: "skipped",
           data_status: "completed",
+          ...await notifyDraw(target.lottery_type, target.issue),
         });
         continue;
       }
@@ -94,15 +110,6 @@ export async function runIngest({
         assertExpectedDraw(draw, target);
         const completeness = assessDrawCompleteness(draw);
         const saved = await repository.saveDraw(target, draw, completeness);
-        // 推送是附带的事：失败只记一笔，绝不能把这次抓取判成失败。
-        let notification;
-        if (notify) {
-          try {
-            notification = await notify({ lotteryType: target.lottery_type, issue: draw.issue });
-          } catch (error) {
-            notification = { error: String(error).slice(0, 300) };
-          }
-        }
         results.push({
           lottery_type: target.lottery_type,
           issue: draw.issue,
@@ -110,7 +117,7 @@ export async function runIngest({
           action: "fetched",
           data_status: saved.data_status,
           completeness_reason: saved.reason,
-          ...(notification ? { notification } : {}),
+          ...await notifyDraw(target.lottery_type, draw.issue),
         });
       } catch (error) {
         const returnedIssue = /stale_issue:([^;]+)/.exec(String(error))?.[1] ?? "";

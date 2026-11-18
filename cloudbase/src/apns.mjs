@@ -30,12 +30,26 @@ function post(session, path, headers, body, timeoutMs) {
     const request = session.request({ ":method": "POST", ":path": path, ...headers });
     let status = 0;
     let text = "";
-    request.setTimeout(timeoutMs, () => request.close(http2.constants.NGHTTP2_CANCEL));
+    const timer = setTimeout(() => {
+      reject(new Error("apns timeout"));
+      request.close(http2.constants.NGHTTP2_CANCEL);
+    }, timeoutMs);
+    const onClose = () => {
+      clearTimeout(timer);
+      reject(new Error("apns request closed before completion"));
+    };
+    request.once("close", onClose);
     request.on("response", (responseHeaders) => { status = Number(responseHeaders[":status"]); });
     request.setEncoding("utf8");
     request.on("data", (chunk) => { text += chunk; });
-    request.on("end", () => resolve({ status, body: text }));
-    request.on("error", reject);
+    request.on("end", () => {
+      clearTimeout(timer);
+      resolve({ status, body: text });
+    });
+    request.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
     request.end(body);
   });
 }
@@ -45,77 +59,113 @@ export function createApnsClient({
   keyP8 = process.env.APNS_KEY_P8,
   keyId = process.env.APNS_KEY_ID,
   teamId = process.env.APNS_TEAM_ID,
+  productionKeyP8 = process.env.APNS_PRODUCTION_KEY_P8,
+  productionKeyId = process.env.APNS_PRODUCTION_KEY_ID,
   topic = process.env.APNS_TOPIC,
   timeoutMs = 10000,
   connect = http2.connect,
 } = {}) {
-  if (!keyP8 || !keyId || !teamId || !topic) return null;
-  let key;
-  try {
-    key = readSigningKey(keyP8);
-  } catch (error) {
-    // 密钥配坏了也不能挡住核对：当成没配，只留一条日志（不打印密钥内容）。
-    console.error("apns signing key unreadable", error?.code ?? error?.name ?? "error");
-    return null;
-  }
-  if (!key) return null;
+  const configured = (value) => {
+    const text = String(value ?? "").trim();
+    return text.startsWith("{{env.") ? "" : text;
+  };
+  const signing = (rawKey, rawId, environment) => {
+    if (!configured(rawKey) || !configured(rawId)) return null;
+    try {
+      const key = readSigningKey(rawKey);
+      if (key?.asymmetricKeyType !== "ec" || key.asymmetricKeyDetails?.namedCurve !== "prime256v1") {
+        console.error("apns signing key must use P-256", environment);
+        return null;
+      }
+      return { key, keyId: configured(rawId) };
+    } catch (error) {
+      console.error("apns signing key unreadable", environment, error?.code ?? "error");
+      return null;
+    }
+  };
+  if (!configured(teamId) || !configured(topic)) return null;
+  const sharedKey = signing(keyP8, keyId, "shared");
+  const hasProductionConfig = Boolean(configured(productionKeyP8) || configured(productionKeyId));
+  const productionKey = hasProductionConfig ? signing(productionKeyP8, productionKeyId, "production") : sharedKey;
+  if (!sharedKey && !productionKey) return null;
   return {
     /**
      * @returns {Promise<Array<{token, ok, status, reason, gone}>>} gone 表示令牌已失效，应停用。
      */
-    async send(devices, { title, body, data = {}, threadId, mutableContent = false, contentAvailable = false, collapseId }) {
+    async send(devices, { title, body, data = {}, threadId, contentAvailable = false, collapseId }) {
       const payload = JSON.stringify({
         aps: {
           alert: { title, body },
           sound: "default",
           ...(threadId ? { "thread-id": threadId } : {}),
-          // 让手机上的通知扩展有机会在显示前改写正文。
-          ...(mutableContent ? { "mutable-content": 1 } : {}),
-          // 顺便在后台唤醒 App：它用本机的票核对完，会把这条通知换成中奖情况。
+          // 有机会在后台核对；不依赖唤醒来显示原始通知。
           ...(contentAvailable ? { "content-available": 1 } : {}),
         },
         ...data,
       });
-      const token = providerToken({ key, keyId: keyId.trim(), teamId: teamId.trim() });
-      const results = [];
       const byHost = new Map();
       for (const device of devices) {
         const host = HOSTS[device.environment] ?? HOSTS.production;
-        byHost.set(host, [...(byHost.get(host) ?? []), device]);
+        if (!byHost.has(host)) byHost.set(host, []);
+        byHost.get(host).push(device);
       }
-      for (const [host, group] of byHost) {
+
+      const sendGroup = async ([host, group]) => {
+        const environment = host === HOSTS.sandbox ? "sandbox" : "production";
+        const credential = environment === "production" ? productionKey : sharedKey;
+        if (!credential) {
+          return group.map(({ token }) => ({ token, ok: false, status: 0,
+            reason: `${environment}_key_not_configured`, gone: false }));
+        }
+        const token = providerToken({ ...credential, teamId: configured(teamId) });
+        const deadline = Date.now() + timeoutMs;
         const session = connect(host);
         session.on("error", () => {});
+        const results = [];
         try {
-          for (const device of group) {
-            try {
-              const response = await post(session, `/3/device/${device.token}`, {
-                authorization: `bearer ${token}`,
-                "apns-topic": (device.bundle_id || topic).trim(),
-                "apns-push-type": "alert",
-                "apns-priority": "10",
-                // 同一个 id 的通知互相替换；它也是手机上这条通知的标识符。
-                ...(collapseId ? { "apns-collapse-id": collapseId } : {}),
-                "content-type": "application/json",
-              }, payload, timeoutMs);
-              let reason = "";
-              try { reason = JSON.parse(response.body || "{}").reason ?? ""; } catch { /* 非 JSON */ }
-              results.push({
-                token: device.token,
-                ok: response.status === 200,
-                status: response.status,
-                reason,
-                gone: response.status === 410 || ["BadDeviceToken", "Unregistered"].includes(reason),
-              });
-            } catch (error) {
-              results.push({ token: device.token, ok: false, status: 0, reason: String(error), gone: false });
-            }
+          for (let offset = 0; offset < group.length; offset += 25) {
+            const batch = group.slice(offset, offset + 25);
+            const remaining = deadline - Date.now();
+            const received = await Promise.all(batch.map(async (device) => {
+              const failure = { token: device.token, ok: false, status: 0, reason: "network_error", gone: false };
+              if (remaining <= 0) return failure;
+              try {
+                const response = await post(session, `/3/device/${device.token}`, {
+                  authorization: `bearer ${token}`,
+                  // All registrations belong to the one configured app.
+                  "apns-topic": topic.trim(),
+                  "apns-push-type": "alert",
+                  "apns-priority": "10",
+                  "apns-expiration": String(Math.floor(Date.now() / 1000) + 4 * 60 * 60),
+                  ...(collapseId ? { "apns-collapse-id": collapseId } : {}),
+                  "content-type": "application/json",
+                }, payload, remaining);
+                let reason = "";
+                try {
+                  const value = JSON.parse(response.body || "{}").reason;
+                  if (typeof value === "string" && /^[A-Z][a-zA-Z]{0,49}$/.test(value)) reason = value;
+                } catch { /* APNs may close without a JSON body */ }
+                return {
+                  token: device.token,
+                  ok: response.status === 200,
+                  status: response.status,
+                  reason,
+                  gone: response.status === 410 || ["BadDeviceToken", "Unregistered"].includes(reason),
+                };
+              } catch {
+                // A transport error can contain the request path and the device token.
+                return failure;
+              }
+            }));
+            results.push(...received);
           }
         } finally {
           session.close();
         }
-      }
-      return results;
+        return results;
+      };
+
+      return (await Promise.all([...byHost].map(sendGroup))).flat();
     },
   };
 }

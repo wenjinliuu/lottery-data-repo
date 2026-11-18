@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createCloudBaseDatabase } from "./repository.mjs";
@@ -75,19 +76,22 @@ export class DrawPushStore {
     this.db = database;
   }
 
-  /** 登记或更新一台设备。lotteries 传空数组就是退订。 */
-  async registerDevice({ token, environment, bundle_id: bundleId, lotteries }) {
+  /** 新版只发送开关。旧版列表仅用于判断是否订阅，不保留购买偏好。 */
+  async registerDevice({ token, environment, bundle_id: bundleId, enabled, lotteries }) {
     const normalized = String(token ?? "").trim().toLowerCase();
     if (!/^[0-9a-f]{64,200}$/.test(normalized)) throw new ValidationError("invalid_token");
-    if (!Array.isArray(lotteries) || lotteries.some((item) => !LOTTERY_TYPES.includes(item))) {
+    if (enabled !== undefined && typeof enabled !== "boolean") throw new ValidationError("invalid_enabled");
+    if (enabled === undefined &&
+        (!Array.isArray(lotteries) || lotteries.some((item) => !LOTTERY_TYPES.includes(item)))) {
       throw new ValidationError("invalid_lotteries");
     }
+    const subscribed = enabled ?? (lotteries.length > 0);
     ensureSuccess(
       await this.db.from("push_devices").upsert({
         token: normalized,
         environment: environment === "sandbox" ? "sandbox" : "production",
         bundle_id: String(bundleId ?? "").slice(0, 200),
-        lotteries: [...new Set(lotteries)].sort(),
+        lotteries: subscribed ? [...LOTTERY_TYPES].sort() : [],
         disabled: false,
         last_error: null,
         updated_at: new Date().toISOString(),
@@ -95,15 +99,6 @@ export class DrawPushStore {
       "register push device",
     );
     return { ok: true };
-  }
-
-  async devicesFor(lotteryType) {
-    const rows = ensureSuccess(
-      await this.db.from("push_devices").select("token,environment,bundle_id,lotteries")
-        .eq("disabled", false).limit(1000),
-      "read push devices",
-    );
-    return rows.filter((row) => Array.isArray(row.lotteries) && row.lotteries.includes(lotteryType));
   }
 
   async disableDevice(token, reason) {
@@ -124,40 +119,32 @@ export class DrawPushStore {
     return rows[0] ?? null;
   }
 
-  /** 抢这一期的推送名额；已经推过返回 false。 */
-  async claim(lotteryType, issue) {
-    const existing = ensureSuccess(
-      await this.db.from("draw_push_log").select("issue")
-        .eq("lottery_type", lotteryType).eq("issue", issue).limit(1),
-      "read draw push log",
-    );
-    if (existing.length) return false;
-    const inserted = ensureSuccess(
-      await this.db.from("draw_push_log").upsert(
-        { lottery_type: lotteryType, issue },
-        { onConflict: "lottery_type,issue", ignoreDuplicates: true },
-      ).select("issue"),
-      "claim draw push",
-    );
-    return inserted.length > 0;
+  async claim(lotteryType, issue, claimId) {
+    const rows = ensureSuccess(await this.db.rpc("claim_draw_push_deliveries", {
+      p_lottery_type: lotteryType, p_issue: issue, p_claim_id: claimId,
+    }), "claim draw push deliveries");
+    return rows.map(({ device_token, environment }) => ({ token: device_token, environment }));
   }
 
-  async recordDelivery(lotteryType, issue, delivered) {
+  async recordDelivery(lotteryType, issue, claimId, result) {
+    const error = result.gone ? "inactive_device" : (result.reason || `http_${result.status}`);
     ensureSuccess(
-      await this.db.from("draw_push_log").update({ delivered })
-        .eq("lottery_type", lotteryType).eq("issue", issue),
+      await this.db.from("draw_push_deliveries")
+        .update({
+          accepted_at: result.ok ? new Date().toISOString() : null,
+          // Leave failed claims on cooldown before the next scheduled attempt.
+          ...(result.ok || result.gone ? { lease_until: null } : {}),
+          last_error: result.ok ? null : error,
+        })
+        .eq("lottery_type", lotteryType).eq("issue", issue)
+        .eq("device_token", result.token).eq("claim_id", claimId),
       "record draw push delivery",
     );
   }
+
 }
 
-/**
- * 开奖号码落库后调用：给订了这个彩种的设备各推一条，每期只推一次。
- * 通知同时带 content-available：App 在后台被唤醒，用本机的票核对完，
- * 再用同一个标识符（collapse id）发一条本地通知把它换成中奖情况。
- * App 没被唤醒（比如被手动划掉了）时，用户看到的就是开奖号码本身。
- * 任何失败都不该影响抓取本身，调用方要自己兜住异常。
- */
+/** Push an alert after the numbers are available. APNs acceptance is recorded per device. */
 export async function pushDraw({
   lotteryType,
   issue,
@@ -168,26 +155,40 @@ export async function pushDraw({
   const draw = await store.drawRow(lotteryType, issue);
   const hasNumbers = Object.values(draw?.numbers ?? {}).flat().some((value) => Number.isInteger(value));
   if (!hasNumbers) return { push: "no_numbers" };
-  const devices = await store.devicesFor(lotteryType);
-  // 没人订就不占名额：之后有设备订阅了，下一期照常推。
-  if (!devices.length) return { push: "no_devices" };
-  if (!(await store.claim(lotteryType, issue))) return { push: "already_sent" };
+
+  const claimId = randomUUID();
+  const devices = await store.claim(lotteryType, issue, claimId);
+  if (!devices.length) return { push: "no_pending_devices" };
 
   const name = lotteryNames[lotteryType] ?? lotteryType;
   const results = await apns.send(devices, {
     title: `${name} ${issue} 期开奖`,
     body: numbersText(lotteryType, draw.numbers),
     threadId: `draw-${lotteryType}`,
-    mutableContent: true,
     contentAvailable: true,
     collapseId: `draw-${lotteryType}-${issue}`,
     data: drawPayload(lotteryType, draw),
   });
-  for (const result of results.filter((item) => item.gone)) {
-    await store.disableDevice(result.token, result.reason || `http_${result.status}`);
+
+  let recordFailures = 0;
+  for (let offset = 0; offset < results.length; offset += 25) {
+    const recorded = await Promise.allSettled(results.slice(offset, offset + 25).map(async (result) => {
+      await store.recordDelivery(lotteryType, issue, claimId, result);
+      if (result.gone) await store.disableDevice(result.token, result.reason || `http_${result.status}`);
+    }));
+    recordFailures += recorded.filter((item) => item.status === "rejected").length;
   }
-  const delivered = results.filter((item) => item.ok).length;
-  await store.recordDelivery(lotteryType, issue, delivered);
-  const errors = results.filter((item) => !item.ok).map((item) => item.reason || `http_${item.status}`);
-  return { push: "sent", devices: devices.length, delivered, ...(errors.length ? { push_errors: errors } : {}) };
+  const accepted = results.filter((item) => item.ok).length;
+  const errors = Object.create(null);
+  for (const result of results.filter((item) => !item.ok)) {
+    const reason = result.reason || `http_${result.status}`;
+    errors[reason] = (errors[reason] ?? 0) + 1;
+  }
+  return {
+    push: accepted === devices.length ? "accepted" : (accepted ? "partial_failure" : "failed"),
+    devices: devices.length,
+    accepted,
+    ...(accepted < devices.length ? { push_errors: errors } : {}),
+    ...(recordFailures ? { record_failures: recordFailures } : {}),
+  };
 }

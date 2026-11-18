@@ -141,3 +141,22 @@ test("fake repositories never reach the real push path by default", async () => 
   });
   assert.equal("notification" in result.results[0], false);
 });
+
+test("completed draws retry notification without fetching upstream again", async () => {
+  const fixture = ingestFixture({ complete: true });
+  fixture.repository.dueTargets = async () => [{
+    lottery_type: "pl3", issue: "26253", draw_date: "2026-09-20", data_status: "completed",
+  }];
+  fixture.repository.recordSkipped = async () => {};
+  fixture.client.query = async () => assert.fail("push retry must not consume a draw API call");
+  const calls = [];
+  const result = await runIngest({
+    slot: "all_retry_1",
+    targetDate: "2026-09-20",
+    ...fixture,
+    notify: async (target) => { calls.push(target); return { push: "accepted", accepted: 1 }; },
+  });
+  assert.deepEqual(calls, [{ lotteryType: "pl3", issue: "26253" }]);
+  assert.equal(result.results[0].action, "skipped");
+  assert.equal(result.results[0].notification.accepted, 1);
+});
