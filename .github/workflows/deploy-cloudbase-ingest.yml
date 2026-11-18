@@ -120,6 +120,18 @@ jobs:
           tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
           tcb env use "$CLOUDBASE_ENV_ID" --yes
 
+      - name: Apply draw push retry migration before changing functions
+        run: |
+          migration_dir="$RUNNER_TEMP/lottery-push-retry-migration"
+          mkdir -p "$migration_dir/cloudbase/migrations"
+          cp cloudbase/migrations/20261112090000_draw_push.sql "$migration_dir/cloudbase/migrations/"
+          cp cloudbase/migrations/20261118120000_draw_push_retries.sql "$migration_dir/cloudbase/migrations/"
+          cd "$migration_dir"
+          tcb login --cloudbase-api-key "$CLOUDBASE_API_KEY" -e "$CLOUDBASE_ENV_ID" --yes
+          tcb db pg migration fetch -e "$CLOUDBASE_ENV_ID"
+          tcb db pg migration up -e "$CLOUDBASE_ENV_ID" --dry-run
+          tcb db pg migration up -e "$CLOUDBASE_ENV_ID" --yes
+
       - name: Deploy ingest function without triggers
         run: tcb fn deploy lottery-ingest --force --yes
 
