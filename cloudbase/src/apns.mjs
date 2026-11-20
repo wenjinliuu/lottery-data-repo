@@ -92,7 +92,7 @@ export function createApnsClient({
     /**
      * @returns {Promise<Array<{token, ok, status, reason, gone}>>} gone 表示令牌已失效，应停用。
      */
-    async send(devices, { title, body, data = {}, threadId, contentAvailable = false, collapseId }) {
+    async send(devices, { title, body, data = {}, threadId, contentAvailable = false, mutableContent = false, collapseId }) {
       const payload = JSON.stringify({
         aps: {
           alert: { title, body },
@@ -103,6 +103,16 @@ export function createApnsClient({
         },
         ...data,
       });
+      const passivePayload = mutableContent ? JSON.stringify({
+        aps: {
+          alert: { title, body },
+          "interruption-level": "passive",
+          "thread-id": "draw-other",
+          "mutable-content": 1,
+          ...(contentAvailable ? { "content-available": 1 } : {}),
+        },
+        ...data,
+      }) : payload;
       const byHost = new Map();
       for (const device of devices) {
         const host = HOSTS[device.environment] ?? HOSTS.production;
@@ -139,7 +149,7 @@ export function createApnsClient({
                   "apns-expiration": String(Math.floor(Date.now() / 1000) + 4 * 60 * 60),
                   ...(collapseId ? { "apns-collapse-id": collapseId } : {}),
                   "content-type": "application/json",
-                }, payload, remaining);
+                }, device.passiveDraws ? passivePayload : payload, remaining);
                 let reason = "";
                 try {
                   const value = JSON.parse(response.body || "{}").reason;

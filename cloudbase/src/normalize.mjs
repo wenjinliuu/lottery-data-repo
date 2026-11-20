@@ -44,6 +44,24 @@ export function parseNumbers(lotteryType, queryResult) {
   }
 }
 
+export function hasCompleteDrawNumbers(lotteryType, numbers = {}) {
+  const valid = (values, count, min, max) => Array.isArray(values) && values.length === count &&
+    values.every((value) => Number.isInteger(value) && value >= min && value <= max);
+  const distinct = (values, count, max) => valid(values, count, 1, max) && new Set(values).size === count;
+  switch (lotteryType) {
+    case "ssq": return distinct(numbers.red, 6, 33) && distinct(numbers.blue, 1, 16);
+    case "dlt": return distinct(numbers.front, 5, 35) && distinct(numbers.back, 2, 12);
+    case "qlc": return distinct(numbers.basic, 7, 30) && valid([numbers.special], 1, 1, 30);
+    case "kl8": return distinct(numbers.nums, 20, 80);
+    case "qxc": return numbers.digits?.length === 7 && valid(numbers.digits.slice(0, 6), 6, 0, 9) &&
+      valid(numbers.digits.slice(6), 1, 0, 14);
+    case "fc3d":
+    case "pl3": return valid(numbers.digits, 3, 0, 9);
+    case "pl5": return valid(numbers.digits, 5, 0, 9);
+    default: return false;
+  }
+}
+
 function normalizePrizeDetails(value) {
   if (!Array.isArray(value)) return [];
   return value.map((raw, index) => {
@@ -162,8 +180,7 @@ export function assertExpectedDraw(draw, expected) {
   if (draw.draw_date !== expected.draw_date) {
     throw new Error(`wrong_draw_date:${draw.draw_date};expected:${expected.draw_date}`);
   }
-  const values = Object.values(draw.numbers).flat().filter((value) => value != null);
-  if (!values.length || values.some((value) => !Number.isInteger(value))) {
+  if (!hasCompleteDrawNumbers(draw.lottery_type, draw.numbers)) {
     throw new Error("invalid_numbers");
   }
 }
